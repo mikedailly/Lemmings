@@ -1,0 +1,138 @@
+Lemmings Revolution (PC) BOX format
+  documented by ccexplore
+
+For some reason, Lemmings Revolution packs most of its data files into a single 
+large BOX file, instead of simply letting them live as individual files in 
+individual directories.  There isn't even any compression going on inside BOX 
+files. Go figure.
+
+The format is really simple though.
+
+Sidenote: the "Dragon unPACKer" program (as of version 5.6.2 [build 268]) has 
+major bugs in its extraction code for BOX files. It produces the correct 
+directory listing, but does not correctly associate each file entry with the 
+correct set of bytes in the BOX file, at least when I tried it on the files on
+my game CD.
+
+----------------
+BOX format
+----------------
+
+[NOTE: per Intel convention, all integers are little-endian, meaning that
+ a 4-byte hexadecimal integer 0xdeadbeef is stored in bytes as 
+ 0xef, 0xbe, 0xad, 0xde.]
+
+Header Info (14 bytes)
+0x0000-0x0005: "LEMBOX"
+0x0006-0x0009: 4-byte integer, number of files N
+0x000A-0x000D: 4-byte integer, offset from first byte after the header to File 
+               Locations table
+
+File Directory (variable size)
+0x000E:  N filename entries (variable size), each entry as follows:
+        0x00-0x03: 4-byte integer, length L of text string following
+        0x04: L bytes in 8-bit ASCII, name of file (including path), no 
+              0-termination
+
+File Locations table (variable size)
+        0x00-0x03: 4-byte integer, number of table entries N' (should be equal 
+                   to N)
+        0x04: N' table entries
+              each entry is a 4-byte integer, offset from start of BOX file to 
+              first byte of contents of the file
+
+File Lengths table (variable size)
+        0x00-0x03: 4-byte integer, number of table entries N" (should be equal 
+                   to N)
+        0x04: N" table entries
+              each entry is a 4-byte integer, length of file (in bytes)
+
+remainder of BOX file are the bytes for the individual files contained within
+
+----------------
+Example
+----------------
+
+Suppose we want to capture the following files in the directory tree below into
+a BOX file:
+
+AFILE.EXT        (file contents: 0x42)
+DIR1\FILE1.ZZZ   (file contents: 0xde 0xad 0xbe 0xef 0xde 0xad 0xbe 0xef)
+DIR1\2ND.MMM     (file contents: 0xab 0xcd 0xef)
+D2\SD3\Y.CD      (file contents: 0xac 0xdc)
+
+Below is one possible encoding. "One possible" because the ordering of files
+can be anything--files under the same subdirectory do not have to come up
+in consecutive table entries in the BOX file, as demonstrated in the example
+encoding below.
+
+Similarly, the contents of each file may not necessarily come in the same order 
+as the file ordering in the tables, because the File Locations table provides 
+direct offsets into the BOX file for each file's contents, theoretically allow 
+you to place the contents of each file in any order consistent with the offsets
+and lengths given in the tables. That said, in the BOX files from the game, I 
+think the file contents do come in the same order as the files do in the tables.
+
+Resulting BOX file, viewed in hex editor:
+
+4C 45 4D 42 4F 58 04 00 00 00 3E 00 00 00 0E 00 
+00 00 44 49 52 31 5C 46 49 4C 45 31 2E 5A 5A 5A 
+09 00 00 00 41 46 49 4C 45 2E 45 58 54 0C 00 00 
+00 44 49 52 31 5C 32 4E 44 2E 4D 4D 4D 0B 00 00 
+00 44 32 5C 53 44 33 5C 59 2E 43 44 04 00 00 00 
+74 00 00 00 7C 00 00 00 7D 00 00 00 80 00 00 00 
+04 00 00 00 08 00 00 00 01 00 00 00 03 00 00 00 
+02 00 00 00 DE AD BE EF DE AD BE EF 42 AB CD EF 
+AC DC
+
+Below is the breakdown:
+
+4C 45 4D 42 4F 58: "LEMBOX"
+04 00 00 00: 0x00000004 = 4 files
+3E 00 00 00: offset to File Locations table = 0xE (header length) + 0x0000003E
+             = 0x0000004C from start of BOX file (counting from zero).
+
+File Directory, which we know has 4 entries for 4 files
+
+0E 00 00 00 44 49 52 31 5C 46 49 4C 45 31 2E 5A 5A 5A: 
+  "DIR1\FILE1.ZZZ", string length 0x0000000E = 14 bytes
+
+09 00 00 00 41 46 49 4C 45 2E 45 58 54: 
+  "AFILE.EXT", string length 0x00000009 = 9 bytes
+
+0C 00 00 00 44 49 52 31 5C 32 4E 44 2E 4D 4D 4D:
+  "DIR1\2ND.MMM", string length 0x0000000C = 12 bytes
+
+0B 00 00 00 44 32 5C 53 44 33 5C 59 2E 43 44:
+  "D2\SD3\Y.CD", string length 0x0000000B = 11 bytes
+
+File Locations table
+
+04 00 00 00: 0x00000004 = 4 files, as expected
+74 00 00 00: location in BOX file for the 1st file's contents, which according 
+             to File Directory is the file DIR1\FILE1.ZZZ
+             so contents of DIR\FILE1.ZZZ starts at 0x00000074 from 
+             start of BOX file
+7C 00 00 00: AFILE.EXT's contents starts at 0x0000007C from start of BOX file
+7D 00 00 00: DIR1\2ND.MMM's contents @ 0x0000007D from start of BOX file
+80 00 00 00: D2\SD3\Y.CD's contents @ 0x00000080 from start of BOX file
+
+File Lengths table
+
+04 00 00 00: 0x00000004 = 4 files, as expected
+08 00 00 00: DIR1\FILE1.ZZZ's length is 0x00000008 = 8 bytes
+01 00 00 00: AFILE.EXT's length is 0x00000001 = 1 byte
+03 00 00 00: DIR1\2ND.MMM's length is 0x00000003 = 3 bytes
+02 00 00 00: D2\SD3\Y.CD's length is 0x00000002 = 2 bytes
+
+DE AD BE EF DE AD BE EF: these 8 bytes are DIR1\FILE1.ZZZ's file contents
+                         located at offset 0x00000074 as specified earlier
+
+42: this 1 byte is AFILE.EXT's file contents
+    located at offset 0x0000007C as specified earlier
+
+AB CD EF: these 3 bytes are DIR1\2ND.MMM's file contents
+          located at offset 0x0000007D as specified earlier
+
+AC DC: these 2 bytes are D2\SD3\Y.CD's file contents
+       located at offset 0x00000080 as specified earlier

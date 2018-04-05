@@ -1,0 +1,1118 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "_LemmingsNext.asm",
+			"settings":
+			{
+				"buffer_size": 8296,
+				"encoding": "Cyrillic (Windows 1251)",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "lemming.asm",
+			"settings":
+			{
+				"buffer_size": 16033,
+				"encoding": "Cyrillic (Windows 1251)",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "explosion.asm",
+			"settings":
+			{
+				"buffer_size": 3375,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "scroll.asm",
+			"settings":
+			{
+				"buffer_size": 7828,
+				"encoding": "Cyrillic (Windows 1251)",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "level.asm",
+			"settings":
+			{
+				"buffer_size": 9439,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "filesys.asm",
+			"settings":
+			{
+				"buffer_size": 13918,
+				"encoding": "Cyrillic (Windows 1251)",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "SpriteManager.asm",
+			"settings":
+			{
+				"buffer_size": 2409,
+				"encoding": "Cyrillic (Windows 1251)",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/E/Dropbox/Backups/Source/ZXSpectrum/Lemmings/win95lem/winlemm/SRC32/LOADER/LOADER.H",
+			"settings":
+			{
+				"buffer_size": 7143,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/source/ZXSpectrum/Demo/Layer2/utils.asm",
+			"settings":
+			{
+				"buffer_size": 10738,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "irq.asm",
+			"settings":
+			{
+				"buffer_size": 6582,
+				"encoding": "Cyrillic (Windows 1251)",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "data.asm",
+			"settings":
+			{
+				"buffer_size": 8744,
+				"encoding": "Cyrillic (Windows 1251)",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "includes.asm",
+			"settings":
+			{
+				"buffer_size": 6539,
+				"encoding": "Cyrillic (Windows 1251)",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "68k/Lemmings/lemmings.asm",
+			"settings":
+			{
+				"buffer_size": 239467,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "panel.asm",
+			"settings":
+			{
+				"buffer_size": 2817,
+				"encoding": "Cyrillic (Windows 1251)",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "docs/lemmings_lvl_file_format.txt",
+			"settings":
+			{
+				"buffer_size": 11032,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "bob.asm",
+			"settings":
+			{
+				"buffer_size": 11556,
+				"encoding": "Cyrillic (Windows 1251)",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/source/ZXSpectrum/esxDOS/esxdos.inc",
+			"settings":
+			{
+				"buffer_size": 2317,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "Packages/z80asm/z80asm.sublime-build",
+	"build_system_choices":
+	[
+		[
+			[
+				[
+					"Packages/z80asm/z80asm.sublime-build",
+					""
+				],
+				[
+					"Packages/z80asm/z80asm.sublime-build",
+					"Run"
+				],
+				[
+					"Packages/z80asm/z80asm.sublime-build",
+					"Build and Run"
+				]
+			],
+			[
+				"Packages/z80asm/z80asm.sublime-build",
+				""
+			]
+		]
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/C/source/ZXSpectrum/Lemmings"
+	],
+	"file_history":
+	[
+		"/C/source/ZXSpectrum/Lemmings/docs/draw_example.asm",
+		"/C/source/ZXSpectrum/Lemmings/docs/readme.txt",
+		"/C/source/ZXSpectrum/Lemmings/copper.asm",
+		"/C/source/ZXSpectrum/Lemmings/utils.asm",
+		"/C/source/ZXSpectrum/Lemmings/points.asm",
+		"/C/source/ZXSpectrum/Lemmings/explosion.asm",
+		"/C/source/ZXSpectrum/Lemmings/68k/Lemmings/points.asm",
+		"/C/source/ZXSpectrum/Lemmings/level.asm",
+		"/C/source/ZXSpectrum/Lemmings/a.bat",
+		"/C/source/ZXSpectrum/Lemmings/68k/Lemmings/dmaconst.asm",
+		"/C/source/ZXSpectrum/Lemmings/68k/Lemmings/doslevels.asm",
+		"/c/Source/ZXSpectrum/Lemmings/docs/draw_example.asm",
+		"/C/source/ZXSpectrum/_Demos/layer2_test/readme.md",
+		"/C/source/ZXSpectrum/esxDOS/esxdos_api.txt",
+		"/C/source/ZXSpectrum/esxDOS/errors.inc",
+		"/C/source/ZXSpectrum/_Demos/uart2.asm",
+		"/C/Program Files (x86)/WinRAR3.1/rarreg.key",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Utils/ProPack/Source/C6502_2.S",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Assemblers/start.s",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Assemblers/run.s",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Beta/Frame/Main.s",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Graphics/DMA/Gore/Collisions.Anim.s",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Graphics/DMA/Gore/Foe.Anim.s",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Pas/Famicom/CYCLES.S",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Pas/HiredGuns/Bob.s",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Squiffy/Squiffy-Part1",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Squiffy/Squiffy-Part2",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Squiffy/Squiffy-Part3",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Squiffy/crap",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Source/Assembler/yylex.pas",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Source/Assembler/Lex.PAS",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Source/Assembler/SNasm.PAS",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Source/Assembler/hardware3.i",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Source/Assembler/LexTable.s",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Source/FrameWork/frame.s",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Source/FrameWork/DavesFrameWork.s",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Source/Debug/DMADebug.S",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Source/Debug/Debug.s",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Source/Cookie/COOKIE.DAT",
+		"//drobo-fs/Backup/Amiga_C64_Backup/Amiga/MikesA1200/Work/Source/Lemmings/lemmings.asm",
+		"//drobo-fs/Backup/DMA/GTA2_Source/3dma.cpp",
+		"/C/Users/Mike/AppData/Local/Temp/Rar$DRa39396.31183/LEMMINGS/LEMMING.ASM",
+		"/C/Users/Mike/AppData/Roaming/Sublime Text 3/Packages/z80asm/README.md",
+		"/C/Users/Mike/AppData/Roaming/Sublime Text 3/Packages/z80asm/z80asm.about",
+		"/C/source/ZXSpectrum/Demo/VBlankTest/utils.asm",
+		"/C/source/ZXSpectrum/Demo/VBlankTest/includes.asm",
+		"/C/source/ZXSpectrum/Lemmings/irq.asm",
+		"/C/source/ZXSpectrum/Lemmings/c.bat",
+		"/H/SD_WLAN/CONFIG",
+		"/C/Users/Mike/Downloads/new_commands.odt",
+		"/C/source/ZXSpectrum/Lemmings/a2.bat",
+		"/C/Users/Mike/Downloads/ZXNEXT/SD_WLAN/CONFIG",
+		"/C/Users/Mike/Downloads/ZXNEXT/.webdav",
+		"/E/Dropbox/Backups/Source/ZXSpectrum/Lemmings/bob.asm",
+		"/C/source/ZXSpectrum/Lemmings/lemming.asm",
+		"/C/source/ZXSpectrum/Lemmings/test.asm",
+		"/E/Dropbox/Backups/Source/ZXSpectrum/Lemmings/_LemmingsNext.asm",
+		"/C/source/ZXSpectrum/Lemmings/c2.bat",
+		"/E/Dropbox/Backups/Source/ZXSpectrum/Lemmings/data.asm",
+		"/C/source/ZXSpectrum/Demo/Layer2/layer2.sna.map",
+		"/C/source/ZXSpectrum/Lemmings/filesys.asm",
+		"/C/source/ZXSpectrum/esxDOS/esxdos.inc",
+		"/E/Dropbox/Backups/Source/ZXSpectrum/Lemmings/win95lem/winlemm/SRC32/LOADER/MAINLD.CPP",
+		"/C/source/ZXSpectrum/Warhawk/WarhawkNext/Warhawk.asm",
+		"/C/source/ZXSpectrum/Warhawk/l.txt",
+		"/E/Dropbox/Backups/Source/ZXSpectrum/Lemmings/docs/draw_example.asm",
+		"/C/source/ZXSpectrum/Lemmings/SpriteManager.asm",
+		"/C/source/ZXSpectrum/Demo/Layer2/layer2.asm",
+		"/C/source/ZXSpectrum/Lemmings/panel.asm",
+		"/C/source/ZXSpectrum/Lemmings/SpriteBouncing.asm",
+		"/E/Dropbox/Backups/Source/ZXSpectrum/Demo/raddemo/SpriteBouncing.asm",
+		"/C/Users/Mike/Downloads/dma.vhd",
+		"/E/Dropbox/Backups/Source/ZXSpectrum/Lemmings/win95lem/winlemm/SRC32/LOADER/LOAD.CPP",
+		"/C/source/ZXSpectrum/Demo/rad/test.asm",
+		"/C/source/ZXSpectrum/Demo/Mouse/mouse.asm",
+		"/C/source/ZXSpectrum/Demo/Mouse/utils.asm",
+		"/C/source/ZXSpectrum/Demo/SID/sid.asm",
+		"/C/source/ZXSpectrum/Lemmings/win95lem/crunch/CRUNCH.ASM",
+		"/C/source/ZXSpectrum/Lemmings/win95lem/crunch/CRUNCH.EXP",
+		"/C/source/ZXSpectrum/Lemmings/win95lem/LEMMINGS/LOAD.ASM",
+		"/C/source/ZXSpectrum/Lemmings/docs/lemmings_main_dat_file_format.txt",
+		"/C/source/ZXSpectrum/Lemmings/docs/lemmings_dat_source.zip",
+		"/C/source/ZXSpectrum/Lemmings/docs/lemmings_lvl_file_format.txt",
+		"/C/source/ZXSpectrum/em/help.txt",
+		"/C/source/ZXSpectrum/em/e.bat",
+		"/E/Dropbox/Backups/Source/ZXSpectrum/Lemmings/win95lem/winlemm/SRC32/RENDER/DRAW.CPP",
+		"/C/source/ZXSpectrum/Lemmings/lemmings.asm",
+		"/C/source/ZXSpectrum/Lemmings/lemmings.sna.map",
+		"/C/source/ZXSpectrum/Demo/jim1/test.asm",
+		"/C/source/ZXSpectrum/Demo/test/zzz.asm",
+		"/C/source/ZXSpectrum/Demo/rad/a.bat",
+		"/C/source/ZXSpectrum/Demo/Layer2/SpriteBouncing.asm",
+		"/C/source/ZXSpectrum/Demo/Layer2/filesys.asm",
+		"/C/source/ZXSpectrum/Lemmings/data.asm",
+		"/C/source/ZXSpectrum/Lemmings/includes.asm",
+		"/C/source/ZXSpectrum/Lemmings/bob.asm",
+		"/C/source/ZXSpectrum/Lemmings/scroll.asm",
+		"/E/Dropbox/Backups/Games/lem_src/SRC32/LEMMINGS/GRAPHICS/LEMMSMA.MOG",
+		"/C/source/ZXSpectrum/Lemmings/docs/compression.h",
+		"/C/source/ZXSpectrum/Lemmings/LemDS/lemmings_winlemm_lvl_to_lds/lemmings_winlemm_lvl_to_lds/lemmings_level.c",
+		"/C/source/ZXSpectrum/Lemmings/LemDS/lemmings_winlemm_lvl_to_lds/lemmings_winlemm_lvl_to_lds/utility.c",
+		"/C/source/ZXSpectrum/Lemmings/LemDS/lemmings_winlemm_lvl_to_lds/lemmings_winlemm_lvl_to_lds/lemmings_level.h",
+		"/C/source/ZXSpectrum/Demo/a.bat",
+		"/C/source/ZXSpectrum/Demo/utils.asm",
+		"/E/Dropbox/Backups/Games/lem_src/SRC32/LEMMINGS/ICONWND.CPP",
+		"/C/Users/Mike/AppData/Roaming/Sublime Text 3/Packages/z80asm/helps/Basic Symbols",
+		"/C/Users/Mike/AppData/Roaming/Sublime Text 3/Packages/z80asm/helps/Z80 Opcodes",
+		"/C/Users/Mike/AppData/Roaming/Sublime Text 3/Packages/z80asm/build.bat",
+		"/E/Program Files/Sublime Text 3/Packages/z80asm/buildrun.bat",
+		"/E/Program Files/Sublime Text 3/Packages/z80asm/build.bat",
+		"/C/Users/Mike/AppData/Roaming/Sublime Text 3/Packages/z80asm/z80asm.sublime-build",
+		"/C/Users/Mike/AppData/Roaming/Sublime Text 3/Packages/z80asm/z80asm.sublime-settings",
+		"/C/source/ZXSpectrum/muti_scroller.asm",
+		"/C/source/ZXSpectrum/Lemmings/scroll_offsets.asm",
+		"/C/source/ZXSpectrum/Lemmings/bank_offset.asm",
+		"/C/source/ZXSpectrum/Lemmings/layer2.sna",
+		"/C/source/ZXSpectrum/Layer2/a.bat",
+		"/C/source/XeO3/Plus4/xeo3.inc",
+		"/C/source/ZXSpectrum/Layer2/SpriteBouncing.asm",
+		"/C/source/ZXSpectrum/Layer2/utils.asm",
+		"/C/source/ZXSpectrum/Layer2/includes.asm",
+		"/C/source/ZXSpectrum/Layer2/scroll.asm",
+		"/C/source/ZXSpectrum/Layer2/irq.asm",
+		"/C/source/ZXSpectrum/Layer2/filesys.asm",
+		"/C/source/ZXSpectrum/Layer2/layer2.asm",
+		"/C/source/ZXSpectrum/Layer2/layer2.sna",
+		"/C/source/ZXSpectrum/Layer2/tilemap.asm",
+		"/C/source/ZXSpectrum/t/bin/cd.asm"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 96.0,
+		"where_history":
+		[
+			"c:\\Source\\ZXSpectrum\\Lemmings",
+			"E:\\Dropbox\\Backups\\Source\\ZXSpectrum\\Lemmings",
+			"E:\\Dropbox\\Backups\\Source\\ZXSpectrum\\Lemmings\\win95lem",
+			"C:\\source\\ZXSpectrum\\Lemmings\\win95lem\\win95m\\level\\ORIG",
+			"E:\\Dropbox\\Backups\\Source\\ZXSpectrum\\Lemmings\\win95lem\\winlemm\\SRC32",
+			"C:\\source\\zxspectrum\\Lemmings",
+			"E:\\Dropbox\\Backups\\Games\\lem_src\\SRC32\\LEMMINGS",
+			"C:\\source\\ZXSpectrum\\Lemmings",
+			"C:\\source\\XeO3\\Plus4"
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"scroll_offsets",
+			"mul",
+			"processlembomber",
+			"AnimFrame",
+			"ProcessLemBomber",
+			"DrawWalker",
+			"DrawLemmingFrame",
+			"cursor",
+			"CursorShape",
+			"cp",
+			"ScrollIndex",
+			"exit",
+			"dc.b",
+			"frames",
+			"\n                ",
+			"dmalen",
+			"DrawLevelBob",
+			"NewFrameFlag",
+			"SetSprites",
+			"FlipScreens",
+			"123b",
+			"$123b",
+			"123b",
+			"NextReg",
+			"VRAM_BASE_BANK",
+			"$123b",
+			"SetScreens",
+			"LexBasic",
+			"NextRegA",
+			"DefaultDrive",
+			" DEFAULTDRIVE",
+			"filename",
+			"                call    PrintHex\nMinersLeft",
+			"MinersLeft",
+			"add\tbc,$",
+			"add\thl,$",
+			"add\thl",
+			"add\\thl",
+			"hl,$",
+			"add hl,$",
+			"CopyPanelToScreen",
+			"cpu",
+			"speed",
+			"NextLemming_NoDraw",
+			"DrawLemming",
+			"DoFalling_skip",
+			"$3f",
+			"SetState",
+			"56",
+			"mousex",
+			"DrawLemming",
+			"lemtitle",
+			"MAX_LEM",
+			"LemX",
+			"FlipScreens",
+			"20",
+			"$14",
+			"21",
+			"$15",
+			"call",
+			"                ;",
+			"uploadsprites",
+			"120",
+			"CreateLevel",
+			"init",
+			"EWRTYPE",
+			"89",
+			"EISDIR",
+			"GetSetDrive",
+			"LoadBank",
+			"load_bank",
+			"InitPanel",
+			"InitGame",
+			"StartAddress",
+			"$FF",
+			"mmu6",
+			"CreateLevel",
+			"DrawBobLevel",
+			"SetupAttribs",
+			"ObiInstSize",
+			"ENDDMA",
+			"LEN",
+			"jp",
+			"call",
+			"DMALen",
+			"SetSprites",
+			"IRQVector",
+			"ReadMouse",
+			"InnerRender",
+			"BobFlags",
+			"LoadCompact",
+			"BobYcoord",
+			"g_pObjects",
+			"tLem1Object",
+			"tagLem1Object",
+			"tLem1Object",
+			"ObjectGround",
+			"STAT",
+			"fClose",
+			"fStat",
+			"cary",
+			"F_STAT",
+			"size",
+			"NOW USE MINERS AND CLIMBERS",
+			"ScrollIndex",
+			"RenderMaskRLESprite",
+			"InitLemmings",
+			"initlemmings",
+			"seek",
+			"RAM",
+			"SD card",
+			"SD",
+			"PANELNUMBERSADDRESS",
+			"LevelAddress",
+			"TestFiles",
+			"filehandle",
+			"CurrentBank",
+			"9e",
+			"seek\nseek",
+			"$15",
+			"LemmingsFile",
+			"\t\tld\ta,PanelBank\n",
+			"SetBank",
+			"LemmingsBank",
+			"error_opening",
+			"FileHandle",
+			"FA_READ",
+			"F_SEEK"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"db",
+			"SpriteReg",
+			"($57)",
+			"ldi",
+			"$",
+			"db",
+			"1",
+			""
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "_LemmingsNext.asm",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 8296,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								7638,
+								7638
+							]
+						],
+						"settings":
+						{
+							"spell_check": true,
+							"syntax": "Packages/z80asm/z80asm.tmLanguage",
+							"tab_size": 8,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3930.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "lemming.asm",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 16033,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								9072,
+								9072
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/z80asm/z80asm.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 7559.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 8,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "explosion.asm",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3375,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1703,
+								1703
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/z80asm/z80asm.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1118.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "scroll.asm",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7828,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2606,
+								2617
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/z80asm/z80asm.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 8230.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "level.asm",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 9439,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3386,
+								3386
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/z80asm/z80asm.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 6597.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "filesys.asm",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 13918,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6704,
+								6704
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/z80asm/z80asm.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 9843.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 10,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "SpriteManager.asm",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2409,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/z80asm/z80asm.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "/E/Dropbox/Backups/Source/ZXSpectrum/Lemmings/win95lem/winlemm/SRC32/LOADER/LOADER.H",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7143,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5492,
+								5503
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 3611.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 15,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "/C/source/ZXSpectrum/Demo/Layer2/utils.asm",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 10738,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								8023,
+								8023
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/z80asm/z80asm.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 6926.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 14,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 1,
+			"sheets":
+			[
+				{
+					"buffer": 9,
+					"file": "irq.asm",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6582,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4364,
+								4364
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/z80asm/z80asm.tmLanguage",
+							"tab_size": 8,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1705.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 11,
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "data.asm",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 8744,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5687,
+								5687
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/z80asm/z80asm.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 2996.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 11,
+					"file": "includes.asm",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6539,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2542,
+								2542
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/z80asm/z80asm.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1843.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 9,
+					"type": "text"
+				},
+				{
+					"buffer": 12,
+					"file": "68k/Lemmings/lemmings.asm",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 239467,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								165951,
+								166079
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/z80asm/z80asm.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 159596.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 12,
+					"type": "text"
+				},
+				{
+					"buffer": 13,
+					"file": "panel.asm",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2817,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								925,
+								925
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/z80asm/z80asm.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 14,
+					"file": "docs/lemmings_lvl_file_format.txt",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 11032,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								714,
+								730
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 10.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 13,
+					"type": "text"
+				},
+				{
+					"buffer": 15,
+					"file": "bob.asm",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 11556,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								10210,
+								10210
+							]
+						],
+						"settings":
+						{
+							"spell_check": true,
+							"syntax": "Packages/z80asm/z80asm.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 10875.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 16,
+					"file": "/C/source/ZXSpectrum/esxDOS/esxdos.inc",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2317,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								956,
+								956
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 456.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 16,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 27.0
+	},
+	"input":
+	{
+		"height": 36.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			],
+			[
+				1,
+				0,
+				2,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			0.543449981301,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 124.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "lemmings.sublime-project",
+	"replace":
+	{
+		"height": 50.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": false,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 283.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

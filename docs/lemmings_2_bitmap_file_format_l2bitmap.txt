@@ -1,0 +1,81 @@
+Lemmings 2 data documentation in bitmap format.
+An implementation to dump specified files as targa can be found at http://geoo.digibase.ca/lemmings/l2bitmap.cpp
+Extracted .png images at http://geoo.digibase.ca/lemmings/l2bitmap.7z
+
+Some of the files are compressed while others are not; as the compressed ones are easily identified by the character sequence 'GCSM', I won't note which ones are compressed and which ones are not.
+All documentation refers to uncompressed data; so you'll have to use Mindless' lem2zip to decompress the compressed files.
+
+The bitmap format is analogous to the bitmap format of the tiles in the style files, except that the size can vary.
+The size of the bitmaps is not specified in the files themselves, and I haven't found a specification anywhere else either.
+Therefore the descriptions will include the sizes of the individual bitmaps.
+Same applies to the palette, so a sensible palette from a different file has to be chosen.
+In this case the palettes have been taken from various .iff files, and for each bitmap I'll specify the .iff file and the palette ID.
+To which data in the file this corresponds exactly is described in l2ss.txt.
+
+The bitmap format is almost like a linear sequence of color entries, with the difference that first all pixels with
+x-positions 4n are defined, followed by all pixels with x-positions 4n+1, then 4n+2 and 4n+3 (n is non-negative integer):
+
+(x_size * y_size) bytes: list of colorIDs (from palette) for a certain pixel whose position is implicitely defined
+	pseudocode description (by Mindless, adapted):
+
+	p = 0
+	for v = 0 to 3
+		for y = 0 to (y_size - 1)
+			for x = 0 to (x_size - 1) step 4
+				pset((x + v, y), d[p]
+				p += 1
+			next
+		next
+	next
+	
+	(d is a byte pointer to the current tile, pset is a pixel setting function)
+
+----------------
+Contents
+----------------
+
+font.dat
+	palette: practice.iff (1)
+	size: 102 bitmaps of 16x11
+panel.dat
+	palette: practice.iff (1), subtract 0x80 from each palette ID
+	size:
+		1 bitmap of 32x30, 
+		1 bitmap of 32x20,
+		59 bitmaps of 8x8,
+		1 bitmap of 16x9,
+		non-bitmap L2SS data (see l2ss.txt)
+pointer.dat
+	palette: practice.iff (1), subtract 0x80 from each palette ID
+	size: 18 bitmaps of 16x16
+rockwall.dat
+	same as frontend/screens/rockwall.dat
+vilscene.dat
+	same as introdat/bckgrnds/vilscene.dat
+frontend/screens/award.dat
+	palette: award.iff (1)
+	size: 320x200
+frontend/screens/end1-5.dat
+	palette: end.iff (1)
+	size: 320x200
+frontend/screens/map.dat
+	palette: map.iff (1)
+	size: 320x200
+frontend/screens/menu.dat
+	palette: menu.iff (1)
+	size: 320x200
+frontend/screens/rockwall.dat
+	palette: practice.iff (1)
+	size: 320x200
+introdat/bckgrnds/black.dat
+	a full one-colored (black) screen
+	size: 320x200
+introdat/bckgrnds/cosyroom.dat
+	palette: waking.iff (2)
+	size: 320x200
+introdat/bckgrnds/nightvil.dat
+	palette: intro.iff (2)
+	size: 320x200
+introdat/bckgrnds/vilscene.dat
+	palette: talis2.iff (2)
+	size: 320x200

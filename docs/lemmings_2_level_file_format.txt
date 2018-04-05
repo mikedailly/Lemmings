@@ -1,0 +1,105 @@
+Lemmings 2 - uncompressed level file format
+
+Header info (12 bytes)
+0x0000-0x0003: "FORM"
+0x0004-0x0007: file size - 8 (big endian)
+0x0008-0x000b: "L2LV" (type: level)
+
+section overview (4 sections):
+L2LH (level header - general data)
+	contains general data for the level
+L2MH (map header)
+	contains information on how the tiles are arranged in the map
+L2MP (map terrain data)
+	contains the terrain tiles that make up the level
+L2BO (object data)
+	contains information on the objects in the level
+
+0x000c-0c000f: "L2LH" (section various general data)
+0x0010-0x0013: section data size (big endian)
+0x0014-0x002b: level name
+0x002c-0x003b: skillID (see appendix A) (2 bytes each, little endian)
+0x003c-0x0043: amount/skill (1 byte each)
+0x0044: time (minutes)
+0x0045: unknown
+0x0046: time (seconds)
+0x0047: unknown
+0x0048-0x0049: style (see appendix B), has no effect (?) (little endian)
+0x004a-0x004b: x screen start position (little endian)
+0x004c-0x004d: y screen start position (little endian)
+0x004e-0x004f: x-screen cut-off/px from the left (little endian)
+0x0050-0x0051: y-screen cut-off/px from the top (little endian)
+0x0052-0x0053: x-screen extension/px to the right (little endian)
+0x0054-0x0055: y-screen extension/px to the bottom (little endian)
+0x0056-0x0057: lemmings that may be killed for still reaching gold (little endian)
+0x0058-0x0059: release rate (little endian, signed integer) - 0x1400 highest possible RR;
+	negative values (e.g. 0xffff) are possible
+0x005a-0x005d: unknown (empty)
+
+0x005e-0x0061: "L2MH" (section map header)
+0x0062-0x0065: section data size (big endian)
+0x0066-0x0067: style (see Appendix B), has effect on the level (little endian)
+0x0068-0x0069: different tile arrangement - depending on value: amount of tiles/line (little endian)
+	0x00 - 80 (0x50) tiles/line
+	0x01 - 64 (0x40) tiles/line
+	0x02 - 50 (0x32) tiles/line
+	0x03 - 40 (0x28) tiles/line
+	0x04 - 32 (0x20) tiles/line
+	0x05 - 24 (0x18) tiles/line
+	0x06 - 20 (0x14) tiles/line
+0x006a-0x006b: unknown (empty)
+
+0x006c-0x006f: "L2MP" (section terrain map) (see Appendix C)
+0x0070-0x0073: section data size (big endian)
+0x0074-0x1f39: terrain data (7884 bytes)
+	1971 terrain piece entries (4 bytes each):
+	0x00-0x01: modifier - 0x4000=background, 0x0000=foreground
+	0x02-0x03: terrain piece ID (big endian)
+
+0x1f40-0x1f43: section "L2BO" (section objects)
+0x1f44-0x1f47: section data size (big endian)
+0x1f48-0x21c7: object data (640 bytes)
+	64 object entries (10 bytes each):
+	0x00-0x01: object ID (little endian)
+	0x02-0x03: x-position (little endian)
+	0x04-0x05: y-position (little endian)
+	0x06-0x07: for steel blocks: number of blocks of same type horizontally attached (little endian)
+		for cannon: number of 16-pixel chain blocks extending standard size
+	0x08-0x09: for steel blocks: number of blocks of same type vertically attached (little endian)
+		for swing: number of chain elements - 2
+
+
+Appendix A: skillID table
+0x00 no skill
+0x01-0x32 skills as in selection screen (training levels)
+0x33 blocker
+
+Appendix B: style value table
+0x00 Classic
+0x01 Beach
+0x02 Cavelems
+0x03 Circus
+0x04 Egyptian
+0x05 Highland
+0x06 Medieval
+0x07 Outdoor
+0x08 Polar
+0x09 Shadow
+0x0a Space
+0x0b Sports
+
+Appendix C: level field architecture
+width: ref. 0x0068-0x0069;
+height: should not exceed 1600/width 
++2 unused rows each above and below actual field (-)
++1 unused column each left and right to the actual field (|)
++unused rest tiles at the end (R)
+i.e.
+-----------------
+-----------------
+|               |
+| used terrain  |
+|               |
+-----------------
+-----------------RRR
+field can be cut off right/bottom setting bytes 0x004a-0x004d

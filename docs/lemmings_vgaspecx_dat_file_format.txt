@@ -1,0 +1,68 @@
+vgaspecX.dat file format
+------------------------
+
+To read a vgaspecX.dat file format, you first decompress it using the regular .dat file decompression.  You should end up with just a single decompressed data section.
+
+Then there is a second level of compression that you need to deal with, though a tiny part of the data section is already usable after the first-level decompression.  Namely, the first 24 bytes specifies the VGA palette to be used for the graphics.  As you know each VGA palette entry takes 3 bytes (I believe I explained palettes when explaining groundXo.dat), so 24 bytes is 8 palette entries.  They get assigned to colors 8-15 in the game palette; colors 0-7 (the "fixed" colors) of the game palette are unaffected, though I think the game always duplicates color 8 in color 7 in its palette (test this out yourself to see if I'm right).
+
+Notice that since this overwrites half of the game palette, it also affects the colors of the interactive objects being used by a special graphics level.
+
+Following the 8-entry VGA palette is 16 bytes which I believe corresponds to the EGA palettes, but there's a gap in my notes on that, so you'll have to experiment to find out how those 16 bytes are used.  It's really of little use since nowadays no one runs the game in EGA mode anyway.
+
+Anyway, after that finally comes the actual bitmap graphics which has this second level of compression.  Fortunately, it is much simpler than the first-level compression scheme.  It is byte-based rather than bit-based, and compression/decompression process the bytes in forward order rather than in reverse order as with the first-level scheme.
+
+There are 3 encodings.  One encodes a block of raw bytes, another encodes a run (repetition of the same byte), and the last one just marks the end of a second-level decompressed data section.
+
+The raw chunk encoding consists of a byte in the range of 0x00 - 0x7F, followed by the raw bytes.  That first byte indicates how big the chunk is, that is, how many raw bytes follow.  0x00 means 1, 0x01 means 2, ..., and 0x7F means 128.  So for example:
+
+0x00 0xab decompresses to 0xab
+0x02 0x12 0x34 0x56 decompresses to 0x12 0x34 0x56
+
+The run-length encoding consists of a byte in the range of 0x81 - 0xFF, followed by a second byte.  The first byte indicates the length of the run, and the second byte indicates the byte that is to be repeated.  0x81 means a length of 128, 0x80 a length of 127, ..., 0xFE means a length of 3 and 0xFF means a length of 2.  So for example:
+
+0xFF 0x45 decompresses to 0x45 0x45, ie. 2 copies of 0x45
+0xC0 0xab decompresses to 65 copies of 0xab
+
+Finally, the presence of a 0x80 outside of the scope of the first or second encoding indicates the end of a second-level decompressed data section.
+
+So for example, the following decompresses to 3 second-level decompressed data sections:
+
+0x00 0x81 0x05 0x80 0x81 0x80 0x81 0x80 0x81 0x80 0xFF 0x80 0x80 0xFD 0x00 0x80
+
+0x00 0x81 -> 0x81
+0x05 0x80 0x81 0x80 0x81 0x80 0x81 -> 0x80 0x81 0x80 0x81 0x80 0x81
+0x80 -> end of first section
+0xFF 0x80 -> 0x80 0x80
+0x80 -> end of second section
+0xFD 0x00 -> 0x00 0x00 0x00 0x00
+0x80 -> end of third section
+
+-----------------------
+
+Pretty easy eh?
+
+In each of the vgaspecX.dat files, after the second-level decompression you should get 4 data sections.  Each section should be of size 14400 bytes, and each corresponds to a quarter of the terrain bitmap.
+
+The terrain bitmap has a fixed size of 960x160.  Data section #1 corresponds to the first 40 scanlines, #2 corresponds to the next 40 scanlines, etc.
+
+Within each data section the bitmap section is stored as a planar bitmap (so altogether 4 separate planar bitmaps, one for each quarter of the terrain).  However, unlike the interactive objects and terrain bitmaps, the planar bitmaps here is 3 bpp, so there are only 3 planes rather than 4.  As usual, bitplane 0 comes first, then bitplane 1, then bitplane 2.
+
+The color numbers you get out of these planar bitmaps are mapped to the game's palette as follows:
+
+0 -> 0, 1-7 -> 9-15
+
+I believe the terrain bitmap is always placed at a fixed location on the level, basically centered.  However, it's also possible that maybe its placement is based on the level's starting x-position as specified in the level's LVL data.  Experiment to find out, and e-mail me as to which theory is correct.
+
+I also believe when a level uses special graphics, the terrain specification section of the level's LVL data is ignored (so the terrain comes purely from the vgaspecX.dat file), but you should experiment to verify, and e-mail me if I'm wrong.
+
+------------------------
+
+Well that completes my knowledge of the .DAT files.
+
+Oh, in case of mistakes in this doc:  try experimenting and see.  What I know 100% sure is:
+
+1) the second-level decompression exactly as described here
+2) that after the second-level decompression, you get 4 sections each of size 14400 bytes, and that they are 3 bpp planar bitmaps, and the colors map as described
+3) There are some palette information stored in the first dozen or so bytes before the compressed bitmaps.
+
+It is possible that maybe the doc here is wrong on how many bytes of palette data there are.  In this doc I said there will be 40 bytes:  first 24 bytes goes into the VGA palette, and the other 16 to EGA.  If doing this leaves you with an incorrect number of data sections or incorrectly-sized or malformed data sections for the compressed bitmap, try varying the number of bytes the palette data takes up until you find something that works.  Hopefully you won't need to do this, but if you do e-mail me also to alert me of the mistake.

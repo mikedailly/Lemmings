@@ -1,0 +1,570 @@
+How to Decompress and Compress .DAT Files Used in PC Lemmings
+
+document by ccexplore
+
+small fix by Simon (in XgagrX.dat, terrain comes first, objects second)
+
+
+Decompression
+-------------
+
+All compressed .dat files use the same compression algorithm.  .dat files
+which are compressed include the following:
+
+XgagrX.dat
+levelXXX.dat
+XgaspecX.dat
+Main.dat
+Cgamain.dat
+
+I don't know about the other .dat files; however, importantly enough, the
+groundXo.dat files are NOT compressed.  The XgaspecX.dat has a second layer of
+compression underneath the .dat compression scheme (that is, once you
+decompress an XgaspecX.dat file using the normal .DAT decompression algorithm,
+you have to apply yet another decompression algorithm to get to the actual
+data); I'll explain that in a separate document.
+
+A compressed .dat file consists of some number of "compressed data sections"
+one following another.  Each compressed data section consists of a 10-byte
+header and then the actual compressed data, and immediately after that comes
+the next compressed data section with its header and data, and so forth.  A
+header has the following layout:
+
+byte num_bits_in_first_byte
+byte checksum
+word unused1
+word decompressed_data_size
+word unused2
+word compressed_data_size
+
+I'll explain num_bits_in_first_byte later.  The checksum is an exclusive or
+("xor") of all the bytes in the actual compressed data (ie. excluding the
+header).  The decompressed_data_size refers to the number of bytes you'll get
+when you decompressed the data.  The compressed_data_size refers to the SUM of
+the number of bytes in the header (always 10) plus the number of bytes in the
+actual compressed data.  unused1 and unused2 are not used and are set to zero.
+
+---------------------------------------------
+
+In explaining the decompression algorithm, for now imagine that instead of
+bytes, the compressed data (minus the header) is actually a stream of bits.
+I'll explain later how this conceptual stream of bits is stored as the bytes
+found in the file.  The decompression algorithm builds the decompressed data
+backwards, starting from its last byte going byte-by-byte towards the first
+byte.  Compression is achieved because the stream of bits can encode both raw
+bytes, and references to a block of consecutive bytes that had been
+decompressed previously.
+
+Specifically there are 6 different ways the bits encode bytes of the
+decompressed data:
+
+1) 00 nnn xxxxxxxx xxxxxxxx ...
+
+Two consecutive 0 bits encode the start of a short chunk of raw bytes.  The
+next 3 bits encode the number of bytes in the encoding, minus 1.  Then the
+following groups of 8 bits each encode a byte.  Remember that decompression
+goes backwards byte by byte, so the last xxxxxxxx gives you the earliest byte.
+
+example:  00 000 00010000
+
+This decompresses to the byte 00010000 = 0x10 (hex) or 16 (decimal).  The 00
+means a short chunk of raw bytes.  The 000 means the number of bytes encoded
+is 1 since 1 - 1 = 0.  Then 0x10 comes from the next 8 bits which was 00010000.
+
+example:  00 001 00010000 11111111
+
+This decompresses to the bytes 0xFF 0x10.  We know 2 bytes are encoded because
+of the 001.  The 0xFF comes from 11111111 and the 0x10 from 00010000.  Notice
+that although the bits that encodes 0xFF comes later, because decompression
+reconstructs the bytes backwards, the 0xFF goes before the 0x10 in the
+decompressed data.
+
+example:  00 100 11111111 10101010 00001111 11110000 00000000
+
+This decompresses to 0x00 0xF0 0x0F 0xAA 0xFF.
+
+Because only 3 bits are used to encode the number of bytes, only a maximum of
+8 bytes can be encoded in this format.
+
+
+2) 01 mmmmmmmm
+
+A "01" encodes a reference to two consecutive bytes in previously decompressed
+data.  The mmmmmmmm denotes the offset, minus 1, to the END of the two-byte
+block from the current position.
+
+For the following examples, supposed so far we have decompressed the following
+bytes 0x01 0x02 0x03 0x09 0x07, and then we encounter the 01 mmmmmmmm in the
+stream of bits.  This will decode into two bytes, and since decompression
+reconstructs the data backwards, these next two bytes will go BEFORE the 0x01.
+
+example: 01 00000001
+
+The 00000001 means offset - 1 = 1, so offset = 1 + 1 = 2.  So the 2 bytes
+referred to are "0x01 0x02".  So after decoding these bits the decompressed
+data becomes 0x01 0x02 0x01 0x02 0x03 0x09 0x07
+
+example: 01 00000100
+
+00000100 is 4, so offset = 4 + 1 = 5.  So we are referring to the "0x09 0x07",
+and so after decoding we get 0x09 0x07 0x01 0x02 0x03 0x09 0x07.
+
+example: 01 00000000
+
+This might look like an illegal encoding, but is actually valid and
+meaningful!  The offset is 1.  What does that mean?  Well, it decodes into
+0x01 0x01, making the decompressed data become 0x01 0x01 0x01 0x02 0x03 0x09
+0x07.  If you think about it this makes sense because in the final
+decompressed data we in fact DO have two occurrences of the "0x01 0x01" block;
+it just so happens that because the offset is 1, these two blocks overlap:
+      _______
+     |       |
+0x01 0x01 0x01 0x02 0x03 0x09 0x07
+|_______|
+
+I'll provide similar examples later in other encodings, so hopefully you'll
+understand this crucial final point by then.  It is crucial because as you'll
+see later, this concept allows for an efficent way to encode a long run of the
+same byte value.
+
+Notice that since only 8 bits are allotted for the offset - 1 value, the
+maximum offset that can be encoded in this format is 256, corresponding to
+11111111.
+
+
+3) 100 mmmmmmmmm
+
+This is similar to #2.  It is also a reference, but to three consecutive bytes
+in previously decompressed data.  The offset field is now 9 bits instead of 8,
+thereby allowing you to reference as far as 512 bytes off from the current
+position.
+
+Again as before, we'll assume we have so far decompressed and gotten the bytes
+0x01 0x02 0x03 0x09 0x07
+
+example: 100 000000011
+
+So 000000011 is 3, so the offset is 4, and therefore the block of 3 bytes
+referred to are "0x02 0x03 0x09".  The decompressed data then becomes 0x02
+0x03 0x09 0x01 0x02 0x03 0x09 0x07.  Here is a diagram depiction:
+                     ____________
+                    |            |
+0x02 0x03 0x09 0x01 0x02 0x03 0x09 0x07
+|____________|
+
+example: 100 000000001
+
+The offset is 2, so again we are talking about two overlapping blocks of 3
+bytes in the original decompressed data.  So the block of bytes generated by
+the encoding is 0x02 0x01 0x02, and the decompressed data then becomes:
+           ____________
+          |            |
+0x02 0x01 0x02 0x01 0x02 0x03 0x09 0x07
+|____________|
+
+Again, I marked the two 3-byte blocks so you can clearly see how the block of
+3 that was generated from decoding the bits is indeed a copy of the other
+block of 3 that is an offset of 2 away.
+
+example: 100 000000000
+
+Hopefully by now it should make sense to you that the bits decode into the 3
+bytes 0x01 0x01 0x01, and the decompressed data becomes 0x01 0x01 0x01 0x01
+0x02 0x03 0x09 0x07.  But just in case, here's the diagram depiction:
+      ____________
+     |            |
+0x01 0x01 0x01 0x01 0x02 0x03 0x09 0x07
+|____________|
+
+Another way to work out the bytes the bits decode to in the situations with
+overlapping blocks, is to consider copying the bytes from the referenced block
+to the destination starting from the last byte back to the first.  So in the
+second to last example above, first we copy the 0x02:
+             _________
+            |         |
+            v         |
+____ ____ 0x02 0x01 0x02 0x03 0x09 0x07
+
+Then the 0x01:
+        _________
+       |         |
+       v         |
+____ 0x01 0x02 0x01 0x02 0x03 0x09 0x07
+
+And finally, the 0x02:
+   _________
+  |         |
+  v         |
+0x02 0x01 0x02 0x01 0x02 0x03 0x09 0x07
+
+
+4) 101 mmmmmmmmmm
+
+This is similar to #2 and #3.  It is a reference to four consecutive bytes in
+previously decompressed data.  With a 10-bit offset field, you can reference
+as far as 1024 bytes off from the current position.
+
+Again, assume we've so far decompressed and gotten 0x01 0x02 0x03 0x09 0x07.
+
+example: 101 0000000100
+
+0000000100 is 4, so offset is 5, and the bits decode to the bytes "0x02 0x03
+0x09 0x07".  The decompressed data becomes 0x02 0x03 0x09 0x07 0x01 0x02 0x03
+0x09 0x07.
+
+example: 101 0000000010
+
+Offset is 3, and the bits decode to the bytes "0x03 0x01 0x02 0x03".
+Decompressed data becomes 0x03 0x01 0x02 0x03 0x01 0x02 0x03 0x09 0x07
+
+
+5) 110 nnnnnnnn mmmmmmmmmmmm
+
+This is similar to #2, #3 and #4; in fact it's essentially a generalization,
+allowing you to specify both the length of the block of bytes you are
+referencing as well as its location (offset).
+
+The 8 bits nnnnnnnn following the 110 specifies the length of the block, minus
+1, allowing for a maximum block length of 256.  The mmmmmmmmmmmm is a 12-bit
+offset field that lets you reference as far as 4096 bytes off from the current
+position.
+
+Although you can use this format to encode references to blocks of length 2, 3
+or 4, the previous encoding formats are obviously more efficent for those
+purposes, assuming their offset field is large enough to hold the offset in
+question.  For length 1 this encoding takes far more bits then if you just
+encode this directly using the "00 nnn xxxxxxxx ..." format.  So this encoding
+is primarily for encoding references to block lengths which are 5 or higher,
+or occasionally to a block whose offset is too far away to be captured in the
+more efficient encodings.
+
+Here for our examples below, assume the decompressed data so far are 0x0A 0x02
+0x03 0x04 0x05 0x06 0x07 0x08.
+
+example: 110 00000100 000000000110
+
+nnnnnnnn here is 00000100 = 4, so the length of block is 5.  The offset field
+is 000000000110 so the offset is 6+1 = 7.  So the reference is to a block of 5
+bytes an offset of 7 away from the current position, so the bits decode into
+"0x03 0x04 0x05 0x06 0x07", and the decompressed data now becomes 0x03 0x04
+0x05 0x06 0x07 0x0A 0x02 0x03 0x04 0x05 0x06 0x07 0x08.
+
+example: 110 00001111 000000000000
+
+So the block length is 16 and the offset is 1.  This is an example of how you
+can encode a long run of the same byte.  The bits decode to 16 "0x0A"s, and so
+the decompressed data becomes a run of 17 "0x0A"s (including the one that was
+already decompressed earlier), follow by the previously decompressed "0x02
+0x03 0x04 0x05 0x06 0x07 0x08".
+
+
+6) 111 nnnnnnnn xxxxxxxx xxxxxxxx ...
+
+Finally, this is similar to #1.  It encodes raw bytes, but allows you to
+encode more than the maximum of 8 possible with the "short raw data" format
+that is #1.  The 8-bit value nnnnnnnn is the number of bytes encoded minus 9,
+so you can encode up to 255 + 9 = 264 raw bytes with this encoding.  Again,
+because decompression always build the data from back to front, the first
+xxxxxxxx encodes a byte closest to the end of the decompressed data while the
+last xxxxxxxx encodes a byte closest to the beginning.
+
+example: 111 00000000 00000001 00000010 00000011 00000100 00000101 00000110
+00000111 00001000 00001001
+
+This decodes to "0x09 0x08 0x07 0x06 0x05 0x04 0x03 0x02 0x01".  We know there
+are 9 bytes from the "00000000".  And again notice the backwardness that
+causes the first 8 bits following the "00000000" to actually be encoding the
+0x01 that goes to the end, while the last 8 bits in the encoding yields the
+bytes that goes to the beginning.
+
+
+As a final exercise summing up all 6 encoding formats, work it out for
+yourself that the stream of bits:
+
+111 00000000 00000001 00000010 00000011 00000100 00000101 00000110 00000111
+00001000 00001001 101 0000000111 01 00000001 00 001 00000001 11111111 110
+00000110 000000000010 100 000001110
+
+decompresses to the following bytes:
+
+0x04 0x03 0x02 0x05 0xFF 0x01 0x05 0xFF 0x01 0x05 0xFF 0x01 0x05 0x04 0x05
+0x04 0x03 0x02 0x09 0x08 0x07 0x06 0x05 0x04 0x03 0x02 0x01
+
+You determine when to stop decompressing by keeping track of how many bytes
+you have decompressed so far.  Once you have decompressed as many bytes as
+dictated by the value of decompressed_data_size in the header, you stop.
+
+-----------------------
+
+Finally, how to retrieve the stream of bits from the actual bytes of
+compressed data.  It turns out the stream of bits are also stored in a
+"backwards" fashion into the bytes of the compressed data, so that bits at the
+front of the stream goes into the last bytes of the compressed data, and bits
+at the end of the stream goes into the first bytes of the compressed data.
+
+Specifically, starting from the last byte of the compressed data, you pull out
+the bits of that byte one-by-one starting from the rightmost bit (ie. the
+"least significant" bit) until all 8 bits are pulled, then you go to the next
+to last byte and repeat the process, and so forth until you end up at the
+first byte of compressed data.  Actually, one more important detail:  remember
+the num_bits_in_first_byte field of the header?  The value of that field in
+the header dictates a special treatment for the first byte you generate the
+bitstream with (namely, the last byte of compressed data):  after you pulled
+num_bits_in_first_byte many bits from the byte, you skip to the previous byte,
+from which point on you will always pull all 8 bits from a byte before moving
+on.  If num_bits_in_first_byte happens to be zero (shouldn't happen, but if),
+then this means you don't pull any bits from the last byte of compressed data,
+but instead start off by directly skipping to the second to last byte of
+compressed data.  Clearly num_bits_in_first_byte should normally range from 1
+to 8.  The purpose of this value is because the total number of bits in the
+bitstream may not be a multiple of 8, in which case one byte will only be
+holding 7 or less bits of the bitstream.
+
+Here are some examples, showing the compressed data, the value of
+num_bits_in_first_byte, and the corresponding stream of bits you will do your
+decompression from. (Note: since the examples are meant only for illustrating
+the compressed data -> bitstream process, the resulting stream of bits might
+not actually work out correctly if you try to decompress from it.)
+
+Example 1
+
+compressed data:  0xA3
+num_bits_in_first_byte = 8
+corresponding stream of bits:  1 1 0 0 0 1 0 1
+
+Explanation:  0xA3 is 10100011 in binary.  As explained earlier, you pull the
+bits out from the right, so the first bit in the stream is the rightmost bit
+of 0xA3, the second bit in the stream is the bit second from right in 0xA3,
+etc.  Because num_bits_in_first_byte = 8, all 8 bits of the byte contributes
+to the bitstream.
+
+
+Example 2:
+
+compressed data: 0x57 0xA3
+num_bits_in_first_byte = 8
+corresponding stream of bits: 1 1 0 0 0 1 0 1 1 1 1 0 1 0 1 0
+
+Explanation:  Remember, we start off with the last byte of compressed data to
+start the bitstream.  And here, the last byte is 0xA3 as before, plus
+num_bits_in_first_byte is still 8.  So the first 8 bits of the bitstream is
+identical to what we had in example 1.  The next 8 bits of the bitstream then
+comes from the byte preceding 0xA3, namely 0x57 which is 01010111 in binary.
+Since we pull bits from the right as before, the 9th-11th bits in the
+bitstream are 1, then the 12th bit is 0, etc.
+
+
+Example 3:
+
+compressed data: 0x57 0xA3
+num_bits_in_first_byte = 6
+corresponding stream of bits: 1 1 0 0 0 1 1 1 1 0 1 0 1 0
+
+Explanation:  The compressed data is exactly the same as example 2, but
+num_bits_in_first_byte is now 6 instead of 8.  The effect is that after
+pulling 6 bits from 0xA3, we ignore the remaining 2 bits, instead skipping
+ahead to the preceding byte of 0x57 and pull the 7th bit and onwards from
+there.  Notice that num_bits_in_first_byte only applies to 0xA3 (the last byte
+of compressed data, which is the FIRST byte used for constructing the
+bitstream; hope the nomenclature isn't too confusing), so when we work with
+0x57, we still use all 8 of its bits, not just 6.
+
+Because 2 bits are ignored, if we had 0x57 0x23 instead of 0x57 0xA3, the
+resulting stream of bits would still be the same.  Whereas in example 2 if we
+had 0x57 instead of 0x23, the 8th bit of the corresponding bitstream would've
+been a 0 instead of a 1.
+
+============================================
+
+compression
+-----------
+
+In general, given a particular compressed file format, there are basically
+just one decompression algorithm, but potentially infinitely many compression
+algorithms that work (some better than others of course).  So the discussion
+here is just a suggestion of one possible compression algorithm that would
+work with the .DAT file format.  I've tested it though and it works pretty
+well for .DAT files that are levelpacks (in fact, almost on par with the
+compression algorithm used by Psygnosis itself, the latter being a hair more
+compact, and definitely far surpasses the compression algorithm lemedit uses).
+ It doesn't work too well for the other .DAT files (resulting in filesizes 1.5
+to 2 times bigger than what Psygnosis managed).
+
+It should be clear from the discussion in decompression, that you achieve
+compresssion through the use of those reference encodings, where you reference
+a block of bytes instead of encoding its bits directly in the bitstream,
+thereby saving the number of bits used.  For example, 3 bytes normally takes
+8x3 = 24 bits, but if you can use a "100" encoding instead, the same 3 bytes
+would only take 13 bits.
+
+Also observe that references to blocks of n bytes can always be think of as n
+- 1 consecutive references to 2-byte blocks.  For example:
+                                                    _________________
+                                                   |                 |
+0x01 0x02 0x03 0x04 ...(some intervening bytes)... 0x01 0x02 0x03 0x04
+|_________________|
+
+Can be thought of as 3 consecutive length-2 references:
+
+      _______                                            _______
+     |       |                                          |       |
+0x01 0x02 0x03 0x04 ...(some intervening bytes)... 0x01 0x02 0x03 0x04
+|_______| |~~~~~~~|                                |_______| |~~~~~~~|
+
+
+So my approach to compression is basically as follows:
+
+1) Scan the original uncompressed data backwards from end to beginning.
+
+2) Use a table to keep track of occurrences of pairs of consecutive bytes.
+Use it to keep track of the most recent occurrence for each of the 65536
+possible pairs of two consecutive bytes.  (If you know what a hash table is,
+you can use that to avoid having a giant table with 65536 entries.  Well,
+65536's not really that big of a table, except maybe in DOS and even then you
+might still be okay.)
+
+3) As you scan the uncompressed data, create a list of 2-byte references,
+based on the table you use to keep track of occurrences.  For example, suppose
+your current two consecutive bytes are 0x01 0x02, and the table recorded the
+closest previous occurrence is 6 bytes away, then this means a 2-byte
+reference in the current position with offset = 6.  Add that to the list of
+2-byte references you've found so far.
+
+But what if you already have on your "reference list" a 2-byte reference that
+overlaps with the current 2-byte reference you are trying to add?  (This can
+happen for example with the diagrammed example above.)  Well, there are two
+cases:
+
+  i) The reference you are trying to add and the other reference it overlaps
+with both have the same offsets.  Then basically we're talking precisely about
+the situation depicted in the diagrammed example above, where the two 2-byte
+references are really a single 3-byte reference.  So instead of adding a
+separate reference, increase the length of the reference already on the list
+by 1.
+
+ ii) In the other case, the offsets are different.  Then they really are
+separate 2-byte references, just so happens that they overlap.  You can't have
+both though in the final compressed data, since each reference when
+decompressed generates exactly 2 bytes.  So you'll need to make one of the two
+a 1-byte refernece instead.  Except 1-byte references can only be represented
+with the 23 bit "110" format, which is far too inefficient.  So in other
+words, you drop one of the two 2-byte references.  This means you don't add
+the 2-byte reference you would've otherwise added to the list.
+
+4) Then you scan through the list of references and makes adjustments, based
+on the fact that:
+  i) the maximum offset of a reference is limited depending on its length
+ ii) references of lengths > 256 must eventually be broken down into two or
+more references of length 256 or less
+
+There are many additional things you can consider here.  For example, although
+a lone 2-byte reference allows you to store 16 bits as 10 bits in the
+compressed data, if the bytes to either side of the 2-byte destination block
+(the block you are copying bytes into) can only be encoded in one of the two
+"raw" formats, then in effect you are splitting what could've potentially been
+just one unbroken raw encoding into two.  Since a raw encoding has overhead (5
+or 11 bits depending on number of bytes encoded, which is in addition to the
+bits you need to encode the raw bytes themselves), the 6 bits you saved in the
+2-byte reference might not be worth it.  If you look at my C++ code, the
+method Compressor::optimize_refchunks deals with these sort of things.  That
+being said, don't get too clever with this. (I'd say even my code is probably
+a bit overkill in this aspect.)
+
+5) Then calculate the total number of bits you'd need to encode the references
+and the intervening raw-byte encodings.  Use that to figure out what
+num_bits_in_first_byte should be, as well as how big to make your buffer for
+holding the final compressed data.
+
+6) Then generate the compressed data by encoding the reference and raw bytes.
+Finally generate the checksum, and then create and fill the header
+appropriately.  Remember that the compressed_data_size in the header actually
+refers to both the header itself and the actual compressed data, so the value
+would actually be 10 + the number of bytes of actual compressed data.
+
+This is in a nutshell the approach I used.  For details see the code for the
+class "Compressor" in compression.cpp.  Notice that you only have to keep
+track of potential 2-byte references, since longer length references can
+naturally come out from step 3i); in particular, since you always keep track
+of just the most recent occurrences, my approach will automatically identify
+things like long runs of the same byte.  Of course, the same choice of keeping
+track of just the most recent occurrence means sometimes my approach might
+miss a long n-byte reference with a large offset, because there was an
+intermediate short reference with a smaller offset which caused the table to
+lose track of the earlier occurrence that would've allowed a longer reference
+to be used.
+
+Finally, if you find yourself too confused, consider not doing any
+compression, instead simply encode the data using only raw-byte encodings
+only.  The resulting "compressed" file would of course be bigger than the
+original decompressed data, but it'll make programming a lot easier.  The main
+reason compression was used anyway was so the game would fit on a floppy back
+then; nowadays you have more than enough memory and disk space to deal with
+the data without compressing it, and I think for the most part the PC Lemmings
+program will let you get away with doing a horrible job with compression, as
+long as you generate a .DAT file that follows the expected format.
+
+
+============================================
+
+Okay, I Decompressed; Now What?
+-------------------------------
+
+Once you decompress a .DAT file into its original uncompressed data, the next
+step of course will depend on the purpose of the data.  The uncompressed data
+format of a levelXXX.dat file will obviously be different than that of a
+XgagrX.dat file.
+
+The details on this really belongs in separate documents.  Moreover, right now
+I only know about the uncompressed data formats for levelXXX.dat, vgagrX.dat,
+and vgaspecX.dat.  But I'll make a brief explanation here.
+
+The levelXXX.dat is fairly simple after you decompress it.  Each compressed
+data section (the combination of a header and the compressed bytes)
+corresponding to a single level.  After decompressing a single section, you
+get 2048 bytes of data exactly in the .LVL format lemedit uses for its
+so-called "direct save" format.  You can find the details of the .lvl file
+format by Googling on the web.
+
+The vgagrX.dat holds exactly 2 compressed data sections per file.  I trust
+that you know or gathered that each the vgagrX.dat file corresponds to a
+"normal graphics set" of the same number, specifically the graphics used in
+the EGA/VGA mode.  The first data section contains the bytes for the bitmaps
+used for the terrain pieces, while the second data section contains the bytes
+for the interactive objects' bitmaps.  In order to further interpret these
+bytes, you will need to also parse the groundXo.dat files, which holds the
+descriptions (eg. size, activation area, number of frames of animation) to the
+objects and terrain of the graphics set, as well as an offset specifying where
+in the uncompressed data of vgagrX.dat you will find the bitmap data for the
+object/terrain.  I'll discuss this in a future document (both the vgagrX.dat
+and the groundXo.dat).
+
+Finally, the vgaspecX.dat each holds exactly a single compressed data section.
+ I trust that you know or gathered that each vgaspecX.dat file corresponds to
+a so-called "extended graphics set", used by the 4 "special levels" in PC
+Lemmings (the 'spec' in the filename stands for "special" by the way, I
+think).  As mentioned earlier, the vgaspecX.dat files uses two levels of
+compression, so after decompressing the .dat the normal way, you have to apply
+a second, different decompression algorithm.  Fortunately, this second
+decompression algorithm (and the corresponding compression algorithm) is much
+more straightforward.  After this second round of decompression, you will end
+up with basically a 960x160 bitmap.  This is 3 screens worth of graphics.  The
+bad news is, the so-called "extended graphics set" is not really a graphics
+set at all.  Instead, it is basically just a bitmap representing the entire
+terrain of a level!  So you can dash your hopes now on trying to creating a
+level using the graphics of "A Beast of a Level".  Well, you can, but you'll
+be forced to use the entire terrain exactly as it is from the level, not
+individual parts and elements of it.  I'll discuss vgaspecX.dat in another
+future document.
+
+The cgagrX.dat and cgaspecX.dat are obviously the CGA counterparts to
+vgagrX.dat and vgaspecX.dat.  I didn't bother to figure out how to use them
+since all PCs nowadays capable of running Win95 or better is required by
+Windows to support VGA or better.  EGA and VGA uses basically identical
+bitmaps except the palettes are different.  (The palettes are stored in
+groundXo.dat by the way.)
+
+As for main.dat and the CGA counterpart cgamain.dat, they obviously correspond
+to other game graphics, like the intro screen, the fonts, the background
+texture used in the password and level preview screens, etc.  I have not yet
+tried to figure this out yet, and certainly for level-editing purposes I'd
+never need to.
