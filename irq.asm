@@ -169,8 +169,33 @@ DisplayCursor:
                 or      $80
                 out     (SpriteReg),a
 
+                ; Draw Panel selection
+                ld      a,(PanelSelection)
+                swapnib                         ; *16
+                add     a,32+32                 ; 32 border
+                push    af
+                out     (SpriteReg),a
+                ld      a,168                   ; start of panel
+                add     a,32
+                out     (SpriteReg),a
+                xor     a
+                out     (SpriteReg),a           ; set high X
+                ld      a,$82                   ; set shape + enable
+                out     (SpriteReg),a
+
+                ; low part of selection icon
+                pop     af
+                out     (SpriteReg),a
+                ld      a,168+16                   ; start of panel
+                add     a,32
+                out     (SpriteReg),a
+                xor     a
+                out     (SpriteReg),a           ; set high X
+                ld      a,$83                   ; set shape + enable
+                out     (SpriteReg),a
+
                 ret
 CursorShape             db      0
 CursorShape_Current     db      0
-
+PanelSelection          db      0
 

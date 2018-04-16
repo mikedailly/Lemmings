@@ -118,8 +118,8 @@ FallerSplatter	LEMANIM		FSplatter,	17,	0,0		;+1 frame so processing code can det
 LemTitle        File    "lemdat/lemtitle.256"		; title page
 PanelFile       File    "lemdat/lempanel.256"		; Lemmings panel
 PanelNumbers    File    "lemdat/panelnum.256"		; Lemmings panel
-CursorsFile	File	"CURSOR.256"			; Cursors (cross and selection)
-PointsFile	File	"lemdat/points.dat"			; nuke points...
+CursorsFile	File	"lemdat/cursor.256"		; Cursors (cross and selection)
+PointsFile	File	"lemdat/points.dat"		; nuke points...
 
 ; sprites
 LemmingsFile	File	"lemdat/lemmings.spr"

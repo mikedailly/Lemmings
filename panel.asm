@@ -11,7 +11,7 @@ InitPanel:
 		;LoadBank	CursorsFile,$4000,0
 		ei
 		ld	e,0				; which sprite shape to copy to
-		ld	d,2				; how many to copy	
+		ld	d,4				; how many to copy	
 		ld	hl,$c000			; copy from where?
 		call	UploadSprites
 		
@@ -156,6 +156,56 @@ BashersLeft		db	0
 MinersLeft		db	0
 DiggersLeft		db	0
 
+ButtonDown		db	0	; mouse button down?
+
+
+
+
+; ************************************************************************
+;
+; Function:	Load and init the panel
+;
+; ************************************************************************
+ProcessInput:
+		ld	a,(ButtonDown)
+		and	$f
+		jp	z,@TestButton		; button pressed already processed?
+
+		ld	a,(MouseButtons)
+		test	2			; LEFT button
+		ret	z			; if button still down, return
+
+		xor	a			; button not perssed, so clear flag
+		ld	(ButtonDown),a
+		ret
+
+
+@TestButton:	ld	a,(MouseButtons)
+		test	2			; LEFT button
+		ret	nz			; not pressed?
+		ld	(ButtonDown),a
+
+
+		; Once mouse button pressed, check to see where the cursor is
+		ld	a,(MouseY)
+		cp	168
+		ret	c			; if less then the panel, then retun
+
+		ld	a,(MouseX)
+		swapnib				; shift right 16
+		and	$f			; clear top bits...
+		sub	2
+		jp	m,@ReleaseSpeed		; if first 2 boxes...return
+
+		cp	8			; panel slot > 7 then not a skill
+		jp	nc,@pauseNuke	
+
+		ld	(PanelSelection),a	; set selected skill
+
+
+@ReleaseSpeed:		
+@pauseNuke:
+		ret
 
 
 

@@ -52,16 +52,9 @@ StartAddress:
                 call    Cls256
                 im      2                       ; Set up IM2 mode
                 ei
-;                ld      a,0
-;                out     ($fe),a
 
                 ld      a,7+(64)        ; bright white on black
                 call    ClsATTR
-                ;call    SetupAttribs
-
-;                LoadBank        CursorsFile,$4000,0
-;                BORDER   4
-;@lp112          jp       @lp112
 
                 ld      a,0
                 out     ($fe),a
@@ -79,6 +72,7 @@ MainLoop:       ld      a,1                     ; Wait on VBlank....
 @WaitVBlank:    ld      a,(NewFrameFlag)        ; for for it to be reset
                 and     a
                 jr      nz,@WaitVBlank
+
                 ; wait for a minimum of 3 frames....
 @WaitForFrameCount:
                 ld      a,(VBlank)              ; get current FPS
@@ -119,6 +113,7 @@ MainLoop:       ld      a,1                     ; Wait on VBlank....
                 ld      a,0
                 out     ($fe),a
 
+                call    ProcessInput
 
 if USE_COPPER = 0
                 call    CopyPanelToScreen
