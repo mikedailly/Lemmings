@@ -70,11 +70,20 @@ LoadLevel:
 
 		ld	ix,LevelAddress
 		ld	a,(ix+1)
+		ld	(ReleaseRateBin),a
+		ld	(MinReleaseBin),a
+		push	af
 		call	ConvertNumber
-		ld	(ReleaseRate),a
-		ld	(ReleaseRateCounter),a
 		ld	(MinReleaseRate),a
-		ld	a,(ix+3)
+		ld	(ReleaseRate),a
+		pop	af
+		call	ConvertToDelay			; convert the "bin" to the "magic" delay value
+		ld	(ReleaseRateCounter),a
+		ld	(MasterReleaseRate),a
+
+
+		ld	a,(ix+3)			; maximum number of lemmings to release
+		ld	(MaxReleaseLemmingsBin),a
 		call	ConvertNumber
 		ld	(MaxReleaseLemmings),a
 
@@ -143,15 +152,27 @@ ConvertNumber:
 		jr	@lp
 @LessThat10:	ld	c,a
 		ld	a,b
-		add	a,a	; *2	swapnib would be good here
-		add	a,a	; *4
-		add	a,a	; *8
-		add	a,a	; *16
+		swapnib		; *16
+		and	$f0
 		add	a,c	; add remainder
-
 		ret
 
 
+; *****************************************************************************************************************************
+; Convert the 0-99 into a frame delay....Amiga did "odd" things here...
+;	A = panel delay value
+;	A = Frame delay value
+; *****************************************************************************************************************************
+ConvertToDelay:
+		ld	b,a
+		ld	a,99
+		sub	b		; 99-num	
+		srl	a		; /2
+		neg			; negate
+		add	a,53		; *magic*
+		neg
+		add	a,57		; *magic*
+		ret
 
 
 ; *****************************************************************************************************************************

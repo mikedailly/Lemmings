@@ -76,7 +76,7 @@ DrawPanelNumbers:
 		call	SetBank
 
 		ld	b,10
-		ld	ix,ReleaseRate
+		ld	ix,MinReleaseRate
 		ld	iy,PanelScoreOffsets
 @DrawAllPanelNumbers:		
 		push	bc
@@ -144,9 +144,14 @@ PanelNumOffset	ld	c,(hl)
 
 PanelOffsets		dw	0,40*1,40*2,40*3,40*4,40*5,40*6,40*7,40*8,40*9	; offset to the graphics
 PanelScoreOffsets:	db	3,19,35,51,67,83,99,115,131,147			; pixel X coords on panel
+MaxReleaseLemmingsBin	db	0	; max number of lemmings to release (BIN)
 MaxReleaseLemmings	db	0	; max number of lemmings to release
-ReleaseRate		db	0	; panel values
+MinReleaseBin		db	0	; Binary "minimum"
+ReleaseRateBin		db	0	; raw value (not display one)
+
+; Panel numbers - DONT reorder!
 MinReleaseRate		db	0
+ReleaseRate		db	0	; panel values
 ClimbersLeft		db	0
 FloatersLeft		db	0
 BombersLeft		db	0
@@ -157,7 +162,7 @@ MinersLeft		db	0
 DiggersLeft		db	0
 
 ButtonDown		db	0	; mouse button down?
-
+ButtonPressed		db	0	; button pressed this frame?
 
 
 
@@ -167,45 +172,108 @@ ButtonDown		db	0	; mouse button down?
 ;
 ; ************************************************************************
 ProcessInput:
+		xor	a
+		ld	(ButtonPressed),a	; clear pressed flag
 		ld	a,(ButtonDown)
 		and	$f
 		jp	z,@TestButton		; button pressed already processed?
 
 		ld	a,(MouseButtons)
 		test	2			; LEFT button
-		ret	z			; if button still down, return
+		jp	z,@TestSlots		; if button still down, return
 
 		xor	a			; button not perssed, so clear flag
 		ld	(ButtonDown),a
 		ret
 
-
 @TestButton:	ld	a,(MouseButtons)
 		test	2			; LEFT button
-		ret	nz			; not pressed?
+		jp	nz,@TestSlots		; not pressed?
 		ld	(ButtonDown),a
+		dec	a
+		ld	(ButtonPressed),a	; button pressed this frame
 
+
+
+@TestSlots:
 
 		; Once mouse button pressed, check to see where the cursor is
 		ld	a,(MouseY)
 		cp	168
-		ret	c			; if less then the panel, then retun
+		jp	c,AssignSkill		; if less then the panel, then assign Lemming a skill
 
 		ld	a,(MouseX)
 		swapnib				; shift right 16
 		and	$f			; clear top bits...
 		sub	2
+		ld	b,a			; remember slot
 		jp	m,@ReleaseSpeed		; if first 2 boxes...return
 
 		cp	8			; panel slot > 7 then not a skill
 		jp	nc,@pauseNuke	
 
+		ld	a,(ButtonPressed)
+		and	$ff
+		ret	z			; button not pressed
+		ld	a,b			; get panel slot back
 		ld	(PanelSelection),a	; set selected skill
+		ret
 
+		;
+		; Check release rate panels
+		;
+@ReleaseSpeed:	ld	a,(MouseButtons)
+		test	2			; LEFT button
+		ret	nz
 
-@ReleaseSpeed:		
+		ld	a,b
+		cp	$fe			; 0-2 = $FE. Release DOWN
+		jr	nz,@RateUp
+		ld	a,(MinReleaseBin)	; rate down
+		ld	b,a
+		ld	a,(ReleaseRateBin)
+		cp	b
+		ret	z			; if the same, then don't decrease
+		dec	a
+@UpdateReleaseRate:
+		ld	(ReleaseRateBin),a	
+		push	af			; Now convert back into panel display number 
+		call	ConvertNumber
+		ld	(ReleaseRate),a
+		pop	af
+		call	ConvertToDelay		; convert into the frame delay value
+		;ld	(ReleaseRateCounter),a	; don't wipe "current" counter
+		ld	(MasterReleaseRate),a
+		ret
+@RateUp
+		ld	a,(ReleaseRateBin)	; else release UP
+		cp	99
+		ret	z
+		inc	a
+		jp	@UpdateReleaseRate
 @pauseNuke:
 		ret
 
 
 
+AssignSkill:
+		ld	a,(ButtonPressed)
+		and	$ff
+		ret	z			; not pressed?
+
+		
+		ld 	ix,(CursorLemmingIndex)
+		ld	a,ixh
+		and	$ff
+		ret	z			; no lemming selected
+
+
+		ld	a,(PanelSelection)	; get skill
+		cp	2
+		ret	nz			; not bomber?
+
+		ld	a,(ix+LemBombCounter)
+		and	a
+		ret	nz			; already a bomber?
+
+		jp	SetStatePreBomber	; set bomber state

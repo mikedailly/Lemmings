@@ -36,7 +36,7 @@ SpawnLemming:
 		ld	a,LEM_FALLER
 		call	SetState
 		ld	hl,(LemmingXSpawn)
-;		add	hl,105-20
+;		add	hl,105-209
 		add	hl,105
 		ld	(ix+LemX),l
 		ld	(ix+(LemX+1)),h
@@ -44,18 +44,18 @@ SpawnLemming:
 		ld	(ix+LemY),a
 		
 		; set bomber
-		ld	a,50/3
-		ld	(ix+LemBombCounter_Frac),a
-		ld	a,5
-		ld	(ix+LemBombCounter),a
+		;ld	a,50/3
+		;ld	(ix+LemBombCounter_Frac),a
+		;ld	a,5
+		;ld	(ix+LemBombCounter),a
 
 
 
 		ld	bc,LemStructSize
 		add	ix,bc
 		ld	(NextSpawnLemming),ix
-		ld	a,(ReleaseRate)		; from panel
-		ld	a,10
+		ld	a,(MasterReleaseRate)		; from panel
+		;ld	a,10
 @Exit:
 		ld	(ReleaseRateCounter),a
 		ret
@@ -69,6 +69,8 @@ ProcessLemmings:
 		ld 	(CursorLemmingIndex),a		; if high byte is 0, then nothing selected
 		ld 	(CursorLemmingIndex+1),a
 		ld	(CursorShape),a	
+		ld	a,64
+		ld	(CursorDistance),a
 
 		ld 	a,(MouseX)
 		ld 	hl,(ScrollIndex)
@@ -126,9 +128,14 @@ NextLemming_NoDraw:
 
 @NotBomber:
 		; cursor detection - check on Y
-		ld 	a,(CursorLemmingIndex+1)		; already found one?
-		and	a
-		jp	nz,AlreadyFoundOne			; might want to get the one closest to the centre of the cursor.....?
+		;ld 	a,(CursorLemmingIndex+1)		; already found one?
+		;and	a
+		;jp	nz,AlreadyFoundOne			; might want to get the one closest to the centre of the cursor.....?
+		ld	a,(ix+LemSkillMask)
+@CurrentSkillmask:
+		and	SKILLMASK_BOMBER
+		jp	nz,NextLemming_NotActive		; dont select this lemming
+
 
 		ld	a,(MouseY)
 		sub	(ix+LemY)
@@ -160,7 +167,11 @@ NextLemming_NoDraw:
 		cp	8+2					; if A>=8 then too large
 		jr	nc,NextLemming_NotActive
 TestLab
-
+		ld	a,(CursorDistance)
+		cp	l
+		jr	c,AlreadyFoundOne
+		ld	a,l
+		ld	(CursorDistance),a
 		ld 	(CursorLemmingIndex),ix
 		ld	a,1
 		ld	(CursorShape),a
@@ -171,10 +182,9 @@ NextLemming_NotActive:
 		ld	bc,LemStructSize
 		add	ix,bc
 		pop	bc
-		djnz	DoAllLemmings
+		dec	b
+		jp	nz,DoAllLemmings
 		ret
-CursorLemmingIndex	dw 	0			; pointer to lemmign struct
-CursorWorldX 		dw 	0
 
 SkillJumpTable	dw	NextLemming_NotActive
 		dw	ProcessLemFaller
@@ -581,6 +591,18 @@ SetStateBomber:
 		ld	hl,0
 		jp	SetAnim
 
+; -----------------------------------------------------
+; Set PRE-bomber state. Puts the counter above the head
+; ix = Lemming to set
+SetStatePreBomber:
+		ld	a,50/3
+		ld	(ix+LemBombCounter_Frac),a
+		ld	a,5
+		ld	(ix+LemBombCounter),a
+		ld	a,(LemSkillMask)	; set skill mask
+		or	SKILLMASK_BOMBER
+		ld	(LemSkillMask),a
+		ret
 
 ; -----------------------------------------------------
 ; state jump table

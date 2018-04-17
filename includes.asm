@@ -119,21 +119,30 @@ LEM_BASHER		equ	10
 LEM_MINER		equ	11
 LEM_DIGGER		equ	12
 
+; used to quickly disguard lemmings for selection
+SKILLMASK_CLIMBER	equ	1
+SKILLMASK_FLOATER	equ	2
+SKILLMASK_BOMBER	equ	4
+SKILLMASK_BLOCKER	equ	8
+SKILLMASK_BUILDER	equ	16
+SKILLMASK_BASHER	equ	32
+SKILLMASK_MINER		equ	64
+SKILLMASK_DIGGER	equ	128
 
 ;
 ; lemmings structure
 ;
-
 			rsreset
 LemType			rb	1
 LemX			rw	1
 LemY			rb	1
-LemDir			rb	1			; left or right facing
-LemFrameBase		rw	1			; keep base,count and offset together
+LemDir			rb	1		; left or right facing
+LemFrameBase		rw	1		; keep base,count and offset together
 LemFrameCount		rb	1		; so "SetAnim" function is quicker
 LemFrameOffX		rb	1
 LemFrameOffY		rb	1
 LemFrame		rb	1
+LemSkillMask		rb	1		; skill mask
 LemBombCounter		rb	1
 LemBombCounter_Frac	rb	1
 LemSkillTemp		rb	9

@@ -107,11 +107,11 @@ MainLoop:       ld      a,1                     ; Wait on VBlank....
                 call    DrawLevelObjects
 
                 call    SpawnLemming
-                ld      a,1
-                out     ($fe),a
+                ;ld      a,1
+                ;out     ($fe),a
                 call    ProcessLemmings
-                ld      a,0
-                out     ($fe),a
+                ;ld      a,0
+                ;out     ($fe),a
 
                 call    ProcessInput
 

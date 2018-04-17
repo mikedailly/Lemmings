@@ -97,12 +97,19 @@ obj1_12		db	0,0,	99,100,101,102,103,104,105,106,107,108,109,110,-3	// 10 ton wei
 ; *****************************************************************************************************************************
 LemmingXSpawn		dw	0
 LemmingCounter		db	0
-ReleaseRateCounter	db	0			; current,master
+ReleaseRateCounter	db	0	; actual release rate
+MasterReleaseRate	db	0	; "master" value
+
 NextSpawnLemming	dw	0			; offset to Lemming struct
 LemData			ds	LemDataSize
 EndLemData
 
 
+CursorLemmingIndex	dw 	0			; pointer to lemmign struct
+CursorWorldX 		dw 	0
+CursorDistance		db	0			; distance current selection is from centre of cursor 
+
+	
 				; frame		count	offsets
 WalkerLAnim:	LEMANIM		FWalkerL,	8, 	3,0
 WalkerRAnim:	LEMANIM		FWalkerR,	8, 	3,0
