@@ -85,7 +85,10 @@ DrawPanelNumbers:
 		ld	hl,$2900
 		add	hl,bc
 		ld	a,(ix+0)
+		and	a
+		jr	z,@DontDraw
 		call	DrawPanelNumber
+@DontDraw:
 		inc	ix
 		inc	iy
 		pop	bc
@@ -261,7 +264,7 @@ AssignSkill:
 		and	$ff
 		ret	z			; not pressed?
 
-		
+
 		ld 	ix,(CursorLemmingIndex)
 		ld	a,ixh
 		and	$ff
@@ -270,10 +273,17 @@ AssignSkill:
 
 		ld	a,(PanelSelection)	; get skill
 		cp	2
-		ret	nz			; not bomber?
+		jr	nz,@NotBomber			; not bomber?
 
 		ld	a,(ix+LemBombCounter)
 		and	a
 		ret	nz			; already a bomber?
 
 		jp	SetStatePreBomber	; set bomber state
+
+
+@NotBomber:
+		cp	7
+		ret	nz			; not digger
+		ld	a,LEM_DIGGER		; swap lemming to a digger
+		jp	SetState		; set bomber state

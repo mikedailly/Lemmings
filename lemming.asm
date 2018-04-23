@@ -19,6 +19,11 @@ InitLemmings:
 ; Process all lemmings
 ; *****************************************************************************************************************************
 SpawnLemming:
+		ld	a,(TrapDoorStartDelay)		; if trap door not open...
+		cp	$ff
+		ret	nz
+
+
 		ld	a,(ReleaseRateCounter)
 		dec	a
 		jr	nz,@Exit
@@ -35,13 +40,25 @@ SpawnLemming:
 		ld	(ix+LemDir),a		
 		ld	a,LEM_FALLER
 		call	SetState
-		ld	hl,(LemmingXSpawn)
+
+		ld	iy,(TrapDoorlistCurrent)
+		ld	a,(iy+0)
+		or	a,(iy+1)
+		jr	nz,@GetPosition
+		ld	iy,TrapDoorList
+@GetPosition:		
+		ld	l,(iy+0)			; X low
+		ld	h,(iy+1)			; X high
+		ld	a,(iy+2)			; Y (always >0 and <160)
+;		ld	hl,(LemmingXSpawn)
 ;		add	hl,105-209
-		add	hl,105
+;		add	hl,48	;105
 		ld	(ix+LemX),l
 		ld	(ix+(LemX+1)),h
-		ld	a,16
 		ld	(ix+LemY),a
+		ld	bc,3
+		add	iy,bc
+		ld	(TrapDoorlistCurrent),iy
 		
 		; set bomber
 		;ld	a,50/3
@@ -112,7 +129,7 @@ Lemming_Draw:
 		;ld	h,(ix+LemX+1)
 		;call	PlotLevelPixel
 @NotBomber:
-		ld	a,(ix+LemFrame)
+		ld	a,(ix+LemFrame)			; Animate lemming
 		inc	a
 		cp	(ix+LemFrameCount)
 		jr	nz,@NextFrame	
@@ -195,6 +212,10 @@ SkillJumpTable	dw	NextLemming_NotActive
 		dw	0 ;ProcessLemBlocker
 		dw	0 ;ProcessLemClimber
 		dw	ProcessLemBomber
+		dw	0 ;ProcessLemBuilderShrug
+		dw	0 ;ProcessLemBasher
+		dw	0 ;ProcessLemMiner
+		dw	ProcessLemDigger
 
 
 ; *****************************************************************************************************************************
@@ -362,7 +383,7 @@ ProcessLemWalker:
 		inc	b
 		ld	a,d			; faster loading of 4 (save 3 t-states)
 		cp	b
-		jp	z,@SetFaller		; 4 pixel fall?	(only fall a max 4 pixels at once)
+		jp	z,SetFaller		; 4 pixel fall?	(only fall a max 4 pixels at once)
 
 @DoFalling_skip:
 		ld	a,h
@@ -385,12 +406,6 @@ ProcessLemWalker:
 @HitGround:
 		ld	(ix+LemY),c		; 19
 		jp	DrawWalker		
-
-@SetFaller:
-		ld	a,LEM_FALLER
-		call	SetState
-		jp	Lemming_Draw		
-
 
 DrawWalker:	
 		ld	e,(ix+LemX)
@@ -417,6 +432,50 @@ DrawWalker:
 		ld	a,(ix+LemY)	
 		call	DrawLemmingFrame
 		jp	NextLemming_NoDraw
+
+
+
+SetFaller:
+		ld	a,LEM_FALLER
+		call	SetState
+		jp	Lemming_Draw	
+; *****************************************************************************************************************************
+; Function:	Faller
+; *****************************************************************************************************************************
+ProcessLemDigger:
+		ld	a,(ix+LemY)
+		ld	l,(ix+LemX)		; get X
+		ld	h,(ix+(LemX+1))
+		call	GetPixel		; DE = pixel, bank set
+
+@NextLine:
+		ld	a,(hl)			; if no ground under them, then turn into faller
+		and	a
+		;jr	nz,SetFaller
+
+		ld	a,(ix+LemFrame)
+		//inc	a
+		//and	$f		
+		//ld	(ix+LemFrame),a
+		cp	4
+
+		
+		;add	hl,$800			; move down a line
+		;ld	a,h			; crossed from $c000 to $0000
+		;test	$f8
+		;jr	nz,@NextLine
+		;or	$c0
+		;ld	h,a
+		;ld	a,(CurrentBank)
+		;inc	a
+		;ld	(CurrentBank),a
+		;add	a,a
+		;mmu6
+		;inc 	a
+		;mmu7		
+		;jp	@NextLine
+
+		jp	Lemming_Draw
 
 
 
@@ -539,6 +598,10 @@ SetStateNone:	ret
 ; -----------------------------------------------------
 ; Set faller state
 SetStateFaller:
+		ld	a,(LemSkillMask)	; set skill mask
+		and	SKILLMASK_PERMANENT	; get rid of whatever we were doign before
+		ld	(LemSkillMask),a
+
 		ld	(ix+LemFallCount),a	; a=0 on entry
 		ld	a,(ix+LemDir)		; left or right?
 		and	a
@@ -552,6 +615,10 @@ SetStateFaller:
 ; -----------------------------------------------------
 ; Set walker state
 SetStateWalker:
+		ld	a,(LemSkillMask)	; set skill mask
+		and	SKILLMASK_PERMANENT	; get rid of whatever we were doign before
+		ld	(LemSkillMask),a
+
 SetWalkerDirection:
 		ld	a,(ix+LemDir)		; left or right?
 SetWalkerDirection_NoLoad:
@@ -566,7 +633,25 @@ SetWalkerDirection_NoLoad:
 ; -----------------------------------------------------
 ; Set faller state
 SetStateSplatter:
+		; stop it being assignable once its splatting
+		ld	a,SKILLMASK_CLIMBER|SKILLMASK_FLOATER|SKILLMASK_BOMBER|SKILLMASK_BUILDER|SKILLMASK_BASHER|SKILLMASK_MINER|SKILLMASK_DIGGER
+		ld	(LemSkillMask),a
+
 		ld	hl,FallerSplatter
+		jp	SetAnim
+
+; -----------------------------------------------------
+; Set differ state
+SetStateDigger:
+		ld	a,(LemSkillMask)	; set skill mask
+		and	SKILLMASK_PERMANENT	; get rid of whatever we were doign before
+		or	SKILLMASK_DIGGER
+		ld	(LemSkillMask),a
+
+		xor	a			; frame is actually stored in here..
+		ld	(ix+LemSkillTemp),a
+
+		ld	hl,FallerDigger
 		jp	SetAnim
 
 
@@ -607,19 +692,19 @@ SetStatePreBomber:
 ; -----------------------------------------------------
 ; state jump table
 StateJumpTable:
-		dw	SetStateNone		; LEM_NONE
-		dw	SetStateFaller		; LEM_FALLER
-		dw	SetStateWalker		; LEM_WALKER
-		dw	SetStateSplatter	; LEM_SPLATTER
-		dw	0			; LEM_FLOATER		
-		dw	0			; LEM_PREFLOATER	
-		dw	0			; LEM_BLOCKER		
-		dw	0			; LEM_CLIMBER		
-		dw	SetStateBomber		; LEM_BOMBER		
-		dw	0			; LEM_BUILDER_SHRUG	
-		dw	0			; LEM_BASHER		
-		dw	0			; LEM_MINER		
-		dw	0			; LEM_DIGGER		
+		dw	SetStateNone		; 0 - LEM_NONE	
+		dw	SetStateFaller		; 1 - LEM_FALLER
+		dw	SetStateWalker		; 2 - LEM_WALKER
+		dw	SetStateSplatter	; 3 - LEM_SPLATTER
+		dw	0			; 4 - LEM_FLOATER		
+		dw	0			; 5 - LEM_PREFLOATER	
+		dw	0			; 6 - LEM_BLOCKER		
+		dw	0			; 7 - LEM_CLIMBER		
+		dw	SetStateBomber		; 8 - LEM_BOMBER		
+		dw	0			; 9 - LEM_BUILDER_SHRUG	
+		dw	0			; 10 - LEM_BASHER		
+		dw	0			; 11 - LEM_MINER		
+		dw	SetStateDigger		; 12 - LEM_DIGGER		
 
 
 ; *****************************************************************************************************************************
@@ -698,6 +783,9 @@ DrawLemmingFrame:
 		ld	a,h
 		and	a
 		jr	nz,ClipLemming
+		ld	a,l
+		cp	$f8			; right clip
+		jr	nc,ClipLemming
 
 		pop	af
 		;sub	c

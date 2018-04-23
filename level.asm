@@ -4,9 +4,9 @@
 LoadLevel:
 		;LoadBank	level_0023,LevelAddress,LevelBank	; Watch out, there's traps about
 		;LoadBank	level_0030,LevelAddress,LevelBank	; ship  -  Every Lemming for himself!!!
-		;LoadBank	level_0055,LevelAddress,LevelBank	; Steel Works
+		LoadBank	level_0055,LevelAddress,LevelBank	; Steel Works
 		;LoadBank	level_0031,LevelAddress,LevelBank	; art gallery
-		LoadBank	level_0091,LevelAddress,LevelBank	; Just dig
+		;LoadBank	level_0091,LevelAddress,LevelBank	; Just dig
 
 		ld	ix,LevelAddress
 		ld 	a,(ix+$1b)
@@ -113,7 +113,17 @@ LoadLevel:
 		ld	(DiggersLeft),a
 
 
-		; initalise objects
+		; initialise objects
+		ld	a,33				; 2 second pause (50*2/3)
+		ld	(TrapDoorStartDelay),a
+		
+		ld	b,14				; clear entrance list
+		ld	hl,TrapDoorList
+		ld	(TrapDoorlistCurrent),hl
+@WipeEntrances:	ld	(hl),0
+		inc	hl
+		djnz	@WipeEntrances
+
 		push	ix
 		ld	bc,$20
 		add	ix,bc
@@ -122,11 +132,12 @@ LoadLevel:
 
 
 		ld	a,(ix+$19)
-		ld	(ScrollIndex),a
-		ld	(LemmingXSpawn),a
+		ld	l,a
 		ld	a,(ix+$18)
-		ld	(ScrollIndex+1),a
-		ld	(LemmingXSpawn+1),a
+		ld	h,a
+		add	hl,16+32			; offset by 16, and add 32 to center screen on a 256 wide screen (instead of 320)
+		ld	(ScrollIndex),hl
+		ld	(LemmingXSpawn),hl
 
 		call	CreateLevel
 
@@ -135,6 +146,10 @@ LoadLevel:
 		ld	a,ObjectsBank
 		call	Load_Banked
 		call	GenerateMiniMap
+
+		; init the release order
+		ld	hl,TrapDoorList
+		ld	(TrapDoorlistCurrent),hl
 
 		jp	ResetBank
 
@@ -188,56 +203,86 @@ SetupLevelObjects:
 @DoAll
 		ld	c,(ix+1)			; min $FFF8. max $0638
 		ld	b,(ix+0)
-		ld	(iy+0),c			; AMIGA format numbers!!
-		ld	(iy+1),b
+		ld	(iy+(oX+0)),c			; AMIGA format numbers!!
+		ld	(iy+(oX+1)),b
 
-		ld	a,(ix+2)			; min $FFD7. max $009f
-		ld	(iy+3),a			; AMIGA format numbers!!
-		ld	a,(ix+3)
-		ld	(iy+2),a
+		ld	l,(ix+3)			; min $FFD7. max $009f
+		ld	h,(ix+2)
+		ld	(iy+(oY+0)),l			; AMIGA format numbers!!
+		ld	(iy+(oY+1)),h
 
 		; get object index and store pointer to object
 		ld	a,(ix+5)			; object ID (0 to $F).	0 always exit, 1 always start
-		add	a,a				; AMIGA format numbers!!
-		add	a,a				; *16
-		add	a,a
-		add	a,a
+		and	$0F				; mask off top
+		cp	1
+		jr	nz,@NotEntrance
+		; If trap door, record where it opens....
+		ld	hl,(TrapDoorlistCurrent)
+		xor	a
+		ld	a,24
+		adc	a,c		
+		ld	(hl),a
+		inc	hl
+		ld	a,0
+		adc	a,b
+		ld	(hl),a
+		inc	hl		
+		ld	a,(iy+(oY+0))
+		add	a,8
+		ld	(hl),a
+		inc	hl
+		;ld	a,(iy+(oY+1))			; ALWAYS on screen
+		;ld	(hl),a
+		;inc	hl
+		ld	(TrapDoorlistCurrent),hl
+
+		ld	a,1				; reload entrance ID
+@NotEntrance:
+		ld	(iy+oObjID),a			; store object index
+		swapnib					; *16  (already masked)
+						
+		
+		; add on base of object style data
 		ld	hl,ObjectInfo
 		add	hl,a
-		ld	a,l
-		ld	(iy+4),a
-		ld	a,h
-		ld	(iy+5),a
+		ld	(iy+(oPtr+0)),l			; store object data pointer
+		ld	(iy+(oPtr+1)),h
 
 		; object flags
-		ld	a,(ix+6)			; AMIGA format numbers!!
-		ld	(iy+6),a
+		ld	a,(ix+6)			
+		ld	(iy+oFlags),a
+		inc	hl				
 
 
 		; now read out some object data
-		inc	hl				; skip flags
 		ld	a,(hl)				; first frame of object
-		ld	(iy+8),a			; set first frame
-		inc	hl
-		ld	a,(hl)				; get the starting frame of the anim
-		ld	(iy+7),a			; set current frame
-		inc	hl
-		ld	a,(hl)				; max frame
-		ld	(iy+9),a
-		ld	a,1
-		ld	(iy+10),a			; object delta
+		ld	(iy+oFirstFrame),a		; set first frame
+		inc	hl				; Skip first frame
 
-		ld	a,(iy+0)			; if x and y ==0, then not active
-		or	(iy+1)
-		or	(iy+2)
-		or	(iy+3)
+		ld	a,(hl)				; get the starting frame of the anim
+		ld	(iy+oFrame),a			; set current frame
+		inc	hl
+
+		ld	a,(hl)				; max frame
+		ld	(iy+oMaxFrames),a
+
+		ld	(iy+oDelta),1			; object delta
+
+		; do this first?
+		ld	a,(iy+(oX+0))			; if x and y ==0, then not active
+		or	(iy+(oX+1))
+		or	(iy+(oY+0))
+		or	(iy+(oY+1))
 		and 	a
 		jr	z,@NotActive
-		add	bc,$0008
-		ld	(iy+0),c			; AMIGA format numbers!!
-		ld	(iy+1),b
 
-		ld	bc,ObiInstSize			; another
+		; do this above?
+		add	bc,$0008			; add 8 to X to offset scroll mask
+		ld	(iy+(oX+0)),c			; 
+		ld	(iy+(oX+1)),b
+
+
+		ld	bc,oInstSize			; another
 		add	iy,bc
 
 		ld	a,(ObjNumber)
@@ -250,7 +295,7 @@ SetupLevelObjects:
 		add	ix,bc
 
 		dec	e
-		jr	nz,@DoAll
+		jp	nz,@DoAll
 		ret
 
 
@@ -405,8 +450,8 @@ DrawLevelObjects
 		push	bc
 
 		; do a "quick" clip... as quick as we can...
-		ld	l,(ix+0)		; bx = x
-		ld	h,(ix+1)
+		ld	l,(ix+(oX+0))		; bx = x
+		ld	h,(ix+(oX+1))
 @ScrOffset:	ld	bc,$1234		; 20
 		xor	a			; clear carry
 		sbc	hl,bc			; subtract world location		
@@ -421,31 +466,80 @@ DrawLevelObjects
 		and	$fe
 		jr	nz,@OffRight
 @DrawIt:
-		ld	c,(ix+0)	; bx = x
-		ld	b,(ix+1)
-		ld	e,(ix+2)	; de = y
-		ld	d,(ix+3)
-		ld	a,(ix+7)	; hl = sprite
-		ld	l,a
+		ld	c,(ix+(oX+0))	; bx = x
+		ld	b,(ix+(oX+1))
+		ld	e,(ix+(oY+0))	; de = y
+		ld	d,(ix+(oY+1))
+		ld	l,(ix+oFrame)	; hl = sprite
 		ld	h,0
-		;ld	a,(ix+7)	; a = flags
+		;ld	a,(ix+7)	; a = flags (behind, flip etc)
 		xor	a
 		call	DrawLevelBob
 
 @OffRight:
-		ld	a,(ix+7)	; get current frame
-		add	a,(ix+10)
-		cp	(ix+9)		
+		ld	a,(ix+oObjID)	; get object ID (0=entrance)
+		cp	1
+		jr	z,@DontAnimateEntrace
+		ld	a,(ix+oFrame)	; get current frame
+		add	a,(ix+oDelta)
+		cp	(ix+oMaxFrames)		
 		jr	nz,@NextFrame
-		ld	a,(ix+8)
-@NextFrame:	ld	(ix+7),a
-
+		ld	a,(ix+oFirstFrame)
+@NextFrame:	ld	(ix+oFrame),a
+@DontAnimateEntrace:
 
 @NotActive:
-		ld	bc,ObiInstSize
+		ld	bc,oInstSize
 		add	ix,bc
 		pop	bc
 		djnz	@DrawAll
 		ret
+
+
+; *****************************************************************************************************************************
+;  Open Trap doors - scan all objects and open the doors.
+; *****************************************************************************************************************************
+OpenTrapDoors:
+		ld	a,(TrapDoorStartDelay)
+		cp	$ff
+		ret	z				; already open?
+
+		and	a				; zero? of so do animation
+		jr	z,@DoAnimate
+		dec	a
+		ld	(TrapDoorStartDelay),a
+		ret
+
+@DoAnimate:
+		ld	ix,ObjectData
+		ld	a,(ObjNumber)
+		ld	b,a
+
+@AnimateAll:
+		push	bc
+		ld	a,(ix+oObjID)
+		cp	1
+		jr	nz,@NotTrapDoor
+
+		ld	a,(ix+oFrame)
+		add	a,(ix+oDelta)
+		cp	(ix+oMaxFrames)	
+		jr	nz,@NotEndOfAnim
+		ld	a,$ff				; if so end of animation (all doors)
+		ld	(TrapDoorStartDelay),a
+		ld	a,(ix+oFirstFrame)		; get first frame...
+@NotEndOfAnim:		
+		ld	(ix+oFrame),a
+
+
+@NotTrapDoor:
+		ld	bc,oInstSize
+		add	ix,bc
+
+		pop	bc
+		djnz	@AnimateAll
+		ret
+
+
 
 

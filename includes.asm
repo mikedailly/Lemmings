@@ -128,6 +128,7 @@ SKILLMASK_BUILDER	equ	16
 SKILLMASK_BASHER	equ	32
 SKILLMASK_MINER		equ	64
 SKILLMASK_DIGGER	equ	128
+SKILLMASK_PERMANENT	equ	(SKILLMASK_CLIMBER|SKILLMASK_FLOATER|SKILLMASK_BOMBER)
 
 ;
 ; lemmings structure
@@ -148,7 +149,6 @@ LemBombCounter_Frac	rb	1
 LemSkillTemp		rb	9
 LemStructSize		rb	0
 LemDataSize		equ	LemStructSize*MAX_LEM
-
 
 
 	message	"LemSize: ",LemStructSize
@@ -179,12 +179,25 @@ FBlocker		equ	104	; 16 frames
 FDrowner		equ	120	; 16 frames
 FFlamer			equ	136	; 14 frames
 FExit			equ	150	; 8 frames
+FBuilderRight		equ	158	; 16 frames
+FBuilderLeft		equ	174	; 16 frames
+FShruggerRight		equ	190	; 8 frames
+FShruggerLeft		equ	198	; 8 frames
+FDigger			equ	206	; 16 frames
+FBasherRight		equ	254	; 32 frames
+FBasherLeft		equ	286	; 32 frames
+FMinerRight		equ	318	; 24 frames
+FMinerLeft		equ	342	; 24 frames
+FBuilderBrick		equ	366	; 1 frame
+FExplosionMask		equ	367	; 1 frame
+FMinerMask		equ	368	; 1 frame
+
 
 FOne			equ	349	; 1 to 5 counter
 
 
 ;
-; Object structure - 
+; Object definitaion structure - 
 ;
 		rsreset
 Obj_Flags:	rb	1		; various flags
@@ -200,9 +213,6 @@ Obj_Sound	rb	1
 Obj_Padding	rb	6
 Obj_MaxSize	rb	0		; size of struct
 	
-
-	message	"obj1: ",Obj_Anim
-	message	"obj1: ",Obj_MaxSize
 
 LoadFile	macro
 		ld	hl,\0

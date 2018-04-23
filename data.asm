@@ -13,17 +13,6 @@ VBlank		db	0				; vblank counter
 CursorOn	db	0				; flag to enable the IRQ cursor 
 NewFrameFlag	db	0				; setting this will cause the sprite buffers to flip. Reset in IRQ
 
-; *****************************************************************************************************************************
-; Sprite manager
-; *****************************************************************************************************************************
-
-; burn a bit of space so that we can move to each new bit more easily
-		org	((pc+255)&$ffffff00)		; align to the next 256 bytes
-sprite_x	ds	256				 
-sprite_y	ds	256				
-sprite_flags	ds	256
-sprite_shape	ds	256
-
 
 
 
@@ -37,59 +26,42 @@ BlockFileSize	db	0,0,0,0
 BankAddress 	dw	0
 
 ; Tile scrolling on counter
-ScrollIndex:	db	0
+ScrollIndex:	dw	0
 
 
+; Delay for the trap door opening - 2 seconds
+TrapDoorStartDelay	db	0
+TrapDoorList		ds	4*3		; upto 4 entrances (4 bytes per)
+			dw	0		; list termination
+TrapDoorlistCurrent	dw	0	
 
 ; *****************************************************************************************************************************
-; Object definitions
+; Object definitions 256 bytes
 ; *****************************************************************************************************************************
-ObjectInfo:	ds	Obj_MaxSize*16;
-	message	"Loaded = ",Obj_MaxSize
+ObjectInfo:	ds	Obj_MaxSize*16	; style?.dat loaded into here
 
 ; *****************************************************************************************************************************
-; Active Objects
+; Object Instances
 ; *****************************************************************************************************************************
-ObjectData:
-ObjActive	db	0	; object active?
-ObjX		dw	0
-ObjY		dw	0
-ObjPtr		dw	0	; pointer to object structure
-ObjFlags	db	0	; object flags
-ObjFrame	db	0	; current animation frame	8
-ObjFirstFrame	db	0	; first frame of animation	9
-ObjEndFrame	db	0	; end frame of animation +1	10
-ObjDelta	db	0	; animation delta (usuall 1)	11
-ObjEndPtr
-ObiInstSize	equ	ObjEndPtr-ObjectData
-		ds	32*(ObjEndPtr-ObjX)
-		message "objdta = ",ObjectData
-
-ObjNumber	db	0	; number of active objects in this level
+		rsreset
+oActive:	rb	1		; object active?
+oX:		rw	1		; sprite index into the object sprite pool
+oY:		rw	1		; starting frame of the animation
+oPtr:		rw	1		; pointer to object structure
+oFlags:		rb	1		; object flags
+oFrame:		rb	1		; current animation frame	8
+oFirstFrame:	rb	1		; first frame of animation	9
+oMaxFrames:	rb	1		; end frame of animation +1	10
+oDelta:		rb	1		; animation delta (usuall 1)	11
+oObjID		rb	1		; object ID (0=trap door)	12
+oInstSize	rb	0		; size of struct
+	
+ObjectData:	ds	32*oInstSize	; actual instance data
+ObjNumber	db	0		; number of active objects in this level
 
 ; *****************************************************************************************************************************
 ; File system
 ; *****************************************************************************************************************************
-		// objects
-Style0Objects	dw	obj1_1, obj1_2, obj1_3, obj1_4, obj1_5, obj1_6, obj1_7, obj1_8, obj1_9, obj1_10, obj1_11, obj1_12
-Style1Objects	dw	obj1_1, obj1_2, obj1_3, obj1_4, obj1_5, obj1_6, obj1_7, obj1_8, obj1_9, obj1_10, obj1_11, obj1_12
-Style2Objects	dw	obj1_1, obj1_2, obj1_3, obj1_4, obj1_5, obj1_6, obj1_7, obj1_8, obj1_9, obj1_10, obj1_11, obj1_12
-Style3Objects	dw	obj1_1, obj1_2, obj1_3, obj1_4, obj1_5, obj1_6, obj1_7, obj1_8, obj1_9, obj1_10, obj1_11, obj1_12
-Style4Objects	dw	obj1_1, obj1_2, obj1_3, obj1_4, obj1_5, obj1_6, obj1_7, obj1_8, obj1_9, obj1_10, obj1_11, obj1_12
-
-		// 	xoff,yoff,  animations, -1 restart; -2 = stop at end, -3 = restart and stop
-obj1_1		db	0,0,	0,  -1							// exit body		
-obj1_2		db	0,0,	1,  -1							// entrance
-obj1_3		db	0,0,	2,3,4,5,6,7,8,9,10,0,-2					// entrance opening
-obj1_4		db	0,0,	11,12,13,14,15,16,17,18,19,20,21,22,23,24,-1		// green flag
-obj1_5		db	0,0,	25,26,27,28,29,30,31,-1					// arrows left
-obj1_6		db	0,0,	32,33,34,35,36,37,38,-1					// arrows right
-obj1_7		db	0,0,	39,40,41,42,43,44,45,46,-1				// water
-obj1_8		db	0,0,	47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,-3		// bear trap -3=restart and stop
-obj1_9		db	0,0,	62,63,64,65,66,67,-1					// top of exit
-obj1_10		db	0,0,	68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,-3	// boulder
-obj1_11		db	0,0,	85,86,87,88,89,90,91,92,93,94,95,96,97,98,-1		// blue flag
-obj1_12		db	0,0,	99,100,101,102,103,104,105,106,107,108,109,110,-3	// 10 ton weight trap
 
  
 ; *****************************************************************************************************************************
@@ -109,13 +81,14 @@ CursorLemmingIndex	dw 	0			; pointer to lemmign struct
 CursorWorldX 		dw 	0
 CursorDistance		db	0			; distance current selection is from centre of cursor 
 
-	
+
 				; frame		count	offsets
 WalkerLAnim:	LEMANIM		FWalkerL,	8, 	3,0
 WalkerRAnim:	LEMANIM		FWalkerR,	8, 	3,0
 FallerLAnim	LEMANIM		FFallerL,	4,	-3,0
 FallerRAnim	LEMANIM		FFallerR,	4,	-3,0
 FallerSplatter	LEMANIM		FSplatter,	17,	0,0		;+1 frame so processing code can detect
+FallerDigger	LEMANIM		FDigger,	16,	0,0		;+1 frame so processing code can detect
 
 
 
@@ -201,7 +174,5 @@ level2          File    "lemdat/level002.256"
 level3          File    "lemdat/level003.256"
 level4          File    "lemdat/level004.256"
 level91		File    "lemdat/level091.256"
-
-
 
 

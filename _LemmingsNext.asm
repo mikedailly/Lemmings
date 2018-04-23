@@ -29,17 +29,16 @@
 StackEnd:
                 ds      127
 StackStart:     dw      0,0,0,0
-                ds      128                     ; why do I need this?
-                
+                ds      128                     ; why do I need this?                
 StartAddress:
-                bit     7,(ix+$fe)
-                set     3,(iy+$12)
-                ld      a,(ix+$43)
-
                 di    
                 ld      sp,StackStart&$fffe
                 ld      a,VectorTable>>8
                 ld      i,a               
+
+                ld      a,%00000010             ; 14Mhz
+                NextReg $07,a
+
                 BORDER          4      
                 call    FlipScreens             ; get front and bank buffer in order
                 ld      a,$e3
@@ -67,20 +66,24 @@ StartAddress:
 ;               Main loop
 ;                               
 ; ************************************************************************************************************
-MainLoop:       ld      a,1                     ; Wait on VBlank....
+MainLoop:       
+                ; wait for a minimum of 3 frames....
+;@WaitForFrameCount:
+;                ld      a,(VBlank)              ; get current FPS
+;                cp      3
+;                jr      c,@WaitForFrameCount
+;                ld      (fps),a                 ; store frame count
+;                xor     a                       ; clear IRQ frame counter
+;                ld      (VBlank),a
+
+                ld      a,1                     ; Wait on VBlank for new game frame....
                 ld      (NewFrameFlag),a                
 @WaitVBlank:    ld      a,(NewFrameFlag)        ; for for it to be reset
                 and     a
                 jr      nz,@WaitVBlank
 
-                ; wait for a minimum of 3 frames....
-@WaitForFrameCount:
-                ld      a,(VBlank)              ; get current FPS
-                cp      3
-                jr      c,@WaitForFrameCount
-                ld      (fps),a                 ; store frame count
-                xor     a                       ; clear IRQ frame counter
-                ld      (VBlank),a
+
+
 
 
 
@@ -104,6 +107,7 @@ MainLoop:       ld      a,1                     ; Wait on VBlank....
                 out     ($fe),a
 
 
+                call    OpenTrapDoors
                 call    DrawLevelObjects
 
                 call    SpawnLemming
@@ -156,7 +160,7 @@ Init:
 
 
                 ; enable turbo mode 
-                NextReg 7,0                     ; set 14Mhz turbo mode
+                ;NextReg 7,0                     ; set 14Mhz turbo mode
 
                 ld      a,7+(64)
                 call    ClsATTR
@@ -235,6 +239,7 @@ InitGame:
                 include "filesys.asm"
                 include "Copper.asm"
                 include "data.asm"
+                include "masks.asm"
 
 EndOfCode
 

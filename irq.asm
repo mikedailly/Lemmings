@@ -77,11 +77,17 @@ VBlankIRQ:
                 ld      a,(NewFrameFlag)
                 and     a
                 jr      z,@CurrentBuffer                ; no flag set? use current buffer
+                ld      a,(VBlank)
+                cp      3
+                jr      c,@CurrentBuffer
+@DoIt:          ld      (fps),a
                 xor     a
+                ld      (VBlank),a
                 ld      (NewFrameFlag),a                ; clear flag
-                call    FlipScreens
 
-                call    SetSprites                      ; set current sprite bank (double buffered)
+                ; if >= frame 3, then flip screen+sprites
+                call    FlipScreens
+                ;call    SetSprites                      ; set current sprite bank (double buffered)
 @CurrentBuffer:
                 ld      a,(CursorOn)
                 and     a
