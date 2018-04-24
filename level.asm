@@ -4,9 +4,9 @@
 LoadLevel:
 		;LoadBank	level_0023,LevelAddress,LevelBank	; Watch out, there's traps about
 		;LoadBank	level_0030,LevelAddress,LevelBank	; ship  -  Every Lemming for himself!!!
-		LoadBank	level_0055,LevelAddress,LevelBank	; Steel Works
+		;LoadBank	level_0055,LevelAddress,LevelBank	; Steel Works
 		;LoadBank	level_0031,LevelAddress,LevelBank	; art gallery
-		;LoadBank	level_0091,LevelAddress,LevelBank	; Just dig
+		LoadBank	level_0091,LevelAddress,LevelBank	; Just dig
 
 		ld	ix,LevelAddress
 		ld 	a,(ix+$1b)
@@ -135,7 +135,7 @@ LoadLevel:
 		ld	l,a
 		ld	a,(ix+$18)
 		ld	h,a
-		add	hl,16+32			; offset by 16, and add 32 to center screen on a 256 wide screen (instead of 320)
+		add	hl,16+32+16			; offset by 16, and add 32 to center screen on a 256 wide screen (instead of 320)
 		ld	(ScrollIndex),hl
 		ld	(LemmingXSpawn),hl
 

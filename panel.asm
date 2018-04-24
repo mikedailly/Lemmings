@@ -284,6 +284,30 @@ AssignSkill:
 
 @NotBomber:
 		cp	7
-		ret	nz			; not digger
+		;jr	nz,@NotADigger		; not digger
+		ret	nz
 		ld	a,LEM_DIGGER		; swap lemming to a digger
 		jp	SetState		; set bomber state
+
+@NotADigger:	cp	9			; not nuke
+		ret	nz
+
+		ld	a,(ButtonPressed)
+		and	$ff
+		ret	z
+
+		ld	a,(NukeCounter)
+		cp	255
+		jr	nz,@CounterActive
+		xor	a
+		ld	(NukeCounter),a		; active double click counter
+@CounterActive:	
+		cp	25/3
+		jr	c,@DoNuke
+		ld	a,-1
+		ld	a,(NukeCounter)
+@DoNuke
+
+NukeCounter	db	0
+
+	

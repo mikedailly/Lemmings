@@ -128,7 +128,7 @@ Lemming_Draw:
 		;ld	l,(ix+LemX)
 		;ld	h,(ix+LemX+1)
 		;call	PlotLevelPixel
-@NotBomber:
+
 		ld	a,(ix+LemFrame)			; Animate lemming
 		inc	a
 		cp	(ix+LemFrameCount)
@@ -827,7 +827,22 @@ DrawCounter
 		ld	a,(ix+LemY)
 		sub	10
 		jp	DrawLemmingFrame
-@DoBoom:	ld	a,LEM_BOMBER
+@DoBoom:	
+		ld	l,(ix+LemY)
+		ld	h,0
+		add	hl,-14
+		ex	de,hl
+
+		; remove part of the level
+		ld	l,(ix+LemX)
+		ld	h,(ix+(LemX+1))
+		add	hl,-8
+		ld	b,h
+		ld	c,l
+		ld	hl,BomberMask
+		call	ClearBoblevel
+
+		ld	a,LEM_BOMBER
 		jp	SetState
 
 ; *****************************************************************************************************************************

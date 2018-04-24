@@ -91,7 +91,9 @@ MainLoop:
                 call    ReadKeyboard
                 ld      a,(Keys+VK_SPACE)
                 and     a
-                jr      nz,@notpressed              
+                jr      z,@notpressed  
+
+                JP      StartAddress            
 @notpressed:
                 ; draw frame rate
                 ld      de,$4001
@@ -105,6 +107,19 @@ MainLoop:
                 ;call    GenerateMiniMap
                 ld      a,0
                 out     ($fe),a
+
+                ld      a,(MouseX)
+                ld      l,a
+                ld      h,0
+                ld      bc,(ScrollIndex)
+                add     hl,bc
+                ld      a,(MouseY)
+                ld      e,a
+                ld      d,0
+                push    hl
+                pop     bc
+                ld      hl,BomberMask
+                ;call    ClearBoblevel
 
 
                 call    OpenTrapDoors
@@ -219,6 +234,9 @@ SetupAttribs:
 ; Init the game/level
 ; *****************************************************************************************************************************
 InitGame:
+                xor     a
+                ld      (LemmingCounter),a
+                ld      (PanelSelection),a
                 call    InitLemmings
                 call    InitLevel
                 call    InitPanel
