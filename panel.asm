@@ -215,13 +215,18 @@ ProcessInput:
 		cp	8			; panel slot > 7 then not a skill
 		jp	nc,@pauseNuke	
 
+		; Select the skill on the panel
 		ld	a,(ButtonPressed)
 		and	$ff
 		ret	z			; button not pressed
 		ld	a,b			; get panel slot back
 		ld	(PanelSelection),a	; set selected skill
+		; get "mask"
+		ld	hl,SkillMaskTable
+		add	hl,a		
+		ld	a,(hl)
+		ld	(CurrentSkillmask+1),a
 		ret
-
 		;
 		; Check release rate panels
 		;
@@ -258,8 +263,8 @@ ProcessInput:
 		ret
 
 
-
-AssignSkill:
+		; Assign skill to an actual lemming
+AssignSkill:	
 		ld	a,(ButtonPressed)
 		and	$ff
 		ret	z			; not pressed?
@@ -310,4 +315,3 @@ AssignSkill:
 
 NukeCounter	db	0
 
-	

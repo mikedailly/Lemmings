@@ -756,7 +756,7 @@ ClearBoblevel:
 		and	a
 		jr	nz,@Nextline
 		ld	a,e
-		cp	159
+		cp	160
 		ret	nc			; past panel area, clip - JUST STOP
 
 		srl	a			; /4 to get BANK
@@ -806,6 +806,82 @@ ClearBoblevel:
 		djnz	@HeightLoop
 		ret
 
+
+; ************************************************************************
+;
+;	Draw a small sprite into the level (simple)
+;
+;	hl = mask pointer
+;	bc = X (0-1600)
+;	de  = Y
+; 
+; ************************************************************************
+RenderBoblevel:		
+		ld	a,(hl)			; get width
+		ld	(MaskWidth),a
+		inc	hl
+		ld	a,(hl)
+		ld	(MaskHeight),a
+		inc	hl
+
+
+		exx
+		ld	a,(Maskheight)
+		ld	b,a
+@HeightLoop:	exx
+		ld	(MaskAddress),hl	; store current Mask pointer
+
+		ld	a,d			; Y negative? clip it
+		and	a
+		jr	nz,@Nextline
+		ld	a,e
+		cp	160
+		ret	nc			; past panel area, clip - JUST STOP
+
+		srl	a			; /4 to get BANK
+		srl	a
+		add	a,LevelBitmapBank*2	; add on base bank
+		mmu7
+		ld	a,e			; get Y pos
+		add	a,a			; 1 line = $08
+		add	a,a
+		add	a,a
+		and	$18			; keep lines within bank
+		add	a,$e0			; base of bank
+		ld	h,a
+		ld	l,0
+		add	hl,bc			; add on X coord
+
+
+		;
+		; Main plotting loop
+		;
+		push	bc
+		push	de
+		ld	a,(MaskWidth)
+		ld	b,a
+		ld	de,(MaskAddress)
+
+@WipeAll:	ld	a,(de)
+		ld	(hl),a
+@DontWipe:	inc	hl
+		inc	de
+		djnz	@WipeAll
+
+		pop	de
+		pop	bc
+
+
+@NextLine
+		ld	hl,(MaskAddress)
+		ld	a,(MaskWidth)
+		add	hl,a
+		inc	de			; y++
+
+
+		exx	
+		djnz	@HeightLoop
+		ret
 
 
 MaskWidth	db	0

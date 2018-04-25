@@ -26,9 +26,9 @@ SpawnLemming:
 
 		ld	a,(ReleaseRateCounter)
 		dec	a
-		jr	nz,@Exit
+		jp	nz,@Exit
 		ld	a,(LemmingCounter)
-		cp	100	;100
+		cp	10	;00	;100
 		jr	z,@Exit
 		inc	a
 		ld	(LemmingCounter),a
@@ -149,7 +149,7 @@ NextLemming_NoDraw:
 		;and	a
 		;jp	nz,AlreadyFoundOne			; might want to get the one closest to the centre of the cursor.....?
 		ld	a,(ix+LemSkillMask)
-@CurrentSkillmask:
+CurrentSkillmask:
 		and	SKILLMASK_BOMBER
 		jp	nz,NextLemming_NotActive		; dont select this lemming
 
@@ -183,7 +183,7 @@ NextLemming_NoDraw:
 		ld	a,l
 		cp	8+2					; if A>=8 then too large
 		jr	nc,NextLemming_NotActive
-TestLab
+
 		ld	a,(CursorDistance)
 		cp	l
 		jr	c,AlreadyFoundOne
@@ -202,6 +202,8 @@ NextLemming_NotActive:
 		dec	b
 		jp	nz,DoAllLemmings
 		ret
+
+
 
 SkillJumpTable	dw	NextLemming_NotActive
 		dw	ProcessLemFaller
@@ -259,6 +261,8 @@ ProcessLemFaller:
 		ld	a,(ix+LemY)
 		add	a,b
 		ld	(ix+LemY),a
+		cp	160+10
+		jp	nc,KillLemming		; off bottom of the screen?
 
 		; Keep track of how far we've fallen
 		ld	a,(ix+LemFallCount)
@@ -451,29 +455,31 @@ ProcessLemDigger:
 @NextLine:
 		ld	a,(hl)			; if no ground under them, then turn into faller
 		and	a
-		;jr	nz,SetFaller
+		jr	z,SetFaller
 
 		ld	a,(ix+LemFrame)
-		//inc	a
-		//and	$f		
-		//ld	(ix+LemFrame),a
-		cp	4
-
+		cp	0
+		jr	z,@DigFrame
+		cp	13
+		jp	nz,Lemming_Draw	;jr	nz,@NotDigFrame
 		
-		;add	hl,$800			; move down a line
-		;ld	a,h			; crossed from $c000 to $0000
-		;test	$f8
-		;jr	nz,@NextLine
-		;or	$c0
-		;ld	h,a
-		;ld	a,(CurrentBank)
-		;inc	a
-		;ld	(CurrentBank),a
-		;add	a,a
-		;mmu6
-		;inc 	a
-		;mmu7		
-		;jp	@NextLine
+@DigFrame:		
+		; remove part of the level
+		ld	l,(ix+LemY)
+		ld	h,0
+		add	hl,-2
+		ex	de,hl
+		ld	l,(ix+LemX)
+		ld	h,(ix+(LemX+1))
+		add	hl,-6
+		ld	b,h
+		ld	c,l
+		ld	hl,DiggerMask
+		call	ClearBoblevel
+
+		ld	a,(ix+LemY)
+		inc	a
+		ld	(ix+LemY),a
 
 		jp	Lemming_Draw
 
@@ -598,9 +604,9 @@ SetStateNone:	ret
 ; -----------------------------------------------------
 ; Set faller state
 SetStateFaller:
-		ld	a,(LemSkillMask)	; set skill mask
+		ld	a,(ix+LemSkillMask)	; set skill mask
 		and	SKILLMASK_PERMANENT	; get rid of whatever we were doign before
-		ld	(LemSkillMask),a
+		ld	(ix+LemSkillMask),a
 
 		ld	(ix+LemFallCount),a	; a=0 on entry
 		ld	a,(ix+LemDir)		; left or right?
@@ -615,9 +621,9 @@ SetStateFaller:
 ; -----------------------------------------------------
 ; Set walker state
 SetStateWalker:
-		ld	a,(LemSkillMask)	; set skill mask
+		ld	a,(ix+LemSkillMask)	; set skill mask
 		and	SKILLMASK_PERMANENT	; get rid of whatever we were doign before
-		ld	(LemSkillMask),a
+		ld	(ix+LemSkillMask),a
 
 SetWalkerDirection:
 		ld	a,(ix+LemDir)		; left or right?
@@ -635,7 +641,7 @@ SetWalkerDirection_NoLoad:
 SetStateSplatter:
 		; stop it being assignable once its splatting
 		ld	a,SKILLMASK_CLIMBER|SKILLMASK_FLOATER|SKILLMASK_BOMBER|SKILLMASK_BUILDER|SKILLMASK_BASHER|SKILLMASK_MINER|SKILLMASK_DIGGER
-		ld	(LemSkillMask),a
+		ld	(ix+LemSkillMask),a
 
 		ld	hl,FallerSplatter
 		jp	SetAnim
@@ -643,10 +649,10 @@ SetStateSplatter:
 ; -----------------------------------------------------
 ; Set differ state
 SetStateDigger:
-		ld	a,(LemSkillMask)	; set skill mask
+		ld	a,(ix+LemSkillMask)	; set skill mask
 		and	SKILLMASK_PERMANENT	; get rid of whatever we were doign before
 		or	SKILLMASK_DIGGER
-		ld	(LemSkillMask),a
+		ld	(ix+LemSkillMask),a
 
 		xor	a			; frame is actually stored in here..
 		ld	(ix+LemSkillTemp),a
@@ -684,9 +690,9 @@ SetStatePreBomber:
 		ld	(ix+LemBombCounter_Frac),a
 		ld	a,5
 		ld	(ix+LemBombCounter),a
-		ld	a,(LemSkillMask)	; set skill mask
+		ld	a,(ix+LemSkillMask)	; set skill mask
 		or	SKILLMASK_BOMBER
-		ld	(LemSkillMask),a
+		ld	(ix+LemSkillMask),a
 		ret
 
 ; -----------------------------------------------------

@@ -27,6 +27,7 @@ BankAddress 	dw	0
 
 ; Tile scrolling on counter
 ScrollIndex:	dw	0
+SkillMaskTable:	db	SKILLMASK_CLIMBER,SKILLMASK_FLOATER,SKILLMASK_BOMBER,SKILLMASK_BLOCKER,SKILLMASK_BUILDER,SKILLMASK_BASHER,SKILLMASK_MINER,SKILLMASK_DIGGER
 
 
 ; Delay for the trap door opening - 2 seconds
@@ -88,7 +89,7 @@ WalkerRAnim:	LEMANIM		FWalkerR,	8, 	3,0
 FallerLAnim	LEMANIM		FFallerL,	4,	-3,0
 FallerRAnim	LEMANIM		FFallerR,	4,	-3,0
 FallerSplatter	LEMANIM		FSplatter,	17,	0,0		;+1 frame so processing code can detect
-FallerDigger	LEMANIM		FDigger,	16,	0,0		;+1 frame so processing code can detect
+FallerDigger	LEMANIM		FDigger,	16,	0,1		;+1 frame so processing code can detect
 
 
 

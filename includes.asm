@@ -92,15 +92,15 @@ PanelNumbersBank	equ	14
 PanelNumbersAddress	equ	$c800				; 400 bytes
 PanelBank		equ	15
 PanelAddress		equ	$c000				; panel is 8K
-LevelBitmapBank		equ	16				; level bitmap from bank 16 to 36 (20 banks)
+LevelBitmapBank		equ	16				; level bitmap from bank 16 to 38 (22 banks). Last 2 banks are 0 for falling off the bottom
 LevelBitmapAddress	equ	$c000
-StyleBank 		equ 	36				; start of style data (96K - 6 banks)
+StyleBank 		equ 	38				; start of style data (96K - 6 banks)
 StyleBaseAddress 	equ 	$c000
-ObjectsBank 		equ 	36				; Level objects - load over the top of the styles
+ObjectsBank 		equ 	38				; Level objects - load over the top of the styles
 ObjectsBaseAddress 	equ 	$c000
-PointsBank		equ	42
+PointsBank		equ	44
 PointsAddress		equ	$c000
-LemmingsBank		equ	44				; start of lemmings sprites
+LemmingsBank		equ	46				; start of lemmings sprites
 LemmingAddress		equ	$c000
 
 MAX_LEM			equ	100
