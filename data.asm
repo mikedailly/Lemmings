@@ -86,10 +86,13 @@ CursorDistance		db	0			; distance current selection is from centre of cursor
 				; frame		count	offsets
 WalkerLAnim:	LEMANIM		FWalkerL,	8, 	3,0
 WalkerRAnim:	LEMANIM		FWalkerR,	8, 	3,0
-FallerLAnim	LEMANIM		FFallerL,	4,	-3,0
-FallerRAnim	LEMANIM		FFallerR,	4,	-3,0
-FallerSplatter	LEMANIM		FSplatter,	17,	0,0		;+1 frame so processing code can detect
-FallerDigger	LEMANIM		FDigger,	16,	0,1		;+1 frame so processing code can detect
+FallerLAnim:	LEMANIM		FFallerL,	4,	-3,0
+FallerRAnim:	LEMANIM		FFallerR,	4,	-3,0
+SplatterAnim:	LEMANIM		FSplatter,	17,	0,0		;+1 frame so processing code can detect
+DiggerAnim:	LEMANIM		FDigger,	16,	0,1		
+PreBomberAnim:	LEMANIM		FExploder,	17,	2,0		;+1 frame so processing code can detect
+BuilderRAnim:	LEMANIM		FBuilderRight,	16,	0,0		
+BuilderLAnim:	LEMANIM		FBuilderLeft,	16,	0,0		
 
 
 

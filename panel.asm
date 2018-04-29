@@ -11,7 +11,7 @@ InitPanel:
 		;LoadBank	CursorsFile,$4000,0
 		ei
 		ld	e,0				; which sprite shape to copy to
-		ld	d,4				; how many to copy	
+		ld	d,10				; how many to copy	
 		ld	hl,$c000			; copy from where?
 		call	UploadSprites
 		
@@ -28,10 +28,6 @@ InitPanel:
 ;
 ; ************************************************************************
 CopyPanelToScreen:
-		;ld	a,6
-		;out	($fe),a
-		;ld	a,PanelBank*2
-		;mmu6
 		ld	a,PanelBank
 		call	SetBank
 
@@ -57,9 +53,6 @@ else
 		ldir
 endif
 		call	DrawPanelNumbers
-
-		;ld	a,0
-		;out	($fe),a
 
 		ld	bc,$123b
 		ld	a,$2
@@ -175,6 +168,22 @@ ButtonPressed		db	0	; button pressed this frame?
 ;
 ; ************************************************************************
 ProcessInput:
+		; count double click
+		ld	a,(DoubleClipCounterCurrent)
+		cp	$ff			; double click counter maxed out?
+		jr	z,@MaxCount
+		inc	a
+		ld	(DoubleClipCounterCurrent),a
+		cp	$0b			;  < 1 second for a double click
+		jr	c,@DontClearNukeFlag	; over... not clicknig
+		xor	a
+		ld	(NukeFlag),a		; clear nuke flag
+
+@MaxCount:
+@DontClearNukeFlag:
+
+
+
 		xor	a
 		ld	(ButtonPressed),a	; clear pressed flag
 		ld	a,(ButtonDown)
@@ -196,10 +205,11 @@ ProcessInput:
 		dec	a
 		ld	(ButtonPressed),a	; button pressed this frame
 
+		ld	a,0
+		ld	(DoubleClipCounterCurrent),a
 
 
 @TestSlots:
-
 		; Once mouse button pressed, check to see where the cursor is
 		ld	a,(MouseY)
 		cp	168
@@ -213,12 +223,17 @@ ProcessInput:
 		jp	m,@ReleaseSpeed		; if first 2 boxes...return
 
 		cp	8			; panel slot > 7 then not a skill
-		jp	nc,@pauseNuke	
+		jp	nc,DoPauseNukeCheck	
+
+		xor	a			; flag as NOT the nuke button
+		ld	(NukeFlag),a
 
 		; Select the skill on the panel
 		ld	a,(ButtonPressed)
 		and	$ff
 		ret	z			; button not pressed
+
+
 		ld	a,b			; get panel slot back
 		ld	(PanelSelection),a	; set selected skill
 		; get "mask"
@@ -259,7 +274,6 @@ ProcessInput:
 		ret	z
 		inc	a
 		jp	@UpdateReleaseRate
-@pauseNuke:
 		ret
 
 
@@ -284,34 +298,55 @@ AssignSkill:
 		and	a
 		ret	nz			; already a bomber?
 
-		jp	SetStatePreBomber	; set bomber state
+		jp	SetStateBomberCountDown	; set bomber state
 
 
 @NotBomber:
 		cp	7
-		;jr	nz,@NotADigger		; not digger
-		ret	nz
+		jr	nz,@NotADigger		; not digger
+		;ret	nz
 		ld	a,LEM_DIGGER		; swap lemming to a digger
 		jp	SetState		; set bomber state
 
-@NotADigger:	cp	9			; not nuke
-		ret	nz
+@NotADigger:	ret
 
+
+
+
+		;
+		; Do pause and nuke
+		;
+DoPauseNukeCheck:
+		; Check for pause....
+		cp	8
+		jr	nz,@TestNukeButton	; not digger
+		xor	a			; flag as NOT the nuke button
+		ld	(NukeFlag),a
+		ret
+
+@TestNukeButton:
+		; check for NUKE
 		ld	a,(ButtonPressed)
 		and	$ff
 		ret	z
 
-		ld	a,(NukeCounter)
-		cp	255
-		jr	nz,@CounterActive
-		xor	a
-		ld	(NukeCounter),a		; active double click counter
-@CounterActive:	
-		cp	25/3
-		jr	c,@DoNuke
-		ld	a,-1
-		ld	a,(NukeCounter)
-@DoNuke
+		ld	a,(NukeFlag)		; was it clicked last time?
+		and	a
+		jr	z,FirstNukeClick
 
-NukeCounter	db	0
+		ld	a,MAX_LEM		; Nuke Started is also the counter...
+		ld	(NukeStarted),a
+		ld	ix,LemData
+		ld	(NukeIndex),ix
+		ret
+
+
+FirstNukeClick:	ld	a,$ff
+		ld	(NukeFlag),a
+		ret
+
+DoubleClipCounterCurrent	db	0
+NukeFlag			db	0
+NukeStarted			db	0
+NukeIndex			dw	0
 

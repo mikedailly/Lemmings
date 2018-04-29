@@ -118,6 +118,8 @@ LEM_BUILDER_SHRUG	equ	9
 LEM_BASHER		equ	10
 LEM_MINER		equ	11
 LEM_DIGGER		equ	12
+LEM_PREBOMBER		equ	13
+	
 
 ; used to quickly disguard lemmings for selection
 SKILLMASK_CLIMBER	equ	1
@@ -173,7 +175,7 @@ FFloaterStartR		equ	56
 FFloaterR		equ	60	; pingppong
 FFloaterStartL		equ	64
 FFloaterL		equ	68	; pingpong
-FExploder		equ	72
+FExploder		equ	72	; 16 frames
 FSplatter		equ	88	; 16 frames
 FBlocker		equ	104	; 16 frames
 FDrowner		equ	120	; 16 frames

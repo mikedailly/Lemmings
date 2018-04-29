@@ -103,6 +103,13 @@ yscrtest        db      0
 FlipScreens:   
                 ld      a,(CursorShape)                 ; flip cursor
                 ld      (CursorShape_Current),a
+                ld      a,(ExplosionX)
+                ld      (SysExplosionX),a
+                ld      a,(ExplosionY)
+                ld      (SysExplosionY),a
+                ld      a,$ff                   ; disable explosion for the next game frame
+                ld      (ExplosionY),a
+
 
                 ld      a,(Screen1Bank)
                 push    af
@@ -151,6 +158,8 @@ Screen2Bank     db      11
 ; ************************************************************************
 ;
 ; Function:     Display the cursor
+;               Higher priorities are higher sprite numbers
+;               Sprite 1 us under sprite 2
 ;
 ; ************************************************************************
 DisplayCursor:
@@ -159,20 +168,75 @@ DisplayCursor:
                 out     (c),a
                 
 
-                ld      a,(MouseX)
-                add     a,32-8                
+                ; Explosion...
+                ld      a,(SysExplosionY)
+                cp      $ff
+                jp      nz,@Active
+                xor     a
+                out     (SpriteReg),a           ; disable sprite 1
                 out     (SpriteReg),a
-                ld      a,0
-                adc     0
-                push    af
-                ld      a,(MouseY)
-                add     a,32-8
                 out     (SpriteReg),a
-                pop     af                
                 out     (SpriteReg),a
-                ld      a,(CursorShape_Current)
-                or      $80
+
+                out     (SpriteReg),a           ; disable sprite 2
                 out     (SpriteReg),a
+                out     (SpriteReg),a
+                out     (SpriteReg),a
+
+                out     (SpriteReg),a           ; disable sprite 3
+                out     (SpriteReg),a
+                out     (SpriteReg),a
+                out     (SpriteReg),a
+
+                out     (SpriteReg),a           ; disable sprite 4
+                out     (SpriteReg),a
+                out     (SpriteReg),a
+                out     (SpriteReg),a
+                jp      @SkipExpSetup
+@Active:
+                ld      a,(SysExplosionX)
+                ld      l,a
+                ld      h,0
+                add     hl,24
+                ld      a,l
+                out     (SpriteReg),a           ; x
+                ld      a,(SysExplosionY)
+                out     (SpriteReg),a           ; y
+                ld      a,h
+                out     (SpriteReg),a           ; msb
+                ld      a,$86                   ; exp-shape top left 
+                out     (SpriteReg),a           
+
+                ld      a,l
+                out     (SpriteReg),a           ; x
+                ld      a,(SysExplosionY)
+                add     a,16                    ; lower left sprite
+                out     (SpriteReg),a           ; y
+                ld      a,h
+                out     (SpriteReg),a           ; msb
+                ld      a,$87                   ; exp-shape lower left
+                out     (SpriteReg),a           
+
+                add     hl,16
+                ld      a,l
+                out     (SpriteReg),a           ; x
+                ld      a,(SysExplosionY)
+                out     (SpriteReg),a           ; y
+                ld      a,h
+                out     (SpriteReg),a           ; msb
+                ld      a,$88                   ; exp-shape top right
+                out     (SpriteReg),a           
+
+                ld      a,l
+                out     (SpriteReg),a           ; x
+                ld      a,(SysExplosionY)
+                add     a,16                    ; lower right sprite
+                out     (SpriteReg),a           ; y
+                ld      a,h
+                out     (SpriteReg),a           ; msb
+                ld      a,$89                   ; exp-shape lower right
+                out     (SpriteReg),a  
+@SkipExpSetup:
 
                 ; Draw Panel selection
                 ld      a,(PanelSelection)
@@ -199,8 +263,33 @@ DisplayCursor:
                 ld      a,$83                   ; set shape + enable
                 out     (SpriteReg),a
 
+
+                ;
+                ; Do the cursor last so it's on top of everything
+                ;
+                ld      a,(MouseX)
+                add     a,32-8                
+                out     (SpriteReg),a
+                ld      a,0
+                adc     0
+                push    af
+                ld      a,(MouseY)
+                add     a,32-8
+                out     (SpriteReg),a
+                pop     af                
+                out     (SpriteReg),a
+                ld      a,(CursorShape_Current)
+                or      $80
+                out     (SpriteReg),a
+
                 ret
 CursorShape             db      0
+ExplosionX              db      0
+ExplosionY              db      -1              ; -1 to disable
+
 CursorShape_Current     db      0
 PanelSelection          db      0
+SysExplosionX              db      0
+SysExplosionY              db      -1              ; -1 to disable
+
 

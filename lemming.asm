@@ -28,7 +28,7 @@ SpawnLemming:
 		dec	a
 		jp	nz,@Exit
 		ld	a,(LemmingCounter)
-		cp	10	;00	;100
+		cp	100	;100
 		jr	z,@Exit
 		inc	a
 		ld	(LemmingCounter),a
@@ -82,7 +82,7 @@ SpawnLemming:
 ; Process all lemmings
 ; *****************************************************************************************************************************
 ProcessLemmings:
-		xor	a				; clear inedx
+		xor	a				; clear index
 		ld 	(CursorLemmingIndex),a		; if high byte is 0, then nothing selected
 		ld 	(CursorLemmingIndex+1),a
 		ld	(CursorShape),a	
@@ -151,7 +151,7 @@ NextLemming_NoDraw:
 		ld	a,(ix+LemSkillMask)
 CurrentSkillmask:
 		and	SKILLMASK_BOMBER
-		jp	nz,NextLemming_NotActive		; dont select this lemming
+		jp	nz,NextLemming_NotActive		; don't select this lemming
 
 
 		ld	a,(MouseY)
@@ -169,7 +169,7 @@ CurrentSkillmask:
 		ld	h,(ix+LemX+1)
 		sbc	hl,de
 		jp	p,@positiveX				; if positive, skip "NEG HL"
-		ld	a,$ff					; neg hl
+		ld	a,$ff					; neg HL
 		xor	l
 		ld	l,a
 		ld	a,$ff
@@ -218,6 +218,7 @@ SkillJumpTable	dw	NextLemming_NotActive
 		dw	0 ;ProcessLemBasher
 		dw	0 ;ProcessLemMiner
 		dw	ProcessLemDigger
+		dw	ProcessLemPreBomber
 
 
 ; *****************************************************************************************************************************
@@ -322,7 +323,7 @@ ProcessLemWalker:
 		; check first pixel at feet - if empty, then fall
 		ld	a,(hl)
 		and	a
-		jp	z,@DoFalling_skip	; jp instead of jr - 2 tstates quicker
+		jp	z,@DoFalling_skip	; jp instead of jr - 2 T-States quicker
 		;ld	de,$0508
 		inc	d
 		jp	@DoClimbing_skip
@@ -333,7 +334,7 @@ ProcessLemWalker:
 @DoClimbing_skip
 		dec	c
 		inc	b
-		ld	a,d			; faster loading of 5 - save 3 tstates
+		ld	a,d			; faster loading of 5 - save 3 T-States
 		cp	b
 		jp	z,@HitWall		; 4 pixel fall?	(only fall a max 4 pixels at once)
 
@@ -444,7 +445,7 @@ SetFaller:
 		call	SetState
 		jp	Lemming_Draw	
 ; *****************************************************************************************************************************
-; Function:	Faller
+; Function:	Process a lemming digging
 ; *****************************************************************************************************************************
 ProcessLemDigger:
 		ld	a,(ix+LemY)
@@ -461,7 +462,7 @@ ProcessLemDigger:
 		cp	0
 		jr	z,@DigFrame
 		cp	13
-		jp	nz,Lemming_Draw	;jr	nz,@NotDigFrame
+		jp	nz,Lemming_Draw
 		
 @DigFrame:		
 		; remove part of the level
@@ -493,6 +494,48 @@ ProcessLemSplatter:
 		jp	nz,Lemming_Draw
 KillLemming:	xor	a			; kill lemming
 		call	SetState
+		jp	Lemming_Draw
+
+
+; *****************************************************************************************************************************
+; Function:	Process a Splatter
+ProcessLemPreBomber:
+		ld	a,(ix+LemFrame)
+		cp	16
+		jp	nz,Lemming_Draw
+		
+		; remove part of the level
+		ld	l,(ix+LemY)
+		ld	h,0
+		add	hl,-14
+		ex	de,hl
+
+		ld	l,(ix+LemX)
+		ld	h,(ix+(LemX+1))
+		add	hl,-8
+		ld	b,h
+		ld	c,l
+		ld	hl,BomberMask
+		push	bc
+		call	ClearBoblevel
+		pop	hl
+
+		ld	bc,(ScrollIndex)
+		sbc	hl,bc
+		add	hl,8
+		ld	a,h
+		and	a
+		jr	nz,@OffScreen
+		ld	a,l
+		ld	(ExplosionX),a
+		ld	a,(ix+LemY)
+		add	a,16
+		ld	(ExplosionY),a
+
+@OffScreen:
+		ld	a,LEM_BOMBER
+		call	SetState
+
 		jp	Lemming_Draw
 
 
@@ -548,7 +591,7 @@ GetPixel:
 
 
 ; *****************************************************************************************************************************
-; Function:	Setup a new animation
+; Function:	Set up a new animation
 ; IN:		HL = pointed to animation
 ;		ix = Lemming struct
 ; Changes:	a,hl
@@ -590,7 +633,7 @@ SetState:	ld	(ix+LemType),a
 		ex	de,hl
 
 		; all types need to reset the frame index
-		xor	0
+		xor	a
 		ld	(ix+LemFrame),a
 
 		; a ALWAYS = 0 on entry to function
@@ -605,7 +648,7 @@ SetStateNone:	ret
 ; Set faller state
 SetStateFaller:
 		ld	a,(ix+LemSkillMask)	; set skill mask
-		and	SKILLMASK_PERMANENT	; get rid of whatever we were doign before
+		and	SKILLMASK_PERMANENT	; get rid of whatever we were doing before
 		ld	(ix+LemSkillMask),a
 
 		ld	(ix+LemFallCount),a	; a=0 on entry
@@ -622,7 +665,7 @@ SetStateFaller:
 ; Set walker state
 SetStateWalker:
 		ld	a,(ix+LemSkillMask)	; set skill mask
-		and	SKILLMASK_PERMANENT	; get rid of whatever we were doign before
+		and	SKILLMASK_PERMANENT	; get rid of whatever we were doing before
 		ld	(ix+LemSkillMask),a
 
 SetWalkerDirection:
@@ -643,32 +686,40 @@ SetStateSplatter:
 		ld	a,SKILLMASK_CLIMBER|SKILLMASK_FLOATER|SKILLMASK_BOMBER|SKILLMASK_BUILDER|SKILLMASK_BASHER|SKILLMASK_MINER|SKILLMASK_DIGGER
 		ld	(ix+LemSkillMask),a
 
-		ld	hl,FallerSplatter
+		ld	hl,SplatterAnim
 		jp	SetAnim
 
 ; -----------------------------------------------------
 ; Set differ state
 SetStateDigger:
 		ld	a,(ix+LemSkillMask)	; set skill mask
-		and	SKILLMASK_PERMANENT	; get rid of whatever we were doign before
+		and	SKILLMASK_PERMANENT	; get rid of whatever we were doing before
 		or	SKILLMASK_DIGGER
 		ld	(ix+LemSkillMask),a
 
 		xor	a			; frame is actually stored in here..
 		ld	(ix+LemSkillTemp),a
 
-		ld	hl,FallerDigger
+		ld	hl,DiggerAnim
 		jp	SetAnim
 
 
+; -----------------------------------------------------
+; Set faller state
+SetStatePreBomber:
+		; stop it being assignable once its splatting
+		ld	a,SKILLMASK_CLIMBER|SKILLMASK_FLOATER|SKILLMASK_BOMBER|SKILLMASK_BUILDER|SKILLMASK_BASHER|SKILLMASK_MINER|SKILLMASK_DIGGER
+		ld	(ix+LemSkillMask),a
 
+		ld	hl,PreBomberAnim
+		jp	SetAnim
 ; -----------------------------------------------------
 ; Set bomber state
 SetStateBomber:
 		ld	a,255			; increments pre-first draw
 		ld	(ix+LemFrame),a
                 
-		; pre-offset the lemming locaton to center the explosion
+		; pre-offset the lemming location to centre the explosion
                 ld      h,(ix+LemX+1)
                 ld      l,(ix+LemX)
                 add	hl,8
@@ -685,7 +736,7 @@ SetStateBomber:
 ; -----------------------------------------------------
 ; Set PRE-bomber state. Puts the counter above the head
 ; ix = Lemming to set
-SetStatePreBomber:
+SetStateBomberCountDown:
 		ld	a,50/3
 		ld	(ix+LemBombCounter_Frac),a
 		ld	a,5
@@ -711,6 +762,7 @@ StateJumpTable:
 		dw	0			; 10 - LEM_BASHER		
 		dw	0			; 11 - LEM_MINER		
 		dw	SetStateDigger		; 12 - LEM_DIGGER		
+		dw	SetStatePreBomber	; 13 - LEM_PREBOMBER
 
 
 ; *****************************************************************************************************************************
@@ -846,9 +898,9 @@ DrawCounter
 		ld	b,h
 		ld	c,l
 		ld	hl,BomberMask
-		call	ClearBoblevel
+		;call	ClearBoblevel
 
-		ld	a,LEM_BOMBER
+		ld	a,LEM_PREBOMBER
 		jp	SetState
 
 ; *****************************************************************************************************************************

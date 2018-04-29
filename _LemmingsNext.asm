@@ -82,55 +82,20 @@ MainLoop:
                 and     a
                 jr      nz,@WaitVBlank
 
-
-
-
-
-
                 ; Scan keyboard
                 call    ReadKeyboard
-                ld      a,(Keys+VK_SPACE)
-                and     a
-                jr      z,@notpressed  
+                call    ProecssMisc
 
-                JP      StartAddress            
-@notpressed:
-                ; draw frame rate
-                ld      de,$4001
-                ld      a,(fps)
-                call    PrintHex
 
-                ld      a,0
-                out     ($fe),a
 
                 call    DisplayMap              ; Display level bitmap
                 ;call    GenerateMiniMap
-                ld      a,0
-                out     ($fe),a
-
-                ld      a,(MouseX)
-                ld      l,a
-                ld      h,0
-                ld      bc,(ScrollIndex)
-                add     hl,bc
-                ld      a,(MouseY)
-                ld      e,a
-                ld      d,0
-                push    hl
-                pop     bc
-                ld      hl,BomberMask
-                ;call    ClearBoblevel
-
 
                 call    OpenTrapDoors
                 call    DrawLevelObjects
 
                 call    SpawnLemming
-                ;ld      a,1
-                ;out     ($fe),a
                 call    ProcessLemmings
-                ;ld      a,0
-                ;out     ($fe),a
 
                 call    ProcessInput
 
@@ -146,20 +111,37 @@ fps             db      0
 frame           db      0
 
 
-tester:
-                ld      a,VRAM_BASE_BANK
-                call    SetBank
 
-                ld      bc,$2000
-                ld      a,255
-                ld      ($c000),a
-                ld      hl,$c000
-                ld      de,$c001
-                ldir
 
+; *****************************************************************************************************************************
+; Process the small "misc" bits
+; *****************************************************************************************************************************
+ProecssMisc:
+                ld      a,(Keys+VK_SPACE)
+                and     a
+                jr      z,@notpressed  
+
+                JP      StartAddress            
+@notpressed:
+                ; draw frame rate
+                ld      de,$4001
+                ld      a,(fps)
+                call    PrintHex
+
+
+                ; do this last....
+                ld      a,(NukeStarted)
+                and     a
+                ret     z                       ; not new, then RETURN
+                dec     a
+                ld      (NukeStarted),a
+                ld      ix,(NukeIndex)
+                call    SetStateBomberCountDown ; set bomber state
+                ld      bc,LemStructSize
+                add     ix,bc
+                ld      (NukeIndex),ix
                 ret
 
-AnimFrame       db      0
 
 ; *****************************************************************************************************************************
 ; Initialise the game start up crap
@@ -173,9 +155,6 @@ Init:
                 inc     l
                 djnz    @lp1
 
-
-                ; enable turbo mode 
-                ;NextReg 7,0                     ; set 14Mhz turbo mode
 
                 ld      a,7+(64)
                 call    ClsATTR
