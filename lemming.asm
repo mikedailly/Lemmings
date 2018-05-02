@@ -106,7 +106,7 @@ DoAllLemmings:
 		; get type and get lookup in table
 		ld	a,(ix+LemType)
 		and	a
-		jr	z,NextLemming_NotActive	; Not active
+		jp	z,NextLemming_NotActive	; Not active
 		ld	hl,SkillJumpTable
 		add	a,a
 		add	hl,a
@@ -141,6 +141,7 @@ NextLemming_NoDraw:
 		and	a
 		jr	z,@NotBomber
 		call	DrawCounter
+
 
 
 @NotBomber:
@@ -436,14 +437,15 @@ DrawWalker:
 		ld	d,(ix+LemX+1)	
 		ld	a,(ix+LemY)	
 		call	DrawLemmingFrame
+
 		jp	NextLemming_NoDraw
-
-
 
 SetFaller:
 		ld	a,LEM_FALLER
 		call	SetState
 		jp	Lemming_Draw	
+
+		
 ; *****************************************************************************************************************************
 ; Function:	Process a lemming digging
 ; *****************************************************************************************************************************
@@ -730,7 +732,7 @@ SetStateBomber:
 		sub	3
 		ld      (ix+LemY),a
 
-		ld	hl,0
+		ld	hl,PreBomberAnim
 		jp	SetAnim
 
 ; -----------------------------------------------------
@@ -788,6 +790,11 @@ DrawLemming:
 ;		A  = Y
 ; *****************************************************************************************************************************
 DrawLemmingFrame:
+;		ld	(HLLemFrame),hl		; DEBUG code
+;		ld	(DEXPOS),de
+;		ld	(IXVAL),ix
+;		ld	(A_YPOS),a
+
 		push	af
 		push	de
 		ld	a,LemmingsBank*2	; first bank holds offset table
@@ -853,12 +860,30 @@ DrawLemmingFrame:
 		
 
 		; HL = screen address [y,x]
+		ld	bc,$123b		; This is common to EVERY lemming 
+		ld	a,h			; draw function, so move out here
+		and	$c0
+		or	$03+8
+		out	(c),a
+
 CallLemming:	jp	$0000
 		
 
 ClipLemming	pop	af
 		ret
 
+
+;ResetDraw	ld	hl,(HLLemFrame)
+;		ld	de,(DEXPOS)
+;		ld	ix,(IXVAL)
+;		ld	a,(A_YPOS)
+;		jp	DrawLemmingFrame
+
+
+HLLemFrame	dw	0
+DEXPOS		dw	0
+IXVAL		dw	0
+A_YPOS		db	0
 
 ; *****************************************************************************************************************************
 ; Draw the bomber counter

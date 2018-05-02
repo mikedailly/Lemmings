@@ -186,13 +186,13 @@ FBuilderLeft		equ	174	; 16 frames
 FShruggerRight		equ	190	; 8 frames
 FShruggerLeft		equ	198	; 8 frames
 FDigger			equ	206	; 16 frames
-FBasherRight		equ	254	; 32 frames
-FBasherLeft		equ	286	; 32 frames
-FMinerRight		equ	318	; 24 frames
-FMinerLeft		equ	342	; 24 frames
-FBuilderBrick		equ	366	; 1 frame
-FExplosionMask		equ	367	; 1 frame
-FMinerMask		equ	368	; 1 frame
+FBasherRight		equ	222	; 32 frames
+FBasherLeft		equ	254	; 32 frames
+FMinerRight		equ	286	; 24 frames
+FMinerLeft		equ	310	; 24 frames
+FMinerMask		equ	334	; 1 frame
+FExplosionMask		equ	335	; 1 frame
+FBuilderBrick		equ	348	; 1 frame
 
 
 FOne			equ	349	; 1 to 5 counter
