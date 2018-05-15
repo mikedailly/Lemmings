@@ -96,12 +96,12 @@ LevelBitmapBank		equ	16				; level bitmap from bank 16 to 38 (22 banks). Last 2 
 LevelBitmapAddress	equ	$c000
 StyleBank 		equ 	38				; start of style data (96K - 6 banks)
 StyleBaseAddress 	equ 	$c000
-ObjectsBank 		equ 	38				; Level objects - load over the top of the styles
+ObjectsBank 		equ 	44				; Level objects - load over the top of the styles (80k - 5 banks)
 ObjectsBaseAddress 	equ 	$c000
-PointsBank		equ	44
-PointsAddress		equ	$c000
-LemmingsBank		equ	46				; start of lemmings sprites
+LemmingsBank		equ	49				; start of lemmings sprites 
 LemmingAddress		equ	$c000
+PointsBank		equ	LemmingsBank+6			; (2 banks)
+PointsAddress		equ	$c000
 
 MAX_LEM			equ	100
 

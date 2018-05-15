@@ -2,11 +2,11 @@
 ; Level loading/storage
 ; *****************************************************************************************************************************
 LoadLevel:
-		;LoadBank	level_0023,LevelAddress,LevelBank	; Watch out, there's traps about
+		LoadBank	level_0023,LevelAddress,LevelBank	; Watch out, there's traps about
 		;LoadBank	level_0030,LevelAddress,LevelBank	; ship  -  Every Lemming for himself!!!
 		;LoadBank	level_0055,LevelAddress,LevelBank	; Steel Works
 		;LoadBank	level_0031,LevelAddress,LevelBank	; art gallery
-		LoadBank	level_0091,LevelAddress,LevelBank	; Just dig
+		;LoadBank	level_0091,LevelAddress,LevelBank	; Just dig
 
 		ld	ix,LevelAddress
 		ld 	a,(ix+$1b)
@@ -64,7 +64,19 @@ LoadLevel:
 		; default - use style 0
 		jp	@DefaultStyle
 
-@CarryOn:
+@CarryOn:	; get object style file back
+		pop	hl
+		ld	a,ObjectsBank
+		call	Load_Banked
+
+
+
+ResetLevel:
+		call	InitLemmings					; reset the lemmings
+
+		ld	ix,LevelAddress
+
+
 		ld 	a,LevelBank
 		call 	SetBank
 
@@ -124,11 +136,15 @@ LoadLevel:
 		inc	hl
 		djnz	@WipeEntrances
 
+
+
 		push	ix
 		ld	bc,$20
 		add	ix,bc
 		call	SetupLevelObjects
 		pop	ix
+
+
 
 
 		ld	a,(ix+$19)
@@ -142,9 +158,9 @@ LoadLevel:
 		call	CreateLevel
 
 		; get object style file back
-		pop	hl
-		ld	a,ObjectsBank
-		call	Load_Banked
+		;pop	hl
+		;ld	a,ObjectsBank
+		;call	Load_Banked
 		call	GenerateMiniMap
 
 		; init the release order

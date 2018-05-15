@@ -12,6 +12,8 @@ InitLemmings:
 
 		ld	hl,LemData
 		ld	(NextSpawnLemming),hl	; Lemming release index
+		xor	a
+		ld	(LemmingCounter),a
 		ret
 
 
@@ -445,7 +447,7 @@ SetFaller:
 		call	SetState
 		jp	Lemming_Draw	
 
-		
+
 ; *****************************************************************************************************************************
 ; Function:	Process a lemming digging
 ; *****************************************************************************************************************************
@@ -794,7 +796,6 @@ DrawLemmingFrame:
 ;		ld	(DEXPOS),de
 ;		ld	(IXVAL),ix
 ;		ld	(A_YPOS),a
-
 		push	af
 		push	de
 		ld	a,LemmingsBank*2	; first bank holds offset table
@@ -855,16 +856,27 @@ DrawLemmingFrame:
 		pop	af
 		;sub	c
 		;add	a,c
+		dec	a
+		cp	176			; if Y > 176 then clip
+		ret	nc
 		ld	h,a
-		dec	h
-		
 
 		; HL = screen address [y,x]
-		ld	bc,$123b		; This is common to EVERY lemming 
-		ld	a,h			; draw function, so move out here
+
+
+		;
+		; Common drawing code....
+		;
+		ld	bc,$123b
+		ld	a,h			
 		and	$c0
 		or	$03+8
 		out	(c),a
+
+		ex	af,af'
+		ld	a,h
+		and	$3f
+            	ld	h,a
 
 CallLemming:	jp	$0000
 		

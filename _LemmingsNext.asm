@@ -97,6 +97,16 @@ MainLoop:
                 call    SpawnLemming
                 call    ProcessLemmings
 
+                ld      ix,LemData
+                ld      a,(MouseX)
+                ld      hl,(ScrollIndex)
+                add     hl,a
+                ex      de,hl
+                ld      a,(MouseY)
+                ld      hl,0
+                call    DrawLemmingFrame
+
+
                 call    ProcessInput
 
 if USE_COPPER = 0
@@ -121,13 +131,20 @@ ProecssMisc:
                 and     a
                 jr      z,@notpressed  
 
-                JP      StartAddress            
+                call    ResetLevel            
+                ret
 @notpressed:
                 ; draw frame rate
                 ld      de,$4001
                 ld      a,(fps)
                 call    PrintHex
 
+
+;               HL = frame to draw
+;               IX = Lem structure
+;               DE = X
+;               A  = Y                
+ 
 
                 ; do this last....
                 ld      a,(NukeStarted)
@@ -163,6 +180,9 @@ Init:
                 call    InitFilesystem
 
                 call    InitSprites
+                ;ld      a,LemmingsBank
+                ;NextReg
+
                 LoadBanked LemmingsFile,LemmingsBank
                 CALL    InitExplosion
 

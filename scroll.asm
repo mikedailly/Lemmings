@@ -107,7 +107,7 @@ LoadLevelBitmap:
 ;	Function:	Reset the scroll back to the start
 ;
 ; ************************************************************************
-ResetLevel:
+;ResetLevel:
 		ld	hl,0				; Set current position
 		ld	(ScrollIndex),hl
 		call	CopyScreen
