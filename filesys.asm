@@ -484,41 +484,53 @@ ErrorLoop:
 ;		HL = dest screen address
 ;
 ; *********************************************************************
-DrawText:
-		push	de
+DisplayErrorCode:
 		push	hl
 		ld	b,a
+		and	a
+		jr	z,@CodeZero
 		ld	hl,File_ErrorMessages
 @KeepGoing	ld	a,(hl)
 		inc	hl
 		and	a
 		jr	nz,@KeepGoing
 		djnz	@KeepGoing
+@CodeZero:	ex	de,hl
+		pop    hl
 
-
-
-		ld	a,(hl)
+DrawText:
+		ld	a,(de)		
+		inc	de
 		and	a
-		;jp	z,@EndOfMessage
+		ret	z
+		sub	32
+		;cp	$20
+		;jr	z,@NextChar
 
-		ld	h,0
-		sla	l		; character *8
-		rl	h
-		sla	l
-		rl	h
-		sla	l
-		rl	h
-		add	hl,$3d00
 
+		push	de
+		ld	e,a
+		ld	d,0
+		sla	e		; character *8
+		rl	d
+		sla	e
+		rl	d
+		sla	e
+		rl	d
+		add	de,$3d00
+
+		
+		push	hl
 		ld	b,8
 @DrawChar:	ld	a,(de)
 		ld	(hl),a
 		pixeldn
 		inc	de
-		djzn	@DrawChar
-		pop	de
-		inc	de
+		djnz	@DrawChar
 		pop	hl
+		pop	de
+@NextChar
+		inc	hl
 		jr	DrawText
 
 @EndOfMessage:
@@ -561,7 +573,9 @@ File_ENOTEMPTY		db	"ENOTEMPTY",0
 File_EMAPRAM		db	"MAPRAM is active",0
 			db	$ff
 File_EUNKNOWN_ERROR	db	"Unknown file error",0
-
+DemoText		db	"Demo V0.1",0
+DemoText2		db	"ZX Spectrum Next Lemmings",0
+DemoText3		db	"     Prototype V0.1",0
 	
 DefaultDrive:	db	0
 LastFileName	dw	0		; last filename to be loaded

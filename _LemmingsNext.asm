@@ -97,14 +97,14 @@ MainLoop:
                 call    SpawnLemming
                 call    ProcessLemmings
 
-                ld      ix,LemData
-                ld      a,(MouseX)
-                ld      hl,(ScrollIndex)
-                add     hl,a
-                ex      de,hl
-                ld      a,(MouseY)
-                ld      hl,0
-                call    DrawLemmingFrame
+                ;ld      ix,LemData
+                ;ld      a,(MouseX)
+                ;ld      hl,(ScrollIndex)
+                ;add     hl,a
+                ;ex      de,hl
+                ;ld      a,(MouseY)
+                ;ld      hl,0
+                ;call    DrawLemmingFrame
 
 
                 call    ProcessInput
@@ -113,6 +113,16 @@ if USE_COPPER = 0
                 call    CopyPanelToScreen
 endif
                 call    ResetBank
+
+                ld      hl,$4001
+                ld      de,DemoText
+                ld      a,1
+                call    DrawText
+
+                ld      hl,$4023
+                ld      de,DemoText2
+                ld      a,1
+                ;call    DrawText
 
                 jp      MainLoop                ; infinite loop
 
@@ -135,10 +145,14 @@ ProecssMisc:
                 ret
 @notpressed:
                 ; draw frame rate
-                ld      de,$4001
-                ld      a,(fps)
-                call    PrintHex
+                ;ld      de,$4001
+                ;ld      a,(fps)
+                ;call    PrintHex
 
+                ;ld      hl,$4003
+                ;ld      de,DemoText
+                ;ld      a,1
+                ;call    DrawText
 
 ;               HL = frame to draw
 ;               IX = Lem structure

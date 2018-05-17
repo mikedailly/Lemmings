@@ -338,6 +338,8 @@ DoPauseNukeCheck:
 		ld	(NukeStarted),a
 		ld	ix,LemData
 		ld	(NukeIndex),ix
+		ld	a,100
+		ld	(LemmingCounter),a
 		ret
 
 
