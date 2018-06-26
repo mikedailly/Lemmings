@@ -116,7 +116,7 @@ FlipScreens:
                 ld      a,(Screen2Bank)
                 ld      (Screen1Bank),a
                 ld      (CopperGameScreen+1),a
-;                NextRegA 18
+                NextRegA 18
                 pop     af
                 ld      (Screen2Bank),a
 if USE_COPPER = 1 

@@ -92,8 +92,10 @@ FallerRAnim:	LEMANIM		FFallerR,	4,	-3,0
 SplatterAnim:	LEMANIM		FSplatter,	17,	0,0		;+1 frame so processing code can detect
 DiggerAnim:	LEMANIM		FDigger,	16,	0,1		
 PreBomberAnim:	LEMANIM		FExploder,	17,	2,0		;+1 frame so processing code can detect
-BuilderRAnim:	LEMANIM		FBuilderRight,	16,	0,0		
-BuilderLAnim:	LEMANIM		FBuilderLeft,	16,	0,0		
+BuilderRAnim:	LEMANIM		FBuilderRight,	17,	-2,0		;+1 for detection
+BuilderLAnim:	LEMANIM		FBuilderLeft,	17,	0,0		;+1 for detection
+BuilderRShrug:	LEMANIM		FShruggerRight,	9,	1,0		; +1 for detection
+BuilderLShrug:	LEMANIM		FShruggerLeft,	9,	-1,0		; +1 for detection
 
 
 

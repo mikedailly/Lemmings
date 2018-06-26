@@ -2,10 +2,9 @@
 ;
 ;	General equates and macros
 ;
-; ************************************************************************
 USE_DMA			equ	1
 NextInstructions        equ     1
-USE_COPPER		equ	0
+USE_COPPER		equ	1
 
 TBBLUE_REGISTER_SELECT	equ	$243b
 SPRITE_CONTROL_REGISTER	equ	$15
@@ -115,10 +114,11 @@ LEM_BLOCKER		equ	6
 LEM_CLIMBER		equ	7
 LEM_BOMBER		equ	8
 LEM_BUILDER_SHRUG	equ	9
-LEM_BASHER		equ	10
-LEM_MINER		equ	11
-LEM_DIGGER		equ	12
-LEM_PREBOMBER		equ	13
+LEM_BUILDER		equ	10
+LEM_BASHER		equ	11
+LEM_MINER		equ	12
+LEM_DIGGER		equ	13
+LEM_PREBOMBER		equ	14
 	
 
 ; used to quickly disguard lemmings for selection

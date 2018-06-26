@@ -302,6 +302,12 @@ AssignSkill:
 
 
 @NotBomber:
+		cp	4
+		jr	nz,@NotBuilder
+		ld	a,LEM_BUILDER
+		jp	SetState
+		
+@NotBuilder:
 		cp	7
 		jr	nz,@NotADigger		; not digger
 		;ret	nz

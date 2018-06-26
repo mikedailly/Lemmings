@@ -217,7 +217,8 @@ SkillJumpTable	dw	NextLemming_NotActive
 		dw	0 ;ProcessLemBlocker
 		dw	0 ;ProcessLemClimber
 		dw	ProcessLemBomber
-		dw	0 ;ProcessLemBuilderShrug
+		dw	ProcessLemBuilderShrug
+		dw	ProcessLemBuilder
 		dw	0 ;ProcessLemBasher
 		dw	0 ;ProcessLemMiner
 		dw	ProcessLemDigger
@@ -447,6 +448,97 @@ SetFaller:
 		call	SetState
 		jp	Lemming_Draw	
 
+; *****************************************************************************************************************************
+; Function:	Process a lemming building
+; *****************************************************************************************************************************
+ProcessLemBuilderShrug:
+		ld	a,(ix+LemFrame)
+		cp	8			; Last Frame?
+		jp	nz,Lemming_Draw
+		
+		ld	a,LEM_WALKER
+		call	SetState
+
+		jp	Lemming_Draw
+
+
+; *****************************************************************************************************************************
+; Function:	Process a lemming building
+; *****************************************************************************************************************************
+ProcessLemBuilder:
+		ld	a,(ix+LemY)
+		ld	l,(ix+LemX)		; get X
+		ld	h,(ix+(LemX+1))
+		call	GetPixel		; DE = pixel, bank set
+
+		ld	a,(ix+LemFrame)
+		cp	10			; Brick goes down on frame 9 or 10... try 10
+		jr	z,@BrickFrame
+		ld	a,(ix+LemFrame)
+		cp	16			; Brick goes down on frame 9 or 10... try 10
+		jr	z,@MoveBuilder
+		jp	Lemming_Draw
+@MoveBuilder:
+		ld	a,(ix+LemSkillTemp)
+		and	$ff
+		jp	nz,@BricksLeft
+		ld	a,LEM_BUILDER_SHRUG
+		call	SetState
+		jp	Lemming_Draw
+@BricksLeft:
+		xor	a
+		ld	(ix+LemFrame),a
+
+		ld	l,(ix+LemX)
+		ld	h,(ix+(LemX+1))
+
+		ld	a,(ix+LemDir)		; left or right?
+		and	a
+		jr	z,@FaceLeftMove
+		inc	hl
+		inc	hl
+		jr	@SkipLeftMove
+@FaceLeftMove:
+		dec	hl
+		dec	hl
+@SkipLeftMove
+		ld	(ix+LemX),l
+		ld	(ix+(LemX+1)),h
+
+		ld	a,(ix+LemY)
+		dec	a
+		cp	$FF
+		jp	z,KillLemming
+		ld	(ix+LemY),a
+		jp	Lemming_Draw
+
+@BrickFrame:
+		ld	hl,BuilderStep
+		; Draw builer step
+		ld	e,(ix+LemY)
+		ld	d,0
+		dec	de
+		ld	l,(ix+LemX)
+		ld	h,(ix+(LemX+1))
+
+		ld	a,(ix+LemDir)		; left or right?
+		and	a
+		jr	z,@FaceLeft
+		dec	hl
+		dec	hl
+		jr	@SkipLeftOffset
+@FaceLeft:
+		add	hl,-6
+@SkipLeftOffset:
+		ld	b,h
+		ld	c,l
+		ld	hl,BuilderStep
+		call	RenderBoblevel
+		ld	a,(ix+LemSkillTemp)
+		dec	a
+		ld	(ix+LemSkillTemp),a
+
+		jp	Lemming_Draw
 
 ; *****************************************************************************************************************************
 ; Function:	Process a lemming digging
@@ -460,7 +552,7 @@ ProcessLemDigger:
 @NextLine:
 		ld	a,(hl)			; if no ground under them, then turn into faller
 		and	a
-		jr	z,SetFaller
+		jp	z,SetFaller
 
 		ld	a,(ix+LemFrame)
 		cp	0
@@ -694,7 +786,7 @@ SetStateSplatter:
 		jp	SetAnim
 
 ; -----------------------------------------------------
-; Set differ state
+; Set digger state
 SetStateDigger:
 		ld	a,(ix+LemSkillMask)	; set skill mask
 		and	SKILLMASK_PERMANENT	; get rid of whatever we were doing before
@@ -707,6 +799,49 @@ SetStateDigger:
 		ld	hl,DiggerAnim
 		jp	SetAnim
 
+
+; -----------------------------------------------------
+; Set builder shrugger state
+SetStateBuilderShrug:
+stateshrug
+		ld	a,(ix+LemSkillMask)	; set skill mask
+		and	SKILLMASK_PERMANENT	; get rid of whatever we were doing before
+		ld	(ix+LemSkillMask),a
+
+		ld	a,(ix+LemDir)		; left or right?
+		and	a
+		jr	z,@FaceLeft
+
+		ld	hl,BuilderRShrug
+		jp	SetAnim
+@FaceLeft:
+		ld	hl,BuilderLShrug
+		jp	SetAnim
+
+
+; -----------------------------------------------------
+; Set builder state
+SetStateBuilder:
+		ld	a,(ix+LemSkillMask)	; set skill mask
+		and	SKILLMASK_PERMANENT	; get rid of whatever we were doing before
+		or	SKILLMASK_BUILDER
+		ld	(ix+LemSkillMask),a
+
+		;ld	a,0
+		;ld	(ix+LemDir),a
+
+		ld	a,12			; Number of bricks..
+		ld	(ix+LemSkillTemp),a
+
+		ld	a,(ix+LemDir)		; left or right?
+		and	a
+		jr	z,@FaceLeft
+
+		ld	hl,BuilderRAnim
+		jp	SetAnim
+@FaceLeft:
+		ld	hl,BuilderLAnim
+		jp	SetAnim
 
 ; -----------------------------------------------------
 ; Set faller state
@@ -762,11 +897,12 @@ StateJumpTable:
 		dw	0			; 6 - LEM_BLOCKER		
 		dw	0			; 7 - LEM_CLIMBER		
 		dw	SetStateBomber		; 8 - LEM_BOMBER		
-		dw	0			; 9 - LEM_BUILDER_SHRUG	
-		dw	0			; 10 - LEM_BASHER		
-		dw	0			; 11 - LEM_MINER		
-		dw	SetStateDigger		; 12 - LEM_DIGGER		
-		dw	SetStatePreBomber	; 13 - LEM_PREBOMBER
+		dw	SetStateBuilderShrug	; 9 - LEM_BUILDER_SHRUG
+		dw	SetStateBuilder		; 10 - LEM_BUILDER
+		dw	0			; 11 - LEM_BASHER		
+		dw	0			; 12 - LEM_MINER		
+		dw	SetStateDigger		; 13 - LEM_DIGGER		
+		dw	SetStatePreBomber	; 14 - LEM_PREBOMBER
 
 
 ; *****************************************************************************************************************************

@@ -114,14 +114,14 @@ if USE_COPPER = 0
 endif
                 call    ResetBank
 
-                ld      hl,$4001
-                ld      de,DemoText
-                ld      a,1
-                call    DrawText
+                ;ld      hl,$4001
+                ;ld      de,DemoText
+                ;ld      a,1
+                ;call    DrawText
 
-                ld      hl,$4023
-                ld      de,DemoText2
-                ld      a,1
+                ;ld      hl,$4023
+                ;ld      de,DemoText2
+                ;ld      a,1
                 ;call    DrawText
 
                 jp      MainLoop                ; infinite loop
@@ -145,9 +145,9 @@ ProecssMisc:
                 ret
 @notpressed:
                 ; draw frame rate
-                ;ld      de,$4001
-                ;ld      a,(fps)
-                ;call    PrintHex
+                ld      de,$4001
+                ld      a,(MouseButtons)
+                call    PrintHex
 
                 ;ld      hl,$4003
                 ;ld      de,DemoText
@@ -246,7 +246,8 @@ SetupAttribs:
 ; *****************************************************************************************************************************
 ; Init the game/level
 ; *****************************************************************************************************************************
-InitGame:
+InitGame:; ************************************************************************
+
                 xor     a
                 ld      (LemmingCounter),a
                 ld      (PanelSelection),a

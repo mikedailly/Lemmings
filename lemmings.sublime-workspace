@@ -11,7 +11,16 @@
 			"file": "_LemmingsNext.asm",
 			"settings":
 			{
-				"buffer_size": 9013,
+				"buffer_size": 9422,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "filesys.asm",
+			"settings":
+			{
+				"buffer_size": 14166,
 				"encoding": "Cyrillic (Windows 1251)",
 				"line_ending": "Windows"
 			}
@@ -48,15 +57,6 @@
 			"settings":
 			{
 				"buffer_size": 14005,
-				"encoding": "Cyrillic (Windows 1251)",
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "filesys.asm",
-			"settings":
-			{
-				"buffer_size": 13918,
 				"encoding": "Cyrillic (Windows 1251)",
 				"line_ending": "Windows"
 			}
@@ -117,7 +117,7 @@
 			"file": "panel.asm",
 			"settings":
 			{
-				"buffer_size": 6723,
+				"buffer_size": 6758,
 				"encoding": "Cyrillic (Windows 1251)",
 				"line_ending": "Windows"
 			}
@@ -200,11 +200,12 @@
 	},
 	"expanded_folders":
 	[
-		"/C/source/ZXSpectrum/Lemmings",
-		"/C/source/ZXSpectrum/Lemmings/docs"
+		"/C/source/ZXSpectrum/Lemmings"
 	],
 	"file_history":
 	[
+		"/C/source/ZXSpectrum/Demo/DMA/dma.asm",
+		"/E/Dropbox/Backups/Source/midnightresistance.sna",
 		"/C/source/ZXSpectrum/Lemmings/lemdat/lemmings.spr",
 		"/C/source/ZXSpectrum/Demo/Layer2/utils.asm",
 		"/C/source/ZXSpectrum/Lemmings/docs/lemmings_lvl_file_format.txt",
@@ -330,9 +331,7 @@
 		"/C/source/ZXSpectrum/Lemmings/scroll_offsets.asm",
 		"/C/source/ZXSpectrum/Lemmings/bank_offset.asm",
 		"/C/source/ZXSpectrum/Lemmings/layer2.sna",
-		"/C/source/ZXSpectrum/Layer2/a.bat",
-		"/C/source/XeO3/Plus4/xeo3.inc",
-		"/C/source/ZXSpectrum/Layer2/SpriteBouncing.asm"
+		"/C/source/ZXSpectrum/Layer2/a.bat"
 	],
 	"find":
 	{
@@ -359,6 +358,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"nuke",
 			"ScrollIndex",
 			"drawlemming",
 			"drawlemmingframe",
@@ -485,8 +485,7 @@
 			"$123b",
 			"123b",
 			"NextReg",
-			"VRAM_BASE_BANK",
-			"$123b"
+			"VRAM_BASE_BANK"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -517,7 +516,7 @@
 	"groups":
 	[
 		{
-			"selected": 1,
+			"selected": 0,
 			"sheets":
 			[
 				{
@@ -526,15 +525,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 9013,
+						"buffer_size": 9422,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3122,
-								3122
+								8919,
+								8919
 							]
 						],
 						"settings":
@@ -545,14 +544,42 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1350.0,
+						"translation.y": 4476.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
 					"buffer": 1,
+					"file": "filesys.asm",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 14166,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								14005,
+								14005
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/z80asm/z80asm.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 10062.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
 					"file": "lemming.asm",
 					"semi_transient": false,
 					"settings":
@@ -564,8 +591,8 @@
 						"selection":
 						[
 							[
-								17821,
-								17821
+								430,
+								431
 							]
 						],
 						"settings":
@@ -575,14 +602,14 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 15050.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
-					"buffer": 2,
+					"buffer": 3,
 					"file": "level.asm",
 					"semi_transient": false,
 					"settings":
@@ -608,11 +635,11 @@
 						"translation.y": 2391.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 6,
 					"type": "text"
 				},
 				{
-					"buffer": 3,
+					"buffer": 4,
 					"file": "scroll.asm",
 					"semi_transient": false,
 					"settings":
@@ -637,11 +664,11 @@
 						"translation.y": 2280.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 8,
 					"type": "text"
 				},
 				{
-					"buffer": 4,
+					"buffer": 5,
 					"file": "bob.asm",
 					"semi_transient": false,
 					"settings":
@@ -667,35 +694,7 @@
 						"translation.y": 14027.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 10,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "filesys.asm",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 13918,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								6704,
-								6704
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/z80asm/z80asm.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 9834.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 9,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
@@ -724,7 +723,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 8,
+					"stack_index": 12,
 					"type": "text"
 				},
 				{
@@ -753,7 +752,7 @@
 						"translation.y": 4617.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 11,
 					"type": "text"
 				}
 			]
@@ -789,7 +788,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 10,
 					"type": "text"
 				},
 				{
@@ -817,7 +816,7 @@
 						"translation.y": 1726.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 9,
 					"type": "text"
 				},
 				{
@@ -833,8 +832,8 @@
 						"selection":
 						[
 							[
-								2292,
-								2292
+								3003,
+								3003
 							]
 						],
 						"settings":
@@ -843,10 +842,10 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 1517.0,
+						"translation.y": 2197.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 0,
 					"type": "text"
 				},
 				{
@@ -862,8 +861,8 @@
 						"selection":
 						[
 							[
-								2236,
-								2243
+								1250,
+								1250
 							]
 						],
 						"settings":
@@ -871,10 +870,10 @@
 							"syntax": "Packages/z80asm/z80asm.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 719.0,
+						"translation.y": 548.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 14,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
@@ -883,15 +882,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 6723,
+						"buffer_size": 6758,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								5537,
-								5537
+								6470,
+								6470
 							]
 						],
 						"settings":
@@ -900,10 +899,10 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 5130.0,
+						"translation.y": 5679.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 12,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
@@ -932,7 +931,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 13,
+					"stack_index": 14,
 					"type": "text"
 				},
 				{
@@ -958,10 +957,10 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 31976.0,
+						"translation.y": 31977.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 11,
+					"stack_index": 13,
 					"type": "text"
 				},
 				{
