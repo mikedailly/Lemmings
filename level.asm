@@ -2,11 +2,11 @@
 ; Level loading/storage
 ; *****************************************************************************************************************************
 LoadLevel:
-		;LoadBank	level_0023,LevelAddress,LevelBank	; Watch out, there's traps about
+		LoadBank	level_0023,LevelAddress,LevelBank	; Watch out, there's traps about
 		;LoadBank	level_0030,LevelAddress,LevelBank	; ship  -  Every Lemming for himself!!!
 		;LoadBank	level_0055,LevelAddress,LevelBank	; Steel Works
 		;LoadBank	level_0031,LevelAddress,LevelBank	; art gallery
-		LoadBank	level_0091,LevelAddress,LevelBank	; Just dig
+		;LoadBank	level_0091,LevelAddress,LevelBank	; Just dig
 
 		ld	ix,LevelAddress
 		ld 	a,(ix+$1b)
@@ -73,6 +73,7 @@ LoadLevel:
 
 ResetLevel:
 		call	InitLemmings					; reset the lemmings
+		call	ClearLevel			; clear the level bitmap
 
 		ld	ix,LevelAddress
 
@@ -168,6 +169,29 @@ ResetLevel:
 		ld	(TrapDoorlistCurrent),hl
 
 		jp	ResetBank
+
+
+; *****************************************************************************************************************************
+;	Clear the level bitmap area - will take some time.
+; *****************************************************************************************************************************
+ClearLevel:
+		ld	a,LevelBitmapBank*2
+@ClearLevelLoop:
+		NextReg	$56,a
+		
+		ld	hl,$c000
+		ld	(hl),0
+		ld	de,$c001
+		ld	bc,$2000
+		ldir
+
+		inc	a
+		cp	StyleBank*2
+		jr	nz,@ClearLevelLoop
+		ret
+
+
+
 
 ; *****************************************************************************************************************************
 ; Convert the number from binary number (0-99) to BCD 

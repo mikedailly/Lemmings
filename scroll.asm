@@ -193,7 +193,36 @@ CopyScreen:
 @Copy8Lines:	push	bc
 
 if USE_DMA=1
+		ld	a,$1e			; raster hi
+		ld	bc,$243B
+		out	(c),a
+		inc	b
+		in	a,(c)
+		and	1
+		jr	z,@MSBNotSet
 
+		ld	a,$1f			; raster low
+		ld	bc,$243B
+		out	(c),a
+		inc	b
+		in	a,(c)
+		cp	$36
+		jr	c,@LessThan
+
+		; If ALMOST VBlank then wait till AFTER the VBlank
+		ld	a,$1e			; raster hi
+		ld	bc,$243B
+		out	(c),a
+		inc	b
+@WaitTillAfter:		
+		in	a,(c)
+		and	1
+		jr	nz,@WaitTillAfter
+
+
+
+@LessThan:
+@MSBNotSet:
 	; transfer the DMA "program"
 		ld	(DMASrc),hl		; 16
 		ld	(DMADest),de		; 20

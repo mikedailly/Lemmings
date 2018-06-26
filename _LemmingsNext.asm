@@ -58,6 +58,7 @@ StartAddress:
                 ld      a,0
                 out     ($fe),a
                 call    Init
+                NextReg 8,64
 
                 call    InitGame
 
@@ -76,11 +77,16 @@ MainLoop:
 ;                xor     a                       ; clear IRQ frame counter
 ;                ld      (VBlank),a
 
+                ld      a,(vblank)                 
+                ld      (realfps),a      
                 ld      a,1                     ; Wait on VBlank for new game frame....
                 ld      (NewFrameFlag),a                
 @WaitVBlank:    ld      a,(NewFrameFlag)        ; for for it to be reset
                 and     a
                 jr      nz,@WaitVBlank
+
+                ld      a,1
+                out     ($fe),a
 
                 ; Scan keyboard
                 call    ReadKeyboard
@@ -123,11 +129,14 @@ endif
                 ;ld      de,DemoText2
                 ;ld      a,1
                 ;call    DrawText
+                ld      a,0
+                out     ($fe),a
 
                 jp      MainLoop                ; infinite loop
 
 counter         db      0
 fps             db      0        
+realfps         db      0        
 frame           db      0
 
 
@@ -146,7 +155,7 @@ ProecssMisc:
 @notpressed:
                 ; draw frame rate
                 ld      de,$4001
-                ld      a,(MouseButtons)
+                ld      a,(realfps)      ;(MouseButtons)
                 call    PrintHex
 
                 ;ld      hl,$4003
