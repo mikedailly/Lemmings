@@ -365,7 +365,7 @@ CreateLevel:	ld 	bc,LevelAddress+$760
 		ld 	a,(ix+1)		; get low X
 		ld 	c,a 			; BC = X
 		ld 	a,(ix+2) 		; Y pos MSByte
-		and 	a,$7f			
+		and 	$7f			
 		add 	a,a 			; *2
 		ld 	e,a 			; e = Y
 		ld 	a,(ix+3) 		; Terrain byte
@@ -420,7 +420,7 @@ GenerateMiniMap:
 		ld 	hl,$e000
 @CopyRow
 		ld 	a,(hl)
-		and 	a,a
+		and 	a
 		jr 	z,@SkipPixel
 		ld 	a,$10
 @SkipPixel:	ld 	(de),a
@@ -456,7 +456,7 @@ GenerateMask:
 		ld 	hl,$e000
 @CopyRow
 		ld 	a,(hl)
-		and 	a,a
+		and 	a
 		jr 	z,@SkipPixel
 		ld 	a,$10
 @SkipPixel:	ld 	(de),a

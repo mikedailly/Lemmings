@@ -14,36 +14,7 @@ CLIP_SPRITE_REGISTER	equ	$18
 
 
 
-if	NextInstructions==0
-NextReg		macro
-		push	af
-		push	bc
-		ld	bc,TBBLUE_REGISTER_SELECT
-		ld	a,\0
-		out	(c),a
-		inc	b
-		ld	a,\1
-		out	(c),a
-		pop	bc
-		pop	af
-		endm
-NextRegA	macro
-		push	bc
-		push	af
-		ld	bc,$243b
-		ld	a,\0
-		out	(c),a
-		inc	b
-		pop	af
-		out	(c),a
-		pop	bc
-		endm
-else
-                opt             ZXNEXTREG
-NextRegA	macro
-		NextReg	\0,a
-		endm
-endif
+
 
 BORDER		macro	
 		ld	a,\0
@@ -95,12 +66,14 @@ LevelBitmapBank		equ	16				; level bitmap from bank 16 to 38 (22 banks). Last 2 
 LevelBitmapAddress	equ	$c000
 StyleBank 		equ 	38				; start of style data (96K - 6 banks)
 StyleBaseAddress 	equ 	$c000
-ObjectsBank 		equ 	44				; Level objects - load over the top of the styles (80k - 5 banks)
+ObjectsBank 		equ 	StyleBank+6			; Level objects - load over the top of the styles (80k - 5 banks)
 ObjectsBaseAddress 	equ 	$c000
-LemmingsBank		equ	49				; start of lemmings sprites 
+LemmingsBank		equ	ObjectsBank+5			; start of lemmings sprites 
 LemmingAddress		equ	$c000
 PointsBank		equ	LemmingsBank+6			; (2 banks)
 PointsAddress		equ	$c000
+CollisionBank		equ	PointsBank+2			; 4x4 array collision map (3 banks)
+CollisionAddress		equ	$e000				; (20480 bytes from 24576)
 
 MAX_LEM			equ	100
 
@@ -367,6 +340,38 @@ SetSpriteClip	MACRO
 	        out (c),l
 	        out (c),e
         ENDM
+
+
+
+DIVHL	macro		; unsigned (0 in the top)
+	srl	h
+	rr	l
+	endm
+
+SDIVHL	macro		; signed (maintains top bit)
+	sra	h	
+	rr	l
+	endm
+
+DIVDE	macro		; unsigned (0 in the top)
+	srl	d
+	rr	e
+	endm
+
+SDIVDE	macro		; signed (maintains top bit)
+	sra	d	
+	rr	e
+	endm
+
+DIVBC	macro		; unsigned (0 in the top)
+	srl	b
+	rr	c
+	endm
+
+SDIVBC	macro		; signed (maintains top bit)
+	sra	b	
+	rr	c
+	endm
 
 
 

@@ -18,7 +18,7 @@
 
                 opt             Z80                                                                             ; Set z80 mode
                 opt             ZXNEXT
-                ;opt             ZXNEXTREG
+                opt             ZXNEXTREG
 
                 include "includes.asm"
 
@@ -36,7 +36,7 @@ StartAddress:
                 ld      a,VectorTable>>8
                 ld      i,a               
 
-                ld      a,%00000010             ; 14Mhz
+                ld      a,%00000011             ; 14Mhz
                 NextReg $07,a
 
                 BORDER          4      

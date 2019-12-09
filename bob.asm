@@ -401,12 +401,12 @@ ClipLeft
 TestRightClip:
 		ld	(BobXcoord),hl
 		ld	a,h			; get X MSByte
-		and	a,a
+		and	a
 		ret	nz			; if X>=256 then fully clipped
 		ld	a,(BobWidth)		; is right edge clipped?
 		add	hl,a
 		ld	a,h			; if h still == 0 then not off right
-		and	a,a
+		and	a
 		jr	z,@NoClip		;
 		ld	a,(BobWidth)
 		sub	l			; if off right, then L = number of pixels over

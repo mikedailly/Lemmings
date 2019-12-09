@@ -116,11 +116,11 @@ FlipScreens:
                 ld      a,(Screen2Bank)
                 ld      (Screen1Bank),a
                 ld      (CopperGameScreen+1),a
-                NextRegA 18
+                NextReg 18,a
                 pop     af
                 ld      (Screen2Bank),a
 if USE_COPPER = 1 
-                NextRegA 19
+                NextReg 19,a
 else
 SetScreens:
                 ; Swap screen (banks) addresses around 

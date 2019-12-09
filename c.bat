@@ -1,1 +1,1 @@
-copy _LemmingsNext.sna  \\192.168.0.99\DavWWWRoot\__LemNext.sna
+copy _LemmingsNext.sna  \\192.168.0.99\DavWWWRoot\__Lem.sna

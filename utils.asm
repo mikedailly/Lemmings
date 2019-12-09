@@ -39,7 +39,7 @@
 ;			 | Bank 0   |  Bank 1  |  Bank 2  |  Bank 3  |  Bank 4  |  Bank 5  |  Bank 6  |  Bank 7  |          |
 ;			 |          |          | (also at |          | (also at |          |          |          |  NEXT RAM------->
 ;			 |          |          |  0x8000) |          |  0x4000) |          |          |          |          |
-;			 |          |          |  screen  |          |  screen  |          |          |          |          |
+;			 |          |          |          |          |  screen  |          |          |          |          |
 ;		  0xc000 + -------- + -------- + -------- + -------- + -------- + -------- + -------- + -------- + -------- + -------- +
 ;			 | Bank 2   |            Any one of these pages may be switched in.
 ;			 |          |
@@ -615,7 +615,7 @@ UploadCopper:
 		NextReg	$62,0
 
 @lp1:		ld	a,(hl)
-		NextRegA	$60,a
+		NextReg	$60,a
 		inc	hl
 		dec	de
 		ld	a,d

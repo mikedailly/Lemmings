@@ -45,7 +45,7 @@ SpawnLemming:
 
 		ld	iy,(TrapDoorlistCurrent)
 		ld	a,(iy+0)
-		or	a,(iy+1)
+		or	(iy+1)
 		jr	nz,@GetPosition
 		ld	iy,TrapDoorList
 @GetPosition:		
