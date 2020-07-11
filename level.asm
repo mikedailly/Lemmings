@@ -406,36 +406,36 @@ CreateLevel:	ld 	bc,LevelAddress+$760
 ; 	Generate mini-map
 ; *****************************************************************************************************************************
 GenerateMiniMap:
-		ld	a,PanelBank*2		; page in panel
-		MMU6
-		ld 	de,$c000+(204+(10*256))	; start of panel "slot"
+		NextReg	$56,PanelBank*2		; page in panel
+		ld 		de,$c000+(204+(10*256))	; start of panel "slot"
 
-		ld	a,LevelBitmapBank*2	; page in bitmap to $e000
-		ld 	c,20			; mini map is 20 pixels high
+		ld		a,LevelBitmapBank*2	; page in bitmap to $e000
+		ld 		c,20			; mini map is 20 pixels high
 @BuildMap:
-		MMU7
-		ex	af,af'			; remmeber current bank
+		NextReg	$57,a
+		ex		af,af'			; remember current bank
 @Loop4:
-		ld	b,50			; do 4 lines before changing bank
-		ld 	hl,$e000
+		ld		b,50			; do 4 lines before changing bank
+		ld 		hl,$e000
 @CopyRow
-		ld 	a,(hl)
+		ld 		a,(hl)
 		and 	a
-		jr 	z,@SkipPixel
-		ld 	a,$10
-@SkipPixel:	ld 	(de),a
+		jr 		z,@SkipPixel
+		ld 		a,$10
+@SkipPixel:	
+		ld 		(de),a
 		inc 	de
-		ld 	a,32			; pixels are 32 pixels apart.
-		add 	hl,a			; next opcode :)
+		ld 		a,32			; pixels are 32 pixels apart.
+		add 	hl,a
 		djnz	@CopyRow
 
-		ld 	a,256-50		; next row in the panel
+		ld 		a,256-50		; next row in the panel
 		add 	de,a
 
-		ex	af,af'			; remmeber current bank
-		add	a,2			; move on 2 banks - 8 lines
-		dec	c
-		jr	nz,@BuildMap
+		ex		af,af'			; remember current bank again
+		add		a,2				; move on 2 banks - 8 lines
+		dec		c
+		jr		nz,@BuildMap
 		ret		
 
 ; *****************************************************************************************************************************

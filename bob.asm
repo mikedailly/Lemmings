@@ -546,20 +546,22 @@ BobRenderTower	LDIX
 
 
 
-DestModulo	add	de,$0000
-SourceModulo	add	hl,$0000
-		ld	a,d
+DestModulo	
+		add		de,$0000
+SourceModulo	
+		add		hl,$0000
+		ld		a,d
 		test	$e0				; crossed from $e0-$ff to $00?
-		jr	nz,@NoBankChange		
-		or	$e0				; D is already 0, so just OR in bank base address
-		ld	d,a
-		ex	af,af'				; get bank and increment
-		inc	a
+		jr		nz,@NoBankChange		
+		or		$e0				; D is already 0, so just OR in bank base address
+		ld		d,a
+		ex		af,af'				; get bank and increment
+		inc		a
 		mmu7
-		ex	af,af'				; and store it again....
+		ex		af,af'				; and store it again....
 @NoBankChange:
-		dec	b
-		jp	nz,BobDrawAll
+		dec		b
+		jp		nz,BobDrawAll
 		ret
 
 
@@ -570,153 +572,157 @@ SourceModulo	add	hl,$0000
 ;
 ;	Render inside the background
 ;
-RenderInside:	ld	a,(BobWidth)
-		add	a,a				; double width so we can do a DEC C after LDIX
-		ld	c,a
+RenderInside:	
+		ld		a,(BobWidth)
+		add		a,a				; double width so we can do a DEC C after LDIX
+		ld		c,a
 		push	bc
-		ld	b,$e3
+		ld		b,$e3		; allow for fast reloading 
 @lp1:		
 		; 
 		; Unrolled for optimal "fall-through" path.... 
 		; 7 T-States on branch fail, 12 on taking. So fall through is quicker path
 		;	
-		ld	a,(de)				; 7
-		and	a				; 4
-		jr	z,@SkipDraw			; 7
-@DoDraw:	ld	a,b				; 4	b=$e3
+		ld		a,(de)				; 7
+		and		a				; 4
+		jr		z,@SkipDraw			; 7
+@DoDraw:	
+		ld		a,b				; 4	b=$e3
 		ldix					; 16
-		dec	c				; 4
-		jr	z,@exit 			; 7 = 49
+		dec		c				; 4
+		jr		z,@exit 			; 7 = 49
 
-		ld	a,(de)				
-		and	a				
-		jr	z,@SkipDraw			
-		ld	a,b
+		ld		a,(de)				
+		and		a				
+		jr		z,@SkipDraw			
+		ld		a,b
 		ldix
-		dec	c
-		jr	z,@exit 
+		dec		c
+		jr		z,@exit 
 
-		ld	a,(de)				
-		and	a				
-		jr	z,@SkipDraw			
-		ld	a,b
+		ld		a,(de)				
+		and		a				
+		jr		z,@SkipDraw			
+		ld		a,b
 		ldix
-		dec	c
-		jr	z,@exit 
+		dec		c
+		jr		z,@exit 
 	
-		ld	a,(de)				
-		and	a				
-		jr	z,@SkipDraw			
-		ld	a,b
+		ld		a,(de)				
+		and		a				
+		jr		z,@SkipDraw			
+		ld		a,b
 		ldix
-		dec	c
-		jr	z,@exit
+		dec		c
+		jr		z,@exit
 
-		ld	a,(de)				; 7	
-		and	a				; 4
-		jr	z,@SkipDraw			; 12
-		ld	a,b
+		ld		a,(de)				; 7	
+		and		a				; 4
+		jr		z,@SkipDraw			; 12
+		ld		a,b
 		ldix
-		dec	c
-		jr	z,@exit 
+		dec		c
+		jr		z,@exit 
 
-		ld	a,(de)				; 7	
-		and	a				; 4
-		jr	z,@SkipDraw			; 12
-		ld	a,b
+		ld		a,(de)				; 7	
+		and		a				; 4
+		jr		z,@SkipDraw			; 12
+		ld		a,b
 		ldix
-		dec	c
-		jr	z,@exit 
+		dec		c
+		jr		z,@exit 
 
-		ld	a,(de)				; 7	
-		and	a				; 4
-		jr	z,@SkipDraw			; 12
-		ld	a,b
-		ldix
-		dec	c
-		jr	z,@exit 
+		ld		a,(de)				; 7	
+		and		a				; 4
+		jr		z,@SkipDraw			; 12
+		ld		a,b
+		ldix	
+		dec		c
+		jr		z,@exit 
 		
-		ld	a,(de)				; 7	
-		and	a				; 4
-		jr	z,@SkipDraw			; 12
-		ld	a,b
+		ld		a,(de)				; 7	
+		and		a				; 4
+		jr		z,@SkipDraw			; 12
+		ld		a,b
 		ldix
-		dec	c
-		jp	nz,@lp1				; 10 for jump (jr = 12)
+		dec		c
+		jp		nz,@lp1				; 10 for jump (jr = 12)
 
-@exit:		pop	bc
-		jp	DestModulo
-
-
-
-@SkipDraw:	inc	hl
-		inc	e	
-		dec	c
-		dec	c
-		jr	z,@exit2  ;@lp1
-
-		ld	a,(de)				; 7	
-		and	a				; 4
-		jr	nz,@DoDraw
-		inc	hl
-		inc	e	
-		dec	c
-		dec	c
-		jr	z,@exit2
+@exit:		
+		pop		bc
+		jp		DestModulo
 
 
-		ld	a,(de)				; 7	
-		and	a				; 4
-		jr	nz,@DoDraw
-		inc	hl
-		inc	e	
-		dec	c
-		dec	c
-		jr	z,@exit2
+
+@SkipDraw:	
+		inc		hl
+		inc		e	
+		dec		c
+		dec		c
+		jr		z,@exit2  
+
+		ld		a,(de)				; 7	
+		and		a					; 4
+		jr		nz,@DoDraw
+		inc		hl
+		inc		e	
+		dec		c
+		dec		c
+		jr		z,@exit2
 
 
-		ld	a,(de)				; 7	
-		and	a				; 4
-		jr	nz,@DoDraw
-		inc	hl
-		inc	e	
-		dec	c
-		dec	c
-		jr	z,@exit2
+		ld		a,(de)				; 7	
+		and		a				; 4
+		jr		nz,@DoDraw
+		inc		hl
+		inc		e	
+		dec		c
+		dec		c
+		jr		z,@exit2
 
 
-		ld	a,(de)				; 7	
-		and	a				; 4
-		jr	nz,@DoDraw
-		inc	hl
-		inc	e	
-		dec	c
-		dec	c
-		jr	z,@exit2
+		ld		a,(de)				; 7	
+		and		a				; 4
+		jr		nz,@DoDraw
+		inc		hl
+		inc		e	
+		dec		c
+		dec		c
+		jr		z,@exit2
 
 
-		ld	a,(de)				; 7	
-		and	a				; 4
-		jp	nz,@DoDraw
-		inc	hl
-		inc	e	
-		dec	c
-		dec	c
-		jr	z,@exit2
+		ld		a,(de)				; 7	
+		and		a				; 4
+		jr		nz,@DoDraw
+		inc		hl
+		inc		e	
+		dec		c
+		dec		c
+		jr		z,@exit2
 
 
-		ld	a,(de)				; 7	
-		and	a				; 4
-		jp	nz,@DoDraw
-		inc	hl
-		inc	e	
-		dec	c
-		dec	c
-		jp	nz,@lp1
+		ld		a,(de)				; 7	
+		and		a				; 4
+		jp		nz,@DoDraw
+		inc		hl
+		inc		e	
+		dec		c
+		dec		c
+		jr		z,@exit2
+
+
+		ld		a,(de)				; 7	
+		and		a				; 4
+		jp		nz,@DoDraw
+		inc		hl
+		inc		e	
+		dec		c
+		dec		c
+		jp		nz,@lp1
 
 @exit2:
-		pop	bc
-		jp	DestModulo
+		pop		bc
+		jp		DestModulo
 
 
 ; ------------------------------------------------------------------------------------------------------------

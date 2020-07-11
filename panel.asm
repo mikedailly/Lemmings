@@ -169,152 +169,155 @@ ButtonPressed		db	0	; button pressed this frame?
 ; ************************************************************************
 ProcessInput:
 		; count double click
-		ld	a,(DoubleClipCounterCurrent)
-		cp	$ff			; double click counter maxed out?
-		jr	z,@MaxCount
-		inc	a
-		ld	(DoubleClipCounterCurrent),a
-		cp	$0b			;  < 1 second for a double click
-		jr	c,@DontClearNukeFlag	; over... not clicknig
-		xor	a
-		ld	(NukeFlag),a		; clear nuke flag
+		ld		a,(DoubleClipCounterCurrent)
+		cp		$ff							; double click counter maxed out?
+		jr		z,@MaxCount
+		inc		a
+		ld		(DoubleClipCounterCurrent),a
+		cp		$0b							;  < 1 second for a double click
+		jr		c,@DontClearNukeFlag		; over... not clicknig
+		xor		a
+		ld		(NukeFlag),a				; clear nuke flag
 
 @MaxCount:
 @DontClearNukeFlag:
 
 
 
-		xor	a
-		ld	(ButtonPressed),a	; clear pressed flag
-		ld	a,(ButtonDown)
-		and	$f
-		jp	z,@TestButton		; button pressed already processed?
+		xor		a
+		ld		(ButtonPressed),a			; clear pressed flag
+		ld		a,(ButtonDown)
+		and		$f
+		jp		z,@TestButton				; button pressed already processed?
 
-		ld	a,(MouseButtons)
-		test	2			; LEFT button
-		jp	z,@TestSlots		; if button still down, return
+		ld		a,(MouseButtons)
+		test	2							; LEFT button
+		jp		z,@TestSlots				; if button still down, return
 
-		xor	a			; button not perssed, so clear flag
+		xor	a								; button not perssed, so clear flag
 		ld	(ButtonDown),a
 		ret
 
 @TestButton:	ld	a,(MouseButtons)
-		test	2			; LEFT button
-		jp	nz,@TestSlots		; not pressed?
-		ld	(ButtonDown),a
-		dec	a
-		ld	(ButtonPressed),a	; button pressed this frame
+		test	2							; LEFT button
+		jp		nz,@TestSlots				; not pressed?
+		ld		(ButtonDown),a
+		dec		a
+		ld		(ButtonPressed),a			; button pressed this frame
 
-		ld	a,0
-		ld	(DoubleClipCounterCurrent),a
+		ld		a,0
+		ld		(DoubleClipCounterCurrent),a
 
 
 @TestSlots:
 		; Once mouse button pressed, check to see where the cursor is
-		ld	a,(MouseY)
-		cp	168
-		jp	c,AssignSkill		; if less then the panel, then assign Lemming a skill
+		ld		a,(MouseY)
+		cp		168
+		jp		c,AssignSkill				; if less then the panel, then assign Lemming a skill
 
-		ld	a,(MouseX)
-		swapnib				; shift right 16
-		and	$f			; clear top bits...
-		sub	2
-		ld	b,a			; remember slot
-		jp	m,@ReleaseSpeed		; if first 2 boxes...return
+		ld		a,(MouseX)
+		swapnib								; shift right 16
+		and		$f							; clear top bits...
+		sub		2
+		ld		b,a							; remember slot
+		jp		m,@ReleaseSpeed				; if first 2 boxes...return
 
-		cp	8			; panel slot > 7 then not a skill
-		jp	nc,DoPauseNukeCheck	
+		cp		8							; panel slot > 7 then not a skill
+		jp		nc,DoPauseNukeCheck	
 
-		xor	a			; flag as NOT the nuke button
-		ld	(NukeFlag),a
+		xor		a							; flag as NOT the nuke button
+		ld		(NukeFlag),a
 
 		; Select the skill on the panel
-		ld	a,(ButtonPressed)
-		and	$ff
-		ret	z			; button not pressed
+		ld		a,(ButtonPressed)
+		and		$ff
+		ret		z							; button not pressed
 
 
-		ld	a,b			; get panel slot back
-		ld	(PanelSelection),a	; set selected skill
+		ld		a,b							; get panel slot back
+		ld		(PanelSelection),a			; set selected skill
 		; get "mask"
-		ld	hl,SkillMaskTable
-		add	hl,a		
-		ld	a,(hl)
-		ld	(CurrentSkillmask+1),a
+		ld		hl,SkillMaskTable
+		add		hl,a		
+		ld		a,(hl)
+		ld		(CurrentSkillmask+1),a
 		ret
 		;
 		; Check release rate panels
 		;
-@ReleaseSpeed:	ld	a,(MouseButtons)
-		test	2			; LEFT button
-		ret	nz
+@ReleaseSpeed:	
+		ld		a,(MouseButtons)
+		test	2							; LEFT button
+		ret		nz
 
-		ld	a,b
-		cp	$fe			; 0-2 = $FE. Release DOWN
-		jr	nz,@RateUp
-		ld	a,(MinReleaseBin)	; rate down
-		ld	b,a
-		ld	a,(ReleaseRateBin)
-		cp	b
-		ret	z			; if the same, then don't decrease
-		dec	a
+		ld		a,b
+		cp		$fe							; 0-2 = $FE. Release DOWN
+		jr		nz,@RateUp
+		ld		a,(MinReleaseBin)			; rate down
+		ld		b,a
+		ld		a,(ReleaseRateBin)
+		cp		b
+		ret		z							; if the same, then don't decrease
+		dec		a
+
 @UpdateReleaseRate:
-		ld	(ReleaseRateBin),a	
-		push	af			; Now convert back into panel display number 
+		ld		(ReleaseRateBin),a	
+		push	af							; Now convert back into panel display number 
 		call	ConvertNumber
-		ld	(ReleaseRate),a
-		pop	af
-		call	ConvertToDelay		; convert into the frame delay value
-		;ld	(ReleaseRateCounter),a	; don't wipe "current" counter
-		ld	(MasterReleaseRate),a
+		ld		(ReleaseRate),a
+		pop		af
+		call	ConvertToDelay				; convert into the frame delay value
+		;ld	(ReleaseRateCounter),a			; don't wipe "current" counter
+		ld		(MasterReleaseRate),a
 		ret
 @RateUp
-		ld	a,(ReleaseRateBin)	; else release UP
-		cp	99
-		ret	z
-		inc	a
-		jp	@UpdateReleaseRate
+		ld		a,(ReleaseRateBin)			; else release UP
+		cp		99
+		ret		z
+		inc		a
+		jp		@UpdateReleaseRate
 		ret
 
 
 		; Assign skill to an actual lemming
 AssignSkill:	
-		ld	a,(ButtonPressed)
-		and	$ff
-		ret	z			; not pressed?
+		ld		a,(ButtonPressed)
+		and		$ff
+		ret		z							; not pressed?
 
 
-		ld 	ix,(CursorLemmingIndex)
-		ld	a,ixh
-		and	$ff
-		ret	z			; no lemming selected
+		ld 		ix,(CursorLemmingIndex)
+		ld		a,ixh
+		and		$ff
+		ret		z							; no lemming selected
 
 
-		ld	a,(PanelSelection)	; get skill
-		cp	2
-		jr	nz,@NotBomber			; not bomber?
+		ld		a,(PanelSelection)			; get skill
+		cp		2
+		jr		nz,@NotBomber				; not bomber?
 
-		ld	a,(ix+LemBombCounter)
-		and	a
-		ret	nz			; already a bomber?
+		ld		a,(ix+LemBombCounter)
+		and		a
+		ret		nz							; already a bomber?
 
-		jp	SetStateBomberCountDown	; set bomber state
+		jp		SetStateBomberCountDown		; set bomber state
 
 
 @NotBomber:
-		cp	4
-		jr	nz,@NotBuilder
-		ld	a,LEM_BUILDER
-		jp	SetState
+		cp		4
+		jr		nz,@NotBuilder
+		ld		a,LEM_BUILDER
+		jp		SetState
 		
 @NotBuilder:
-		cp	7
-		jr	nz,@NotADigger		; not digger
+		cp		7
+		jr		nz,@NotADigger				; not digger
 		;ret	nz
-		ld	a,LEM_DIGGER		; swap lemming to a digger
-		jp	SetState		; set bomber state
+		ld		a,LEM_DIGGER				; swap lemming to a digger
+		jp		SetState					; set bomber state
 
-@NotADigger:	ret
+@NotADigger:	
+		ret
 
 
 
@@ -324,33 +327,34 @@ AssignSkill:
 		;
 DoPauseNukeCheck:
 		; Check for pause....
-		cp	8
-		jr	nz,@TestNukeButton	; not digger
-		xor	a			; flag as NOT the nuke button
-		ld	(NukeFlag),a
+		cp		8
+		jr		nz,@TestNukeButton			; not digger
+		xor		a							; flag as NOT the nuke button
+		ld		(NukeFlag),a
 		ret
 
 @TestNukeButton:
 		; check for NUKE
-		ld	a,(ButtonPressed)
-		and	$ff
-		ret	z
+		ld		a,(ButtonPressed)
+		and		$ff
+		ret		z
 
-		ld	a,(NukeFlag)		; was it clicked last time?
-		and	a
-		jr	z,FirstNukeClick
+		ld		a,(NukeFlag)				; was it clicked last time?
+		and		a
+		jr		z,FirstNukeClick
 
-		ld	a,MAX_LEM		; Nuke Started is also the counter...
-		ld	(NukeStarted),a
-		ld	ix,LemData
-		ld	(NukeIndex),ix
-		ld	a,100
-		ld	(LemmingCounter),a
+		ld		a,MAX_LEM					; Nuke Started is also the counter...
+		ld		(NukeStarted),a
+		ld		ix,LemData
+		ld		(NukeIndex),ix
+		ld		a,100
+		ld		(LemmingCounter),a
 		ret
 
 
-FirstNukeClick:	ld	a,$ff
-		ld	(NukeFlag),a
+FirstNukeClick:	
+		ld		a,$ff
+		ld		(NukeFlag),a
 		ret
 
 DoubleClipCounterCurrent	db	0

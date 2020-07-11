@@ -41,22 +41,22 @@ FA_OVERWRITE equ $0C
 ;
 ; *******************************************************************************************************
 GetSetDrive:	
-		push	af	; no idea what it uses....
+		push	af					; no idea what it uses....
 		push	bc
 		push	de
 		push	hl
 		push	ix
 
-		xor	a	; set drive. 0 is default
-		rst	$08
-		db	$89
-		ld	(DefaultDrive),a
+		xor		a					; set drive. 0 is default
+		rst		$08
+		db		$89
+		ld		(DefaultDrive),a
 
-		pop	ix
-		pop	hl
-		pop	de
-		pop	bc
-		pop	af
+		pop		ix
+		pop		hl
+		pop		de
+		pop		bc
+		pop		af
 		ret
 
 
@@ -68,13 +68,13 @@ GetSetDrive:
 ;			b  = Open filemode
 ;	ret		a  = handle, 0 on error
 ; *******************************************************************************************************
-fopen:		push	hl
+fopen:	push	hl
 		push	ix
-		pop	hl
-		ld	a,(DefaultDrive)
-		rst	$08
-		db	F_OPEN
-		pop	hl
+		pop		hl
+		ld		a,(DefaultDrive)
+		rst		$08
+		db		F_OPEN
+		pop		hl
 		ret
 
 ; *******************************************************************************************************
@@ -83,12 +83,12 @@ fopen:		push	hl
 ;			b  = Open filemode
 ;	ret		a  = handle, 0 on error
 ; *******************************************************************************************************
-fstat:		push	hl
+fstat:	push	hl
 		push	ix
-		pop	hl
-		rst	$08
-		db	F_FSTAT
-		pop	hl
+		pop		hl
+		rst		$08
+		db		F_FSTAT
+		pop		hl
 		ret
 
 
@@ -101,18 +101,18 @@ fstat:		push	hl
 ; *******************************************************************************************************
 fread:
 		or   	a             ; is it zero?
-             	ret  	z             ; if so return		
+		ret  	z             ; if so return		
 
-             	push	hl
-             	push	ix
+        push	hl
+        push	ix
 
-             	push	ix
-		pop	hl
-		rst	$08
-		db	F_READ
+        push	ix
+		pop		hl
+		rst		$08
+		db		F_READ
 
-		pop	ix
-		pop	hl
+		pop		ix
+		pop		hl
 		ret
 
 ; *******************************************************************************************************
@@ -122,9 +122,9 @@ fread:
 ; *******************************************************************************************************
 fclose:		
 		or   	a             ; is it zero?
-             	ret  	z             ; if so return		
-		rst	$08
-		db	F_CLOSE
+		ret  	z             ; if so return		
+		rst		$08
+		db		F_CLOSE
 		ret
 
 
@@ -140,10 +140,10 @@ fclose:
 fseek:
 		push	ix
 		push	hl
-		rst	$08
-		db	F_SEEK
-		pop	hl
-		pop	ix
+		rst		$08
+		db		F_SEEK
+		pop		hl
+		pop		ix
 		ret
 
 ; *******************************************************************************************************
@@ -160,15 +160,16 @@ InitFileSystem:
 ;		hl = file data pointer
 ;		ix = address to load to (somewhere in the top 16K probably)
 ; *******************************************************************************************************
-Load_Bank:	call	SetBank
+Load_Bank:	
+		call	SetBank
 	
 ; *******************************************************************************************************
 ; Function:	Load a whole file into memory	(confirmed working on real machine)
 ; In:		hl = file data pointer
 ;		ix = address to load to
 ; *******************************************************************************************************
-Load:		ld	(LastFileName),hl
-		call    GetSetDrive		; need to do this each time?!?!?
+Load:	ld		(LastFileName),hl
+		call    GetSetDrive			; need to do this each time?!?!?
 
 		push	bc
 		push	de
@@ -176,136 +177,140 @@ Load:		ld	(LastFileName),hl
 
 
 		; get file size
-		ld	c,(hl)
-		inc	hl
-		ld	b,(hl)
-		inc	hl
-		inc	hl			; skip 3rd byte. On a "full load", it can never be more than 64k!!
+		ld		c,(hl)
+		inc		hl
+		ld		b,(hl)
+		inc		hl
+		inc		hl					; skip 3rd byte. On a "full load", it can never be more than 64k!!
 
 
-		push	bc			; store size
-		push	ix			; store load address
+		push	bc					; store size
+		push	ix					; store load address
 
 
-		push	hl			; get name into ix
-                pop	ix
-                ld      b,FA_READ		; mode open for reading
-                call    fOpen
-                jr	c,@error_opening	; carry set? so there was an error opening and A=error code
-                cp	0			; was file handle 0?
-                jr	z,@error_opening	; of so there was an error opening.
+		push	hl					; get name into ix
+		pop		ix
+        ld      b,FA_READ			; mode open for reading
+        call    fOpen
+        jr		c,@error_opening	; carry set? so there was an error opening and A=error code
+        cp		0					; was file handle 0?
+        jr		z,@error_opening	; of so there was an error opening.
 
-                pop	ix			; get load address back
-                pop	bc			; get size back
+        pop		ix					; get load address back
+        pop		bc					; get size back
 
-                push	af			; remember handle
-                call	fread			; read data from A to address IX of length BC                
-		jr	c,@error_reading
+        push	af					; remember handle
+        call	fread				; read data from A to address IX of length BC                
+		jr		c,@error_reading
 
-                pop	af			; get handle back
-                call	fClose			; close file
-                jr	c,@error_closing
+		pop		af					; get handle back
+		call	fClose				; close file
+		jr		c,@error_closing
 
-        	pop	af			; normal exit
-		pop	de
-		pop	bc
+		pop		af					; normal exit
+		pop		de
+		pop		bc
 		ret
 
 ;
 ; On error, display error code an lock up so we can see it
 ;
 @error_opening:
-		ld	de,$4002
-		ld	a,$ff
+		jp		DisplayError
+		ld		de,$4002
+		ld		a,$ff
 		call	PrintHex		
 
-		ld	a,0
-@infloop2	out     ($fe),a
+		ld		a,0
+@infloop2	
+		out     ($fe),a
 		inc 	a
-		jp	@infloop2
+		jp		@infloop2
 
 
 
-		pop	ix
+		pop		ix
 @error_reading:		
-		pop	bc	; don't pop a, need error code
+		pop		bc	; don't pop a, need error code
 
 @error_closing:
-		ld	de,$4002
+		ld		de,$4002
 		call	PrintHex		
 
-		ld	a,0
-@infloop	out     ($fe),a
+		ld		a,0
+@infloop	
+		out     ($fe),a
 		inc 	a
-		jp	@infloop
+		jp		@infloop
 
-@NormalError:  	pop	bc	; don't pop into A, return with error code
-		pop	de
-		pop	bc
+@NormalError:  	
+		pop		bc	; don't pop into A, return with error code
+		pop		de
+		pop		bc
 		ret
 
 
 
 ; ******************************************************************************
 ; Function:	Load a 256 colour bitmap directly into the screen
-;		Once loaded, enable and display it
+;			Once loaded, enable and display it
 ; In:		hl = file data pointer
 ; ******************************************************************************
 Load256Screen:
-		ld	(LastFileName),hl
+		ld		(LastFileName),hl
 		push	bc
 		push	de
 		push	ix
 		push	af
 
 		; ignore file length... it's set for this (should be 256*192)
-		inc	hl
-		inc	hl
-		inc	hl
+		inc		hl
+		inc		hl
+		inc		hl
 
 		push	hl
-                pop	ix
-                ld      b,FA_READ
-                call    fOpen
-                jr	c,@error_opening	; error opening?
-                cp	0
-                jr	z,@error_opening	; error opening?
-                ld	(LoadHandle),a		; store handle
-
-
-                ld	e,3			; number of blocks
-                ld	a,1			; first bank...
+		pop		ix
+		ld      b,FA_READ
+		call    fOpen
+		jr		c,@error_opening	; error opening?
+		cp		0
+		jr		z,@error_opening	; error opening?
+		ld		(LoadHandle),a		; store handle
+		
+		
+		ld		e,3					; number of blocks
+		ld		a,1					; first bank...
 @LoadAll:
-                ld      bc, $123b
-                out	(c),a			; bank in first bank
-                
-                push	af
-
-                ld	a,(LoadHandle)
-                ld	bc,64*256
-                ld	ix,0
-                call	fread
-
-                pop	af
-                add	a,$40
-                dec	e
-                jr	nz,@LoadAll
-
-                ld	a,(LoadHandle)
-                call	fClose
-
-                ld      bc, $123b
-                ld	a,2
-                out	(c),a                               
-               	jr	@SkipError 
+		ld      bc, $123b
+		out		(c),a				; bank in first bank
+		
+		push	af
+		
+		ld		a,(LoadHandle)
+		ld		bc,64*256
+		ld		ix,0
+		call	fread
+		
+		pop		af
+		add		a,$40
+		dec		e
+		jr		nz,@LoadAll
+		
+		ld		a,(LoadHandle)
+		call	fClose
+		
+		ld		bc, $123b
+		ld		a,2
+		out		(c),a                               
+		jr		@SkipError 
 @error_opening:
-		ld      a,5
-        	out     ($fe),a
+		ld		a,5
+		out		($fe),a
 @SkipError
-        	pop	af
-		pop	ix
-		pop	de
-		pop	bc
+		pop		af
+		pop		ix
+		pop		de
+		pop		bc
 		ret
 LoadHandle	db	0
 
@@ -318,8 +323,9 @@ LoadHandle	db	0
 ; In:		hl = file data pointer
 ;		a = starting bank
 ; *******************************************************************************************************
-Load_Banked:	ld	(LastFileName),hl
-		ld 	(CurrentFBank),a
+Load_Banked:	
+		ld		(LastFileName),hl
+		ld 		(CurrentFBank),a
 		call    GetSetDrive		; need to do this each time?!?!?
 
 		push	bc
@@ -327,71 +333,72 @@ Load_Banked:	ld	(LastFileName),hl
 		
 
 		; get file size
-		ld	a,(hl)			; filesize is 3 bytes - upto 16Mb
-		ld	(BlockFileSize),a
-		inc	hl
-		ld	a,(hl)
-		ld	(BlockFileSize+1),a
-		inc	hl
-		ld	a,(hl)
-		ld	(BlockFileSize+2),a
-		inc	hl
+		ld		a,(hl)			; filesize is 3 bytes - upto 16Mb
+		ld		(BlockFileSize),a
+		inc		hl
+		ld		a,(hl)
+		ld		(BlockFileSize+1),a
+		inc		hl
+		ld		a,(hl)
+		ld		(BlockFileSize+2),a
+		inc		hl
 
 		push	hl			; get name into ix
-                pop	ix
-                ld      b,FA_READ		; mode open for reading
-                call    fOpen
-                jr	c,@error_opening	; carry set? so there was an error opening and A=error code
-                cp	0			; was file handle 0?
-                jr	z,@error_opening	; of so there was an error opening.
-                ld	(FileHandle),a
+        pop		ix
+        ld      b,FA_READ		; mode open for reading
+        call    fOpen
+        jr		c,@error_opening	; carry set? so there was an error opening and A=error code
+        cp		0			; was file handle 0?
+        jr		z,@error_opening	; of so there was an error opening.
+		ld		(FileHandle),a
 
 
 @NextBlock:
-		ld	a,(CurrentFBank)
+		ld		a,(CurrentFBank)
 		call	SetBank
-		inc	a
-		ld	(CurrentFBank),a
+		inc		a
+		ld		(CurrentFBank),a
 
-                ld	a,(BlockFileSize+2)	; is size & $fffc00!=0? if not... more than 16K
-                and	a
-                jr	nz,@MoreThan16K
+		ld		a,(BlockFileSize+2)	; is size & $fffc00!=0? if not... more than 16K
+        and		a
+        jr		nz,@MoreThan16K
 
-                ld	a,(BlockFileSize+1)	; do we have more than 16K to load? if so read a 16K block
-                cp	$3f
-                jr	c,@LessThan16K
+        ld		a,(BlockFileSize+1)	; do we have more than 16K to load? if so read a 16K block
+        cp		$3f
+        jr		c,@LessThan16K
 @MoreThan16K
-                ld	bc,16384		; more than 16K, so
-                jp	@LoadRemaining
-@LessThan16K:	ld	a,(BlockFileSize)	; if not.... read in the rest of the file
-		ld	c,a
-                ld	a,(BlockFileSize+1)
-                ld	b,a
+        ld		bc,16384		; more than 16K, so
+        jp		@LoadRemaining
+@LessThan16K:
+		ld		a,(BlockFileSize)	; if not.... read in the rest of the file
+		ld		c,a
+        ld		a,(BlockFileSize+1)
+        ld		b,a
 
 @LoadRemaining
-		ld 	ix,$c000	  	; Get bank start
-                ld	a,(FileHandle)
-                call	fread			; read data from A to address IX of length BC                
-		jr	c,@error_reading
+		ld 		ix,$c000	  	; Get bank start
+        ld		a,(FileHandle)
+        call	fread			; read data from A to address IX of length BC                
+		jr		c,@error_reading
 
 
-                ; Sub 16K from size
-                xor	a			; clear carry
-                ld	hl,(BlockFileSize)
-                ld	bc,16384
-                sbc	hl,bc
-                ld	(BlockFileSize),hl
+        ; Sub 16K from size
+        xor		a			; clear carry
+        ld		hl,(BlockFileSize)
+        ld		bc,16384
+        sbc		hl,bc
+        ld		(BlockFileSize),hl
 
-                ld	a,(BlockFileSize+2)
-                ld	h,0
-                sbc	a,h
-                ld	(BlockFileSize+2),a                
-                jr	nc,@NextBlock
+        ld		a,(BlockFileSize+2)
+        ld		h,0
+        sbc		a,h
+        ld		(BlockFileSize+2),a                
+        jr		nc,@NextBlock
 
 
-                ld	a,(FileHandle)		; get handle back
-                call	fClose			; close file
-                jr	c,@error_closing
+        ld		a,(FileHandle)		; get handle back
+        call	fClose			; close file
+        jr		c,@error_closing
 
 		pop	de
 		pop	bc
@@ -450,28 +457,32 @@ Load_Banked:	ld	(LastFileName),hl
 ; *********************************************************************
 DisplayError:
 		push	af
-		push	hl
 
 		; wipe screen, ready for error message
-		ld	a,7
+		ld		a,7
 		call	ClsATTR
 		call	Cls
-		ld	a,%00010100		; make sure ULA screen is in front
-		;NextRegA  $15,a			; make sure sprites are off
+		ld		a,%00010100			; make sure ULA screen is in front
+		NextReg	$15,a				; make sure sprites are off
 		
-		ld	de,$0800		; y,x
-		pixelad				; get address into HL
-		pop	de
-		call	DrawText		; de=add, hl=message
+	
+		pop		af					; get error code
+		ld		hl,$4000			; y,x
+		call	DisplayErrorCode
 		
+		ld		hl,(LastFileName)	; filename
+		ld		de,$1000			; y,x
+		pixelad						; get address into HL
+		pop		de
 
 
 
 ErrorLoop:
-		ld	a,0
-@infloop	out     ($fe),a
+		ld		a,0
+@infloop	
+		out     ($fe),a
 		inc 	a
-		jp	@infloop
+		jp		@infloop
 
 
 
@@ -480,62 +491,66 @@ ErrorLoop:
 ; Function:	Draw a text message
 ;
 ; In:  		A  = Error Code
+;			HL = Screen address
 ; Out:		DE = TEXT,0 to print
-;		HL = dest screen address
+;			HL = dest screen address
 ;
 ; *********************************************************************
 DisplayErrorCode:
 		push	hl
-		ld	b,a
-		and	a
-		jr	z,@CodeZero
-		ld	hl,File_ErrorMessages
-@KeepGoing	ld	a,(hl)
-		inc	hl
-		and	a
-		jr	nz,@KeepGoing
+		ld		b,a
+		dec		b
+		and		a
+		jr		z,@CodeZero
+		ld		hl,File_ErrorMessages
+@KeepGoing		
+		ld		a,(hl)
+		inc		hl
+		and		a
+		jr		nz,@KeepGoing
 		djnz	@KeepGoing
-@CodeZero:	ex	de,hl
-		pop    hl
+@CodeZero:	
+		ex		de,hl
+		pop    	hl
 
 DrawText:
-		ld	a,(de)		
-		inc	de
-		and	a
-		ret	z
-		sub	32
+		ld		a,(de)		
+		inc		de
+		and		a
+		ret		z
+		sub		32
 		;cp	$20
 		;jr	z,@NextChar
 
 
 		push	de
-		ld	e,a
-		ld	d,0
-		sla	e		; character *8
-		rl	d
-		sla	e
-		rl	d
-		sla	e
-		rl	d
-		add	de,$3d00
+		ld		e,a
+		ld		d,0
+		ex		de,hl
+		add		hl,hl			; character *8
+		add		hl,hl
+		add		hl,hl
+		add		hl,$3d00
+		ex		de,hl
 
 		
 		push	hl
-		ld	b,8
-@DrawChar:	ld	a,(de)
-		ld	(hl),a
+		ld		b,8
+@DrawChar:	
+		ld		a,(de)
+		ld		(hl),a
 		pixeldn
-		inc	de
+		inc		de
 		djnz	@DrawChar
-		pop	hl
-		pop	de
+		pop		hl
+		pop		de
 @NextChar
-		inc	hl
-		jr	DrawText
+		inc		hl
+		jr		DrawText
 
 @EndOfMessage:
-		pop	hl
-		pop	de
+		pop		hl
+		pop		de
 		ret
 
 
@@ -543,39 +558,39 @@ DrawText:
 
 File_ErrorMessages:
 
-File_EOK:		db	"OK",0
+File_EOK:			db	"OK",0
 File_ENONSENSE		db	"Nonsense in command",0
-File_ESTEND		db	"ESTEND",0
+File_ESTEND			db	"ESTEND",0
 File_EWRTYPE		db	"EWRTYPE",0
-File_ENOENT		db	"No such file or directory",0
-File_EIO		db	"I/O error",0
-File_EINVAL		db	"Invalid file name",0
-File_EACCES		db	"Access Denied",0
-File_ENOSPC		db	"No space left on device",0
-File_ENXIO		db	"Request beyond the limits of the device",0
-File_ENODRV		db	"No such drive",0
-File_ENFILE		db	"Too many files open in system",0
-File_EBADF		db	"Bad file descriptor",0
-File_ENODEV		db	"No such device",0
+File_ENOENT			db	"No such file or directory",0
+File_EIO			db	"I/O error",0
+File_EINVAL			db	"Invalid file name",0
+File_EACCES			db	"Access Denied",0
+File_ENOSPC			db	"No space left on device",0
+File_ENXIO			db	"Request beyond the limits of the device",0
+File_ENODRV			db	"No such drive",0
+File_ENFILE			db	"Too many files open in system",0
+File_EBADF			db	"Bad file descriptor",0
+File_ENODEV			db	"No such device",0
 File_EOVERFLOW		db	"EOVERFLOW",0
-File_EISDIR		db	"EISDIR",0
-File_ENOTDIR		db	"ENOTDIR",0
-File_EEXIST		db	"EEXIST",0
-File_EPATH		db	"Invalid path",0
-File_ENOSYS		db	"ENOSYS",0
+File_EISDIR			db	"EISDIR",0
+File_ENOTDIR		db	"No such directory",0
+File_EEXIST			db	"EEXIST",0
+File_EPATH			db	"Invalid path",0
+File_ENOSYS			db	"ENOSYS",0
 File_ENAMETOOLONG	db	"ENAMETOOLONG",0
-File_ENOCMD		db	"ENOCMD",0
-File_EINUSE		db	"EINUSE",0
+File_ENOCMD			db	"ENOCMD",0
+File_EINUSE			db	"EINUSE",0
 File_ERDONLY		db	"ERDONLY",0
 File_EVERIFY		db	"EVERIFY",0
 File_ELOADKO		db	"ELOADKO",0
 File_ENOTEMPTY		db	"ENOTEMPTY",0
 File_EMAPRAM		db	"MAPRAM is active",0
-			db	$ff
+					db	$ff
 File_EUNKNOWN_ERROR	db	"Unknown file error",0
-DemoText		db	"Demo V0.1",0
-DemoText2		db	"ZX Spectrum Next Lemmings",0
-DemoText3		db	"     Prototype V0.1",0
+DemoText			db	"Demo V0.1",0
+DemoText2			db	"ZX Spectrum Next Lemmings",0
+DemoText3			db	"     Prototype V0.1",0
 	
 DefaultDrive:	db	0
 LastFileName	dw	0		; last filename to be loaded

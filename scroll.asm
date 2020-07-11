@@ -17,16 +17,16 @@ InitLevel:
 ;
 ; ************************************************************************
 ClearLevelBitmap:
-		ld 	a,LevelBitmapBank
+		ld 		a,LevelBitmapBank
 @CopyLoop:
 		call 	SetBank
 		push 	af
 
 		xor 	a
-		ld 	hl,$c000
-		ld 	(hl),a
-		ld 	bc,16383
-		ld 	de,$c001
+		ld		hl,$c000
+		ld		(hl),a
+		ld		bc,16383
+		ld		de,$c001
 		ldir
 
 		pop	af
@@ -161,84 +161,36 @@ DisplayMap:
 ; In:		hl  =  pixel column to draw - index into the map (0-1791)
 ;
 ; ************************************************************************
-;port 107=datagear / port 11=MB02+
-Z80DMAPORT	equ 107
-SPECDRUM        equ 0ffdfh
 CopyScreen:
-		ld	a,$3+8			; $10-Layer1 over, 8-Layer2_2 write, 2-screen on, 1-Page in RAM, bank 0 of screen (3 banks in total)
-		ld	(VRAMBank),a
-		ld	bc,$123b
-		out	(c),a
+		; $01 = enable mapping for writes
+		; $02 = enable layer 2 display
+		; $08 = to map active layer 2 (nextreg 0x12), 1 to map shadow layer 2 (nextreg 0x13)
+		ld		a,1+2+8 
+		ld		(VRAMBank),a
+		ld		bc,$123b
+		out		(c),a
 
-		ld	bc,240
-		ld	(DMALen),bc
+		add		hl,LevelBitmapAddress
 
-		ld	bc,LevelBitmapAddress
-		add	hl,bc
-
-		ld	de,8			; start at top of VRAM bank
-		ld	a,LevelBitmapBank*2	; 20 banks to loop through
+		ld		de,8					; start at top of VRAM bank
+		ld		a,LevelBitmapBank*2		; 20 banks to loop through
 @CopyLoop:
-		mmu6
-		inc	a
-		mmu7
-		inc	a
-		;call	SetBank			; 8 lines per bank
+		NextReg	$56,a
+		inc		a
+		NextReg	$57,a
+		inc		a
+		;ex		af,af'		; remember bank
 		push	af
 		push	hl
-
-		ld	b,8			; 8 lines per bank
+		ld		b,8			; 8 lines per bank
 
 		
-@Copy8Lines:	push	bc
+@Copy8Lines:	
+		ld		c,255
+		;push	bc
 
-if USE_DMA=1
-		ld	a,$1e			; raster hi
-		ld	bc,$243B
-		out	(c),a
-		inc	b
-		in	a,(c)
-		and	1
-		jr	z,@MSBNotSet
-
-		ld	a,$1f			; raster low
-		ld	bc,$243B
-		out	(c),a
-		inc	b
-		in	a,(c)
-		cp	$36
-		jr	c,@LessThan
-
-		; If ALMOST VBlank then wait till AFTER the VBlank
-		ld	a,$1e			; raster hi
-		ld	bc,$243B
-		out	(c),a
-		inc	b
-@WaitTillAfter:		
-		in	a,(c)
-		and	1
-		jr	nz,@WaitTillAfter
-
-
-
-@LessThan:
-@MSBNotSet:
-	; transfer the DMA "program"
-		ld	(DMASrc),hl		; 16
-		ld	(DMADest),de		; 20
-		push	hl			; 11
-		ld	hl,DMACopy 		; 10
-		ld	bc,DMASIZE*256 + Z80DMAPORT	; 10
-		otir				; 21*20  + 240*4
-		pop	hl			; 10 = 1457
-		ld	bc,2048			; 		offset to move to NEXT line in level bitmap
-
-
-
-else
 ;		; copy a whole row (240 pixels)
-		ld	c,255			; 7
-		ldi				; 240*16
+		ldi					; 240*16
 		ldi
 		ldi
 		ldi
@@ -478,43 +430,36 @@ else
 		ldi
 		ldi
 		ldi
-		ld	bc,2048-(256-16)	; offset to move to NEXT line in level bitmap
-endif
-		add	hl,bc			; move there
-		ex	de,hl
-if USE_DMA=1
-		ld	bc,$100		;16	;$100			;16
-else
-		ld	bc,16		;16	;$100			;16
-endif
-		add	hl,bc
-		ex	de,hl
-		pop	bc			; get 8 line counter back	
-		dec	b
-		jr	z,@finishloop
-		jp	@Copy8Lines
-@finishloop
-		ld	a,d			; overflowed the lower 16K?
-		and	$c0			; if so we need to change bank
-		jr	z,@SkipBankSwap
-		ld	d,0
 
-		ld	a,(VRAMBank)		; get current bank
-		add	$40			; next one
-		ld	(VRAMBank),a
-		ld	bc,$123b		; set VRAM bank
-		out	(c),a
+		add		hl,2048-(256-16)	; offset to move to NEXT line in level bitmap
+		ld		a,16				; 15ts
+		add		de,a
+
+		;pop		bc					; get 8 line counter back	
+		dec		b
+		jr		z,@finishloop
+		jp		@Copy8Lines
+@finishloop
+		ld		a,d			; overflowed the lower 16K?
+		and		$c0			; if so we need to change bank (will increment above $4000)
+		jr		z,@SkipBankSwap
+		ld		d,0
+
+		ld		a,(VRAMBank)		; get current VRAM bank
+		add		$40					; next one
+		ld		(VRAMBank),a
+		ld		bc,$123b			; set VRAM bank
+		out		(c),a
+
 @SkipBankSwap:
-		pop	hl			; get back to start of bank
-		pop	af
-		cp	LevelBitmapBank*2+40
-		jr	z,@FinishCopyLoop
-		jp	@CopyLoop
-@FinishCopyLoop:
+		pop		hl					; get back to start of bank
+		pop		af
+		cp		LevelBitmapBank*2+40
+		jp		nz,@CopyLoop
 
 		; leave screen on...
 		ld	bc,$123b
-		ld	a,$12
+		ld	a,$02+8
 		out	(c),a
 
 		call	ResetBank
@@ -525,35 +470,6 @@ BankCount	db	0
 
 
 
-
-DMACopy
-	db $C3			;R6-RESET DMA
-	db $C7			;R6-RESET PORT A Timing
-        db $CB			;R6-SET PORT B Timing same as PORT A
-
-        db $7D 			;R0-Transfer mode, A -> B
-DMASrc  dw $1234		;R0-Port A, Start address				(source address)
-DMALen	dw 240			;R0-Block length					(length in bytes)
-
-        db $54 			;R1-Port A address incrementing, variable timing
-        db $02			;R1-Cycle length port A
-		  
-        db $50			;R2-Port B address fixed, variable timing
-        db $02 			;R2-Cycle length port B
-		  
-        ;db $C0			;R3-DMA Enabled, Interrupt disabled
-
-	db $AD 			;R4-Continuous mode  (use this for block tansfer)
-DMADest	dw $4000		;R4-Dest address					(destination address)
-		  
-	db $82			;R5-Restart on end of block, RDY active LOW
-	 
-	db $CF			;R6-Load
-	db $B3			;R6-Force Ready
-	db $87			;R6-Enable DMA
-ENDDMA
-
-DMASIZE      equ ENDDMA-DMACOPY
 
 
 

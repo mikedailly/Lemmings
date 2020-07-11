@@ -58,22 +58,22 @@ InitExplosion:
 ; ******************************************************************
 expl
 DrawExplosionFrame:	
-		ld	d,0			; keep 16 bit signed from now on
-		add	de,$ff80		; offset origin so all points are positive offsetsd
-		ld	(@PointsYOrigin+1),de	; store Y
+		ld		d,0						; keep 16 bit signed from now on
+		add		de,$ff80				; offset origin so all points are positive offsetsd
+		ld		(@PointsYOrigin+1),de	; store Y
 
-		ld	de,(ScrollIndex)	; 20
-		scf				; SET carry flag (x might be out by 1... doesn't really matter)
-		sbc	hl,de			; subtract world location
-		add	hl,$ff80		; offset origin
-		ld	(@PointsXOrigin+1),hl
+		ld		de,(ScrollIndex)		; 20
+		scf								; SET carry flag (x might be out by 1... doesn't really matter)
+		sbc		hl,de					; subtract world location
+		add		hl,$ff80				; offset origin
+		ld		(@PointsXOrigin+1),hl
 
 		; should probably do a large BBOX clip here...
 
 		; point to correct frame
-		add	a,$c0
-		ld	d,a
-		ld	e,0			; DE = frame address (once banked in)
+		add		a,$c0
+		ld		d,a
+		ld		e,0						; DE = frame address (once banked in)
 
 		; set animation bank
 		NextReg	$56,PointsBank*2
@@ -83,77 +83,80 @@ DrawExplosionFrame:
 		;
 		; Draw all 80 points
 		;
-		ld	bc,$123b
+		ld		bc,$123b
 		exx
-		ld	b,80			; number of points to render
-		ld	a,%10110110		; pixel colours
-		ex	af,af'			; store pixel colour
+		ld		b,80					; number of points to render
+		ld		a,%10110110				; pixel colours
+		ex		af,af'					; store pixel colour
 @AllPoints:
 		exx
 
-		ld	a,(de)			; get X offset
-		inc	e			; points are 256 byte aligned...
-		and	a			; test for 0			
-		jr	z,@NextPoint		; if X==$00 then ignore point
+		ld		a,(de)					; get X offset
+		inc		e						; points are 256 byte aligned...
+		and		a						; test for 0			
+		jr		z,@NextPoint			; if X==$00 then ignore point
 
-@PointsXOrigin:	ld	hl,$0000		; get X origin
-		add	hl,a			; add positive  X offset to X origin
-		ld	a,h
-		and	a			; if high byte is NOT 0, then off screen
-		jr	nz,@NextPoint		; clip to screen
-		ld	a,l
-		ld	(@XStore+1),a		; store X
+@PointsXOrigin:	
+		ld		hl,$0000		; get X origin
+		add		hl,a			; add positive  X offset to X origin
+		ld		a,h
+		and		a			; if high byte is NOT 0, then off screen
+		jr		nz,@NextPoint		; clip to screen
+		ld		a,l
+		ld		(@XStore+1),a		; store X
 
 
 		; now do Y
-@PointsYOrigin:	ld	hl,$0000		; get Y origin
-		ld	a,(de)			; Get Y offset (now positive)
-		add	hl,a
-		ld	a,h
-		and	a			; if high byte is NOT 0, then off screen
-		jr	nz,@NextPoint	
+@PointsYOrigin:	
+		ld		hl,$0000		; get Y origin
+		ld		a,(de)			; Get Y offset (now positive)
+		add		hl,a
+		ld		a,h
+		and		a			; if high byte is NOT 0, then off screen
+		jr		nz,@NextPoint	
 
-		ld	a,l			; get Y
-		cp	160			; in panel area?
-		jr	nc,@NextPoint
-@XStore		ld	l,$00			; LOAD "X" (self-mod-code)
-		ld 	h,a			; put Y into H
+		ld		a,l			; get Y
+		cp		160			; in panel area?
+		jr		nc,@NextPoint
+@XStore		
+		ld		l,$00			; LOAD "X" (self-mod-code)
+		ld 		h,a			; put Y into H
 
 
 		; select correct bank
-		and	$c0
-		or	%00001011		; or in Layer 2 on, write on, back buffer on
-		out	(c),a
+		and		$c0
+		or		%00001011		; or in Layer 2 on, write on, back buffer on
+		out		(c),a
 
-		ld	a,h			; get offset into 16k bank
-		and	$3f
-		ld	h,a
+		ld		a,h			; get offset into 16k bank
+		and		$3f
+		ld		h,a
 
-		ex	af,af'			; get pixel colour
-		ld	(hl),a			; store on screen
+		ex		af,af'			; get pixel colour
+		ld		(hl),a			; store on screen
 		rrca				; rotate pixel colour
-		ex	af,af'			; store again
+		ex		af,af'			; store again
 
-		inc	e			; points are 256 byte aligned...
+		inc		e			; points are 256 byte aligned...
 		exx
 		djnz	@AllPoints
 
 		exx				; get BC back...
-		ld	a,2
-		out	(c),a
+		ld		a,2
+		out		(c),a
 		ret		
 
 @NextPoint:	
-		inc	e			; points are 256 byte aligned...
-		ex	af,af'
+		inc		e			; points are 256 byte aligned...
+		ex		af,af'
 		rrca
-		ex	af,af'
+		ex		af,af'
 		exx
 		djnz	@AllPoints
 
 		exx				; get BC back...
-		ld	a,2
-		out	(c),a
+		ld		a,2
+		out		(c),a
 		ret
 
 

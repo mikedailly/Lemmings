@@ -2,9 +2,9 @@
 ;
 ;	General equates and macros
 ;
-USE_DMA			equ	1
+USE_DMA					equ		0
+USE_COPPER				equ		0
 NextInstructions        equ     1
-USE_COPPER		equ	1
 
 TBBLUE_REGISTER_SELECT	equ	$243b
 SPRITE_CONTROL_REGISTER	equ	$15
@@ -15,22 +15,23 @@ CLIP_SPRITE_REGISTER	equ	$18
 
 
 
-
+; Set the border - used on start up to help debugging
 BORDER		macro	
-		ld	a,\0
-		out	($fe),a
-		endm
+			ld		a,\0
+			out		($fe),a
+			endm
+
 
 ; hardware/registers
-SpriteReg		equ	$57
-SpriteShape		equ	$5b
+SpriteReg				equ	$57
+SpriteShape				equ	$5b
 Kempston_Mouse_Buttons	equ	$fadf
-Kempston_Mouse_X	equ	$fbdf
-Kempston_Mouse_Y	equ	$ffdf
-Mouse_LB		equ	1			; 0 = pressed
-Mouse_RB		equ	2
-Mouse_MB		equ	4
-Mouse_Wheel		equ	$f0
+Kempston_Mouse_X		equ	$fbdf
+Kempston_Mouse_Y		equ	$ffdf
+Mouse_LB				equ	1			; 0 = pressed
+Mouse_RB				equ	2
+Mouse_MB				equ	4
+Mouse_Wheel				equ	$f0
 
 
 
@@ -54,70 +55,75 @@ Mouse_Wheel		equ	$f0
 ;
 ; Layer 2 stuff
 
+Code_Bank		equ	12			; 32K of code  (ZX128 banks 6 and 7)
 
-VRAM_BASE_BANK		equ	8				; 2 layer 2 screens = 6 banks
-LevelBank		equ	14
-LevelAddress		equ	$c000				; 2K
-PanelNumbersBank	equ	14
-PanelNumbersAddress	equ	$c800				; 400 bytes
-PanelBank		equ	15
-PanelAddress		equ	$c000				; panel is 8K
-LevelBitmapBank		equ	16				; level bitmap from bank 16 to 38 (22 banks). Last 2 banks are 0 for falling off the bottom
-LevelBitmapAddress	equ	$c000
-StyleBank 		equ 	38				; start of style data (96K - 6 banks)
-StyleBaseAddress 	equ 	$c000
-ObjectsBank 		equ 	StyleBank+6			; Level objects - load over the top of the styles (80k - 5 banks)
-ObjectsBaseAddress 	equ 	$c000
-LemmingsBank		equ	ObjectsBank+5			; start of lemmings sprites 
-LemmingAddress		equ	$c000
-PointsBank		equ	LemmingsBank+6			; (2 banks)
-PointsAddress		equ	$c000
-CollisionBank		equ	PointsBank+2			; 4x4 array collision map (3 banks)
-CollisionAddress		equ	$e000				; (20480 bytes from 24576)
+;		Seg  DataSeg,$8000,$8000
+;		Seg  CodeSeg,Code_Bank:$0000,$0000
 
-MAX_LEM			equ	100
 
-LEM_NONE		equ	0
-LEM_FALLER		equ	1
-LEM_WALKER		equ	2
-LEM_SPLATTER		equ	3
-LEM_FLOATER		equ	4
-LEM_PREFLOATER		equ	5
-LEM_BLOCKER		equ	6
-LEM_CLIMBER		equ	7
-LEM_BOMBER		equ	8
-LEM_BUILDER_SHRUG	equ	9
-LEM_BUILDER		equ	10
-LEM_BASHER		equ	11
-LEM_MINER		equ	12
-LEM_DIGGER		equ	13
-LEM_PREBOMBER		equ	14
+VRAM_BASE_BANK			equ		8					; 2 layer 2 screens = 6 banks
+LevelBank				equ		14
+LevelAddress			equ		$c000				; 2K
+PanelNumbersBank		equ		14
+PanelNumbersAddress		equ		$c800				; 400 bytes
+PanelBank				equ		15
+PanelAddress			equ		$c000				; panel is 8K
+LevelBitmapBank			equ		16					; level bitmap from bank 16 to 38 (22 banks). Last 2 banks are 0 for falling off the bottom
+LevelBitmapAddress		equ		$c000
+StyleBank 				equ 	38					; start of style data (96K - 6 banks)
+StyleBaseAddress 		equ 	$c000
+ObjectsBank 			equ 	StyleBank+6			; Level objects - load over the top of the styles (80k - 5 banks)
+ObjectsBaseAddress 		equ 	$c000
+LemmingsBank			equ		ObjectsBank+5		; start of lemmings sprites 
+LemmingAddress			equ		$c000
+PointsBank				equ		LemmingsBank+6		; (2 banks)
+PointsAddress			equ		$c000
+CollisionBank			equ		PointsBank+2		; 4x4 array collision map (3 banks)
+CollisionAddress		equ		$e000				; (20480 bytes from 24576)
+	
+MAX_LEM					equ		100
+	
+LEM_NONE				equ		0
+LEM_FALLER				equ		1
+LEM_WALKER				equ		2
+LEM_SPLATTER			equ		3
+LEM_FLOATER				equ		4
+LEM_PREFLOATER			equ		5
+LEM_BLOCKER				equ		6
+LEM_CLIMBER				equ		7
+LEM_BOMBER				equ		8
+LEM_BUILDER_SHRUG		equ		9
+LEM_BUILDER				equ		10
+LEM_BASHER				equ		11
+LEM_MINER				equ		12
+LEM_DIGGER				equ		13
+LEM_PREBOMBER			equ		14
 	
 
 ; used to quickly disguard lemmings for selection
-SKILLMASK_CLIMBER	equ	1
-SKILLMASK_FLOATER	equ	2
-SKILLMASK_BOMBER	equ	4
-SKILLMASK_BLOCKER	equ	8
-SKILLMASK_BUILDER	equ	16
-SKILLMASK_BASHER	equ	32
-SKILLMASK_MINER		equ	64
-SKILLMASK_DIGGER	equ	128
-SKILLMASK_PERMANENT	equ	(SKILLMASK_CLIMBER|SKILLMASK_FLOATER|SKILLMASK_BOMBER)
+SKILLMASK_CLIMBER		equ		1
+SKILLMASK_FLOATER		equ		2
+SKILLMASK_BOMBER		equ		4
+SKILLMASK_BLOCKER		equ		8
+SKILLMASK_BUILDER		equ		16
+SKILLMASK_BASHER		equ		32
+SKILLMASK_MINER			equ		64
+SKILLMASK_DIGGER		equ		128
+SKILLMASK_PERMANENT		equ		(SKILLMASK_CLIMBER|SKILLMASK_FLOATER|SKILLMASK_BOMBER)
 
 ;
 ; lemmings structure
 ;
-			rsreset
-LemType			rb	1
-LemX			rw	1
-LemY			rb	1
-LemDir			rb	1		; left or right facing
+					rsreset
+LemType				rb	1
+LemX				rw	1
+LemY				rb	1
+LemDir				rb	1		; left or right facing
 LemFrameBase		rw	1		; keep base,count and offset together
 LemFrameCount		rb	1		; so "SetAnim" function is quicker
 LemFrameOffX		rb	1
 LemFrameOffY		rb	1
-LemFrame		rb	1
+LemFrame			rb	1
 LemSkillMask		rb	1		; skill mask
 LemBombCounter		rb	1
 LemBombCounter_Frac	rb	1
@@ -136,57 +142,57 @@ LemFallCount		equ	LemSkillTemp
 
 ; 354 lemming sprites
 ; animation frame start
-FWalkerR 		equ	0
-FWalkerL		equ	8
-FFallerR		equ	16
-FFallerL		equ	20
-FClimberR		equ	24
-FClimberL		equ	32
+FWalkerR 			equ	0
+FWalkerL			equ	8
+FFallerR			equ	16
+FFallerL			equ	20
+FClimberR			equ	24
+FClimberL			equ	32
 FClimberFlipR		equ	40
 FClimberFlipL		equ	48
 FFloaterStartR		equ	56
-FFloaterR		equ	60	; pingppong
+FFloaterR			equ	60	; pingppong
 FFloaterStartL		equ	64
-FFloaterL		equ	68	; pingpong
-FExploder		equ	72	; 16 frames
-FSplatter		equ	88	; 16 frames
-FBlocker		equ	104	; 16 frames
-FDrowner		equ	120	; 16 frames
-FFlamer			equ	136	; 14 frames
-FExit			equ	150	; 8 frames
+FFloaterL			equ	68	; pingpong
+FExploder			equ	72	; 16 frames
+FSplatter			equ	88	; 16 frames
+FBlocker			equ	104	; 16 frames
+FDrowner			equ	120	; 16 frames
+FFlamer				equ	136	; 14 frames
+FExit				equ	150	; 8 frames
 FBuilderRight		equ	158	; 16 frames
 FBuilderLeft		equ	174	; 16 frames
 FShruggerRight		equ	190	; 8 frames
 FShruggerLeft		equ	198	; 8 frames
-FDigger			equ	206	; 16 frames
+FDigger				equ	206	; 16 frames
 FBasherRight		equ	222	; 32 frames
-FBasherLeft		equ	254	; 32 frames
-FMinerRight		equ	286	; 24 frames
-FMinerLeft		equ	310	; 24 frames
-FMinerMask		equ	334	; 1 frame
+FBasherLeft			equ	254	; 32 frames
+FMinerRight			equ	286	; 24 frames
+FMinerLeft			equ	310	; 24 frames
+FMinerMask			equ	334	; 1 frame
 FExplosionMask		equ	335	; 1 frame
 FBuilderBrick		equ	348	; 1 frame
 
 
-FOne			equ	349	; 1 to 5 counter
+FOne				equ	349	; 1 to 5 counter
 
 
 ;
 ; Object definitaion structure - 
 ;
-		rsreset
-Obj_Flags:	rb	1		; various flags
-Obj_Anim:	rb	1		; sprite index into the object sprite pool
+				rsreset
+Obj_Flags:		rb	1		; various flags
+Obj_Anim:		rb	1		; sprite index into the object sprite pool
 Obj_FirstFrame:	rb	1		; starting frame of the animation
-Obj_Max:	rb	1		; max anim - offset from ObjAnim
-Obj_Width:	rb	1		; original sprite width - not cropped width
-Obj_Height:	rb	1		; original sprite height - not cropped width
+Obj_Max:		rb	1		; max anim - offset from ObjAnim
+Obj_Width:		rb	1		; original sprite width - not cropped width
+Obj_Height:		rb	1		; original sprite height - not cropped width
 Obj_CollWidth:	rb	1
 Obj_CollHeight:	rb	1
 Obj_CollType:	rb	1
-Obj_Sound	rb	1
-Obj_Padding	rb	6
-Obj_MaxSize	rb	0		; size of struct
+Obj_Sound		rb	1
+Obj_Padding		rb	6
+Obj_MaxSize		rb	0		; size of struct
 	
 
 LoadFile	macro
@@ -221,10 +227,6 @@ File		macro
 		endm
 
 
-;
-; Emulator old MMU instructions
-;
-if	NextInstructions==1
 MMU0		macro		
 		NextReg	$50,a
 		endm
@@ -249,32 +251,6 @@ MMU6		macro
 MMU7		macro		
 		NextReg	$57,a
 		endm
-else
-MMU0		macro		
-		NextRegA	$50,a
-		endm
-MMU1		macro		
-		NextRegA	$51,a
-		endm
-MMU2		macro		
-		NextRegA	$52,a
-		endm
-MMU3		macro		
-		NextRegA	$53,a
-		endm
-MMU4		macro		
-		NextRegA	$54,a
-		endm
-MMU5		macro		
-		NextRegA	$55,a
-		endm
-MMU6		macro		
-		NextRegA	$56,a
-		endm
-MMU7		macro		
-		NextRegA	$57,a
-		endm
-endif
 
 
 

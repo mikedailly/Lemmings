@@ -1,6 +1,6 @@
 ;
 ; Created on Sunday, 11 of June 2017 at 09:43 AM
-; ZX Spectrum Next Lemmings by Mike Dailly, 2017-2018
+; ZX Spectrum Next Lemmings by Mike Dailly, 2017-2020
 ;
 ; While copyright over the source is reserved, users may use 
 ; all or part of it in other products, for free or commercial gain.
@@ -20,6 +20,22 @@
                 opt             ZXNEXT
                 opt             ZXNEXTREG
 
+
+
+ModVolumeBank        equ                16
+ModFileBank          equ                18
+ModSampleBank        equ                50
+
+
+                seg     CODE_SEG, 10:$1c5c,$5c5c
+                seg     MOD_SEG,  ModFileBank:$0000,$0000
+                seg     MOD_VOLUME,  ModVolumeBank:$0000,$0000                ; volume conversion goes here
+
+
+                seg        CODE_SEG
+
+
+
                 include "includes.asm"
 
 
@@ -30,37 +46,48 @@ StackEnd:
                 ds      127
 StackStart:     dw      0,0,0,0
                 ds      128                     ; why do I need this?                
+
 StartAddress:
-                di    
-                ld      sp,StackStart&$fffe
-                ld      a,VectorTable>>8
-                ld      i,a               
+			di    
+			ld      sp,StackStart&$fffe
+			ld      a,VectorTable>>8
+			ld      i,a               
 
-                ld      a,%00000011             ; 14Mhz
-                NextReg $07,a
+			ld      a,%00000011             ; 28Mhz
+			NextReg $07,a
+			ld      a,%00001101
+			
+			BORDER          4      
+			call	FlipScreens             ; get front and bank buffer in order
+			ld		a,$e3
+			BORDER          3
+			call	Cls256
+			BORDER          2
+			call	FlipScreens
+			ld		a,$d3
+			BORDER          1
+			call    Cls256
+			im      2                       ; Set up IM2 mode
+			ei
 
-                BORDER          4      
-                call    FlipScreens             ; get front and bank buffer in order
-                ld      a,$e3
-                BORDER          3
-                call    Cls256
-                BORDER          2
-                call    FlipScreens
-                ld      a,$d3
-                BORDER          1
-                call    Cls256
-                im      2                       ; Set up IM2 mode
-                ei
 
-                ld      a,7+(64)        ; bright white on black
-                call    ClsATTR
+			ld      a,0
+			out     ($fe),a
+			call    Init
+			call    InitGame
 
-                ld      a,0
-                out     ($fe),a
-                call    Init
-                NextReg 8,64
 
-                call    InitGame
+			NextReg 8,%01001000				; disable RAM contention + DACs
+			NextReg 20,$e3   				; global transparancy to $E3             
+			NextReg 21,%0_0_0_010_0_1		; bit 0= sprites 0, bits 4,3,2 = (%010_00) S U L order
+			NextReg 67,%00000000			; select palettes 
+			NextReg	64,$18					; set BRIGHT black on ULA to transparent
+			NextReg 65,$e3
+
+			; enable Layer2
+			ld      a,$02
+			ld      bc,$123b
+			out     (c),a    
 
 ; ************************************************************************************************************
 ;
@@ -68,76 +95,81 @@ StartAddress:
 ;                               
 ; ************************************************************************************************************
 MainLoop:       
-                ; wait for a minimum of 3 frames....
-;@WaitForFrameCount:
-;                ld      a,(VBlank)              ; get current FPS
-;                cp      3
-;                jr      c,@WaitForFrameCount
-;                ld      (fps),a                 ; store frame count
-;                xor     a                       ; clear IRQ frame counter
-;                ld      (VBlank),a
-
-                ld      a,(vblank)                 
-                ld      (realfps),a      
-                ld      a,1                     ; Wait on VBlank for new game frame....
-                ld      (NewFrameFlag),a                
-@WaitVBlank:    ld      a,(NewFrameFlag)        ; for for it to be reset
-                and     a
-                jr      nz,@WaitVBlank
-
-                ld      a,1
-                out     ($fe),a
-
-                ; Scan keyboard
-                call    ReadKeyboard
-                call    ProecssMisc
+			; wait for a minimum of 3 frames....
+			ld        a,(vblank)                 
+			ld        (realfps),a      
+			ld        a,1                     ; Wait on VBlank for new game frame....
+			ld        (NewFrameFlag),a                
+@WaitVBlank:
+			ld        a,(NewFrameFlag)        ; for for it to be reset
+			and       a
+			jr        nz,@WaitVBlank
 
 
+			;ld        a,VRAM_BASE_BANK
+			;NextReg   18,a
+			;NextReg   19,a
+			
+		
+			
 
-                call    DisplayMap              ; Display level bitmap
-                ;call    GenerateMiniMap
+			
+			;ld      a,1
+			;out     ($fe),a
 
-                call    OpenTrapDoors
-                call    DrawLevelObjects
-
-                call    SpawnLemming
-                call    ProcessLemmings
-
-                ;ld      ix,LemData
-                ;ld      a,(MouseX)
-                ;ld      hl,(ScrollIndex)
-                ;add     hl,a
-                ;ex      de,hl
-                ;ld      a,(MouseY)
-                ;ld      hl,0
-                ;call    DrawLemmingFrame
+			; Scan keyboard
+			call    	ReadKeyboard
+			call    	ProecssMisc
+			
+			
+			
+			call    	DisplayMap              ; Display level bitmap
 
 
-                call    ProcessInput
 
-if USE_COPPER = 0
-                call    CopyPanelToScreen
-endif
-                call    ResetBank
+			call    	OpenTrapDoors
+			call    	DrawLevelObjects
+			
+			call    	SpawnLemming
+			call    	ProcessLemmings
+			
+			;ld      ix,LemData
+			;ld      a,(MouseX)
+			;ld      hl,(ScrollIndex)
+			;add     hl,a
+			;ex      de,hl
+			;ld      a,(MouseY)
+			;ld      hl,0
+			;call    DrawLemmingFrame
+			
+			
+			call    	ProcessInput
+			call    	CopyPanelToScreen
 
-                ;ld      hl,$4001
-                ;ld      de,DemoText
-                ;ld      a,1
-                ;call    DrawText
 
-                ;ld      hl,$4023
-                ;ld      de,DemoText2
-                ;ld      a,1
-                ;call    DrawText
-                ld      a,0
-                out     ($fe),a
+			ld      a,1
+			out     ($fe),a
+			call    GenerateMiniMap
+			ld      a,0
+			out     ($fe),a
+			;ld      	hl,$4001
+			;ld      	de,DemoText
+			;ld      	a,1
+			;call    	DrawText
+			
+			;ld      	hl,$4023
+			;ld      	de,DemoText2
+			;ld      	a,1
+			;call    	DrawText
+			ld      	a,0
+			out     	($fe),a
+			
+			jp      	MainLoop                ; infinite loop
 
-                jp      MainLoop                ; infinite loop
-
-counter         db      0
-fps             db      0        
-realfps         db      0        
-frame           db      0
+counter     db      0
+fps         db      0        
+realfps     db      0        
+frame       db      0
 
 
 
@@ -187,53 +219,25 @@ ProecssMisc:
 ; Initialise the game start up crap
 ; *****************************************************************************************************************************
 Init:   
-                ; make sure top line is free of SNA data
-                ld      b,32
-                ld      hl,$4000
-                xor     a
-@lp1            ld      (hl),a
-                inc     l
-                djnz    @lp1
+			ld      a,7+64				; white+bright-ink    black+bright-paper
+			call    ClsATTR
+			call    SetupAttribs
+			call    InitFilesystem
+			call    InitSprites
+
+			LoadBanked LemmingsFile,LemmingsBank
+			CALL    InitExplosion
+
+			ld      a,1                     ; enable IRQ cursor
+			ld      (CursorOn),a
 
 
-                ld      a,7+(64)
-                call    ClsATTR
-                call    SetupAttribs
-
-                call    InitFilesystem
-
-                call    InitSprites
-                ;ld      a,LemmingsBank
-                ;NextReg
-
-                LoadBanked LemmingsFile,LemmingsBank
-                CALL    InitExplosion
-
-
-                ; enable bitmaps
-                ld      a,$02
-                ld      bc,$123b
-                out     (c),a    
-
-
-                ; Enable sprites
-                NextReg 21,1+8                  ; bit 0= sprites 0, bits 4,3,2 = (%010_00) S U L order
-
-                ld      a,1                     ; enable IRQ cursor
-                ld      (CursorOn),a
-
-
-                NextReg 20,$e3
-                
-                NextReg 64,$18                  ; set BRIGHT BLACK to transparent
-                NextReg 65,$e3
-
-if USE_COPPER = 1 
-                ld      hl,GameCopper
-                ld      de,GameCopperSize
-                call    UploadCopper
-                NextReg $62,%11000000
-endif                
+;if USE_COPPER = 1 
+;                ld      hl,GameCopper
+;                ld      de,GameCopperSize
+;                call    UploadCopper
+;                NextReg $62,%11000000
+;endif                
                 ret
 
 
@@ -255,8 +259,7 @@ SetupAttribs:
 ; *****************************************************************************************************************************
 ; Init the game/level
 ; *****************************************************************************************************************************
-InitGame:; ************************************************************************
-
+InitGame:
                 xor     a
                 ld      (LemmingCounter),a
                 ld      (PanelSelection),a
@@ -296,7 +299,8 @@ GraphicsBuffer:
 
 
                 ; Save the SNA out....
-                savesna "_LemmingsNext.sna",StartAddress,StackStart
+;                savesna "_LemmingsNext.snx",StartAddress,StackStart
+                savenex "_LemmingsNext.nex",StartAddress,StackStart
 
 
 

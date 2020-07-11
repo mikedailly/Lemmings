@@ -14,28 +14,8 @@ IM2Routine:     push    hl
                 push    bc
                 push    af
 
-                ld      bc,$123b
-                in      a,(c)
-                push    af
-if NextInstructions=0
-                ld      bc,$243b
-                in      a,(c)
-                push    af
-endif                
-
-                db      $c3                     ; jp $0000
-IRQVector:      dw      VBlankIRQ
-                
-ReturnFromIRQ
-reset_next_port:
-if NextInstructions=0
-                pop     af
-                ld      bc,$243b
-                out     (c),a
-endif
-                pop     af
-                ld      bc,$123b
-                out     (c),a
+IRQVector:      jp      VBlankIRQ               
+ReturnFromIRQ:
         
                 pop     af
                 pop     bc
@@ -111,45 +91,24 @@ FlipScreens:
                 ld      (ExplosionY),a
 
 
+                ; Swap screen (banks) addresses around 
                 ld      a,(Screen1Bank)
                 push    af
                 ld      a,(Screen2Bank)
                 ld      (Screen1Bank),a
-                ld      (CopperGameScreen+1),a
+;                ld      (CopperGameScreen+1),a
                 NextReg 18,a
                 pop     af
                 ld      (Screen2Bank),a
-if USE_COPPER = 1 
                 NextReg 19,a
-else
-SetScreens:
-                ; Swap screen (banks) addresses around 
-                ld      bc,$243B                        
-                ld      a,18
-                out     (c),a
-                ld      bc,$253B
-                ld      a,(Screen1Bank)
-                out     (c),a
-
-                ld      bc,$243B                        
-                ld      a,19
-                out     (c),a
-                ld      bc,$253B
-                ld      a,(Screen2Bank)
-                out     (c),a
-endif
-                ld      a,$02
-                ld      bc,$123b
-                out     (c),a    
 
 
-
-if USE_COPPER = 1
-                ld      hl,GameCopper
-                ld      de,GameCopperSize
-                call    UploadCopper       
-                NextReg $62,%11000000    
-endif
+;if USE_COPPER = 1
+;                ld      hl,GameCopper
+;                ld      de,GameCopperSize
+;                call    UploadCopper       
+;                NextReg $62,%11000000    
+;endif
                 ret
 
 Screen1Bank     db      8
@@ -283,13 +242,13 @@ DisplayCursor:
                 out     (SpriteReg),a
 
                 ret
-CursorShape             db      0
-ExplosionX              db      0
-ExplosionY              db      -1              ; -1 to disable
+CursorShape				db      0
+ExplosionX				db      0
+ExplosionY				db      -1              ; -1 to disable
 
-CursorShape_Current     db      0
-PanelSelection          db      0
-SysExplosionX              db      0
-SysExplosionY              db      -1              ; -1 to disable
+CursorShape_Current		db      0
+PanelSelection			db      0
+SysExplosionX			db      0
+SysExplosionY			db      -1              ; -1 to disable
 
 
