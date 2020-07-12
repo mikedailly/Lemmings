@@ -11,25 +11,26 @@ InitExplosion:
 
 
 		; set animation bank
-		ld	a,PointsBank*2
-		MMU6
-		inc	a
-		MMU7
+		ld		a,PointsBank*2
+		NextReg	DRAW_BANK,a
+		inc		a
+		NextReg	DRAW_BANK+1,a
 
 		; offset all points so they are all positive.... (add $80)
-		ld	de,$c000
+		ld		de,DRAW_BASE
 		exx
-		ld	b,53			; 53 frames
-@Loop2:		exx
-
-		ld	b,00			; only 80 points, so some redundent values
-@Doloop:	ld	a,(de)
-		add	a,$80			; offset by 128
-		ld	(de),a
-		inc	e
+		ld		b,53			; 53 frames
+@Loop2:		
+		exx
+		ld		b,00			; only 80 points, so some redundent values
+@Doloop:
+		ld		a,(de)
+		add		a,$80			; offset by 128
+		ld		(de),a
+		inc		e
 		djnz	@Doloop
 
-		inc	d
+		inc		d
 		exx
 		djnz	@Loop2
 		ret

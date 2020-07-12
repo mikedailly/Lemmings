@@ -156,12 +156,14 @@ InitFileSystem:
 
 ; *******************************************************************************************************
 ; Function:	Load into banked RAM
-; In:		a  = bank to load into 
-;		hl = file data pointer
-;		ix = address to load to (somewhere in the top 16K probably)
+; In:		a  = 8K bank to load into 
+;			hl = file data pointer
+;			ix = address to load to (somewhere in the top 16K probably)
 ; *******************************************************************************************************
 Load_Bank:	
-		call	SetBank
+		NextReg	DRAW_BANK,a
+		inc		a
+		NextReg	DRAW_BANK+1,a
 	
 ; *******************************************************************************************************
 ; Function:	Load a whole file into memory	(confirmed working on real machine)
@@ -321,7 +323,7 @@ LoadHandle	db	0
 ; *******************************************************************************************************
 ; Function:	Load a whole file into memory	
 ; In:		hl = file data pointer
-;		a = starting bank
+;			a = starting bank
 ; *******************************************************************************************************
 Load_Banked:	
 		ld		(LastFileName),hl
@@ -355,8 +357,9 @@ Load_Banked:
 
 @NextBlock:
 		ld		a,(CurrentFBank)
-		call	SetBank
+		NextReg	DRAW_BANK,a
 		inc		a
+		NextReg	DRAW_BANK+1,a		
 		ld		(CurrentFBank),a
 
 		ld		a,(BlockFileSize+2)	; is size & $fffc00!=0? if not... more than 16K
@@ -376,7 +379,7 @@ Load_Banked:
         ld		b,a
 
 @LoadRemaining
-		ld 		ix,$c000	  	; Get bank start
+		ld 		ix,DRAW_BASE  	; Get bank start
         ld		a,(FileHandle)
         call	fread			; read data from A to address IX of length BC                
 		jr		c,@error_reading

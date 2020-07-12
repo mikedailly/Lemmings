@@ -2,14 +2,18 @@
 ;
 ;	General equates and macros
 ;
+
+DRAW_BANK				equ		$52
+DRAW_BASE				equ		$4000
+
 USE_COPPER				equ		0
 NextInstructions        equ     1
 
-TBBLUE_REGISTER_SELECT	equ	$243b
-SPRITE_CONTROL_REGISTER	equ	$15
-CLIP_ULA_REGISTER	equ	$1a
-CLIP_LAYER2_REGISTER	equ	$19
-CLIP_SPRITE_REGISTER	equ	$18
+TBBLUE_REGISTER_SELECT	equ		$243b
+SPRITE_CONTROL_REGISTER	equ		$15
+CLIP_ULA_REGISTER		equ		$1a
+CLIP_LAYER2_REGISTER	equ		$19
+CLIP_SPRITE_REGISTER	equ		$18
 
 
 
@@ -37,9 +41,9 @@ Mouse_Wheel				equ	$f0
 ;
 ; Memory map
 ;
-; $006000-$00BFFF -  game code (banks 0 and 1)
-; $00C000-$00FFFF -  general (paging area)  (bank2)
-; $010000-$024000 -  Rest of 128K normal specturm RAM (banks 3-7)
+; $000000-$007FFF -  general (paging area)  (4 banks)
+; $008000-$00FFFF -  game code (banks 0 and 1)
+; $010000-$024000 -  Rest of 128K normal specturm RAM
 ; $024000-$03C000 -  Layer 2 double buffered screen. (banks 8,9,10  and 11,12,13)
 ; $03C000-$040000 -  Panel graphic  (bank $f)
 ; $040000-$048000 -  Lemmings sprites	(bank $10,$11)
@@ -54,31 +58,31 @@ Mouse_Wheel				equ	$f0
 ;
 ; Layer 2 stuff
 
-Code_Bank		equ	12			; 32K of code  (ZX128 banks 6 and 7)
 
 ;		Seg  DataSeg,$8000,$8000
 ;		Seg  CodeSeg,Code_Bank:$0000,$0000
 
 
+Code_Bank				equ		4					; 32K of code  (ZX128 banks 6 and 7)
 VRAM_BASE_BANK			equ		8					; 2 layer 2 screens = 6 banks
-LevelBank				equ		14
-LevelAddress			equ		$c000				; 2K
-PanelNumbersBank		equ		14
-PanelNumbersAddress		equ		$c800				; 400 bytes
-PanelBank				equ		15
-PanelAddress			equ		$c000				; panel is 8K
-LevelBitmapBank			equ		16					; level bitmap from bank 16 to 38 (22 banks). Last 2 banks are 0 for falling off the bottom
-LevelBitmapAddress		equ		$c000
-StyleBank 				equ 	38					; start of style data (96K - 6 banks)
-StyleBaseAddress 		equ 	$c000
-ObjectsBank 			equ 	StyleBank+6			; Level objects - load over the top of the styles (80k - 5 banks)
-ObjectsBaseAddress 		equ 	$c000
-LemmingsBank			equ		ObjectsBank+5		; start of lemmings sprites 
-LemmingAddress			equ		$c000
-PointsBank				equ		LemmingsBank+6		; (2 banks)
-PointsAddress			equ		$c000
-CollisionBank			equ		PointsBank+2		; 4x4 array collision map (3 banks)
-CollisionAddress		equ		$e000				; (20480 bytes from 24576)
+LevelBank				equ		28
+LevelAddress			equ		DRAW_BASE			; 2K
+PanelNumbersBank		equ		28
+PanelNumbersAddress		equ		DRAW_BASE+$800		; 400 bytes
+PanelBank				equ		30
+PanelAddress			equ		DRAW_BASE			; panel is 8K
+LevelBitmapBank			equ		32					; level bitmap from bank 16 to 38 (22 banks). Last 2 banks are 0 for falling off the bottom
+LevelBitmapAddress		equ		DRAW_BASE
+StyleBank 				equ 	76					; start of style data (96K - 6 banks)
+StyleBaseAddress 		equ 	DRAW_BASE
+ObjectsBank 			equ 	StyleBank+12			; Level objects - load over the top of the styles (80k - 5 banks)
+ObjectsBaseAddress 		equ 	DRAW_BASE
+LemmingsBank			equ		ObjectsBank+10		; start of lemmings sprites 
+LemmingAddress			equ		DRAW_BASE
+PointsBank				equ		LemmingsBank+12		; (2 banks)
+PointsAddress			equ		DRAW_BASE
+CollisionBank			equ		PointsBank+4		; 4x4 array collision map (3 banks)
+CollisionAddress		equ		DRAW_BASE+$2000		; (20480 bytes from 24576)
 	
 MAX_LEM					equ		100
 	

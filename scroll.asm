@@ -19,20 +19,22 @@ InitLevel:
 ClearLevelBitmap:
 		ld 		a,LevelBitmapBank
 @CopyLoop:
-		call 	SetBank
+		NextReg	DRAW_BANK,a
+		inc		a
+		NextReg	DRAW_BANK+1,a
 		push 	af
 
 		xor 	a
-		ld		hl,$c000
+		ld		hl,DRAW_BASE
 		ld		(hl),a
 		ld		bc,16383
-		ld		de,$c001
+		ld		de,DRAW_BASE+1
 		ldir
 
-		pop	af
+		pop		af
 		inc 	a
-		cp 	LevelBitmapBank+20
-		jr 	nz,@CopyLoop
+		cp 		LevelBitmapBank+40
+		jr 		nz,@CopyLoop
 		ret
 
 
@@ -118,41 +120,42 @@ LoadLevelBitmap:
 ; Function:	Handle the scrolling and display the map
 ; ************************************************************************
 DisplayMap:              
-                ld      hl,(ScrollIndex)
-                ld      bc,8    
+		ld      hl,(ScrollIndex)
+		ld      bc,8    
 
-                ld      a,(Keys+VK_Z)
-                and     a
-                jr      z,@notpressed
-                xor	a			; clear carry
-                sbc     hl,bc
+		ld      a,(Keys+VK_Z)
+		and     a
+		jr      z,@notpressed
+		xor		a						; clear carry
+		sbc     hl,bc
 @notpressed:
-                ld      a,(Keys+VK_X)
-                and     a
-                jr      z,@notpressed2
-                add	hl,bc
+		ld      a,(Keys+VK_X)
+		and     a
+		jr      z,@notpressed2
+		add		hl,bc
 @notpressed2:
 		ld      (ScrollIndex),hl
-		jp	@SkipMouse
+		jp		@SkipMouse
 
 
-                ; scroll maps
-                ld      hl,(ScrollIndex)
-                ld      bc,8    
-                ld      a,(MouseX)
-                cp      255-8
-                jr      c,@NoRight
-                add     hl,bc
+		; scroll maps
+		ld      hl,(ScrollIndex)
+		ld      bc,8    
+		ld      a,(MouseX)
+		cp      255-8
+		jr      c,@NoRight
+		add     hl,bc
 @NoRight
-                ld      a,(MouseX)
-                cp      8
-                jr      nc,@NoLeft
-                sbc     hl,bc
-@NoLeft         ld      (ScrollIndex),hl
+		ld      a,(MouseX)
+		cp      8
+		jr      nc,@NoLeft
+		sbc     hl,bc
+@NoLeft	
+		ld      (ScrollIndex),hl
 @SkipMouse:
-                ;
-                ; Fall through.....
-                ;
+		;
+		; Fall through.....
+		;
 
 ; ************************************************************************
 ;
@@ -175,9 +178,9 @@ CopyScreen:
 		ld		de,8					; start at top of VRAM bank
 		ld		a,LevelBitmapBank*2		; 20 banks to loop through
 @CopyLoop:
-		NextReg	$56,a
+		NextReg	DRAW_BANK,a
 		inc		a
-		NextReg	$57,a
+		NextReg	DRAW_BANK+1,a
 		inc		a
 		;ex		af,af'		; remember bank
 		push	af

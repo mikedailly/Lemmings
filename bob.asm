@@ -39,14 +39,14 @@ DrawBobLevel:
 		ld		(BobYcoord),de
 		ld 		a,StyleBank*2		; 8k BANKS
 		ld		(BobBaseBank),a		; get current bank and use that as the base
-		NextReg	$56,a
+		NextReg	DRAW_BANK,a
 		inc		a
-		NextReg	$57,a
+		NextReg	DRAW_BANK+1,a
 
 		; get base of "bob"
 		add		hl,hl					; *4
 		add		hl,hl
-		add		hl,$c000				; base of "bank" (and sprite table offsets)
+		add		hl,DRAW_BASE			; base of "bank" (and sprite table offsets)
 
 		ld		e,(hl)					; read the bank offsetn 
 		inc		hl
@@ -61,9 +61,9 @@ DrawBobLevel:
 		add		a,a						; get 8K banks
 		add		a,c
 		ld		(BobBank),a		
-		NextReg	$56,a
+		NextReg	DRAW_BANK,a
 		inc		a
-		NextReg	$57,a
+		NextReg	DRAW_BANK+1,a
  
 		ex		de,hl					; get bank offset
 		ld		a,(hl)					;
@@ -140,9 +140,9 @@ DrawBobLevel:
 		; copy scanline to temp buffer
 		ld		hl,(CurrentScanline)
 		ld		a,(BobBank)
-		NextReg	$56,a
+		NextReg	DRAW_BANK,a
 		inc		a
-		NextReg	$57,a
+		NextReg	DRAW_BANK+1,a
 
 		ld		de,GraphicsBuffer
 		ld		bc,(BobWidth)
@@ -156,7 +156,7 @@ DrawBobLevel:
 		add		a,a
 		add		a,a
 		;and 	$3f						; don't need to AND as $3F+$C0=$FF
-		or		$c0 					; add on base address (always here)
+		or		Hi(DRAW_BASE)			; add on base address (always here)
 		ld 		d,a 					; get Y (line offset into bank) into D
 		ld		e,0
 		pop 	af
@@ -166,9 +166,9 @@ DrawBobLevel:
 		;and	$1f						; 0 put into bit 7 with srl so no need for AND
 		add		a,LevelBitmapBank		; add on the base of the level
 		add		a,a
-		NextReg	$56,a
+		NextReg	DRAW_BANK,a
 		inc		a
-		NextReg	$57,a
+		NextReg	DRAW_BANK+1,a
 
 
 		ld		hl,(BobXcoord)

@@ -105,81 +105,81 @@ BuilderLShrug:	LEMANIM		FShruggerLeft,	9,	-1,0		; +1 for detection
 LemTitle        File    "lemdat/lemtitle.256"		; title page
 PanelFile       File    "lemdat/lempanel.256"		; Lemmings panel
 PanelNumbers    File    "lemdat/panelnum.256"		; Lemmings panel
-CursorsFile	File	"lemdat/cursor.256"		; Cursors (cross and selection)
-PointsFile	File	"lemdat/points.dat"		; nuke points...
+CursorsFile		File	"lemdat/cursor.256"			; Cursors (cross and selection)
+PointsFile		File	"lemdat/points.dat"			; nuke points...
 
 ; sprites
 LemmingsFile	File	"lemdat/lemmings.spr"
 
 ; styles
-style0		File	"lemdat/styles/style0.spr"
-style1		File	"lemdat/styles/style1.spr"
-style2		File	"lemdat/styles/style2.spr"
-style3		File	"lemdat/styles/style3.spr"
-style4		File	"lemdat/styles/style4.spr"
-styleO0		File	"lemdat/styles/style0o.spr"
-styleO1		File	"lemdat/styles/style1o.spr"
-styleO2		File	"lemdat/styles/style2o.spr"
-styleO3		File	"lemdat/styles/style3o.spr"
-styleO4		File	"lemdat/styles/style4o.spr"
-style0dat	File	"lemdat/styles/style0.dat"
-style1dat	File	"lemdat/styles/style1.dat"
-style2dat	File	"lemdat/styles/style2.dat"
-style3dat	File	"lemdat/styles/style3.dat"
-style4dat	File	"lemdat/styles/style4.dat"
+style0			File	"lemdat/styles/style0.spr"
+style1			File	"lemdat/styles/style1.spr"
+style2			File	"lemdat/styles/style2.spr"
+style3			File	"lemdat/styles/style3.spr"
+style4			File	"lemdat/styles/style4.spr"
+styleO0			File	"lemdat/styles/style0o.spr"
+styleO1			File	"lemdat/styles/style1o.spr"
+styleO2			File	"lemdat/styles/style2o.spr"
+styleO3			File	"lemdat/styles/style3o.spr"
+styleO4			File	"lemdat/styles/style4o.spr"
+style0dat		File	"lemdat/styles/style0.dat"
+style1dat		File	"lemdat/styles/style1.dat"
+style2dat		File	"lemdat/styles/style2.dat"
+style3dat		File	"lemdat/styles/style3.dat"
+style4dat		File	"lemdat/styles/style4.dat"
 
 ; levels
-level_0000	File	"lemdat/levels/LVL0000.LVL"
-level_0001	File	"lemdat/levels/LVL0001.LVL"
-level_0002	File	"lemdat/levels/LVL0002.LVL"
-level_0003	File	"lemdat/levels/LVL0003.LVL"
-level_0004	File	"lemdat/levels/LVL0004.LVL"
-level_0005	File	"lemdat/levels/LVL0005.LVL"
-level_0006	File	"lemdat/levels/LVL0006.LVL"
-level_0007	File	"lemdat/levels/LVL0007.LVL"
-;level_0008	File	"lemdat/levels/LVL0008.LVL"
-;level_0009	File	"lemdat/levels/LVL0009.LVL"
-level_0010	File	"lemdat/levels/LVL0010.LVL"
-level_0011	File	"lemdat/levels/LVL0011.LVL"
-level_0012	File	"lemdat/levels/LVL0012.LVL"
-level_0013	File	"lemdat/levels/LVL0013.LVL"
-level_0014	File	"lemdat/levels/LVL0014.LVL"
-level_0015	File	"lemdat/levels/LVL0015.LVL"
-level_0016	File	"lemdat/levels/LVL0016.LVL"
-level_0017	File	"lemdat/levels/LVL0017.LVL"
-level_0020	File	"lemdat/levels/LVL0020.LVL"
-level_0021	File	"lemdat/levels/LVL0021.LVL"
-level_0022	File	"lemdat/levels/LVL0022.LVL"
-level_0023	File	"lemdat/levels/LVL0023.LVL"
-level_0024	File	"lemdat/levels/LVL0024.LVL"
-level_0025	File	"lemdat/levels/LVL0025.LVL"
-level_0026	File	"lemdat/levels/LVL0026.LVL"
-level_0027	File	"lemdat/levels/LVL0027.LVL"
-level_0030	File	"lemdat/levels/LVL0030.LVL"
-level_0031	File	"lemdat/levels/LVL0031.LVL"
-level_0032	File	"lemdat/levels/LVL0032.LVL"
-level_0033	File	"lemdat/levels/LVL0033.LVL"
-level_0034	File	"lemdat/levels/LVL0034.LVL"
-level_0035	File	"lemdat/levels/LVL0035.LVL"
-level_0036	File	"lemdat/levels/LVL0036.LVL"
+level_0000		File	"lemdat/levels/LVL0000.LVL"
+level_0001		File	"lemdat/levels/LVL0001.LVL"
+level_0002		File	"lemdat/levels/LVL0002.LVL"
+level_0003		File	"lemdat/levels/LVL0003.LVL"
+level_0004		File	"lemdat/levels/LVL0004.LVL"
+level_0005		File	"lemdat/levels/LVL0005.LVL"
+level_0006		File	"lemdat/levels/LVL0006.LVL"
+level_0007		File	"lemdat/levels/LVL0007.LVL"
+;level_0008		File	"lemdat/levels/LVL0008.LVL"
+;level_0009		File	"lemdat/levels/LVL0009.LVL"
+level_0010		File	"lemdat/levels/LVL0010.LVL"
+level_0011		File	"lemdat/levels/LVL0011.LVL"
+level_0012		File	"lemdat/levels/LVL0012.LVL"
+level_0013		File	"lemdat/levels/LVL0013.LVL"
+level_0014		File	"lemdat/levels/LVL0014.LVL"
+level_0015		File	"lemdat/levels/LVL0015.LVL"
+level_0016		File	"lemdat/levels/LVL0016.LVL"
+level_0017		File	"lemdat/levels/LVL0017.LVL"
+level_0020		File	"lemdat/levels/LVL0020.LVL"
+level_0021		File	"lemdat/levels/LVL0021.LVL"
+level_0022		File	"lemdat/levels/LVL0022.LVL"
+level_0023		File	"lemdat/levels/LVL0023.LVL"
+level_0024		File	"lemdat/levels/LVL0024.LVL"
+level_0025		File	"lemdat/levels/LVL0025.LVL"
+level_0026		File	"lemdat/levels/LVL0026.LVL"
+level_0027		File	"lemdat/levels/LVL0027.LVL"
+level_0030		File	"lemdat/levels/LVL0030.LVL"
+level_0031		File	"lemdat/levels/LVL0031.LVL"
+level_0032		File	"lemdat/levels/LVL0032.LVL"
+level_0033		File	"lemdat/levels/LVL0033.LVL"
+level_0034		File	"lemdat/levels/LVL0034.LVL"
+level_0035		File	"lemdat/levels/LVL0035.LVL"
+level_0036		File	"lemdat/levels/LVL0036.LVL"
 
 ; first few levels
-level_0091	File	"lemdat/levels/LVL0091.LVL"		; Just dig
-level_0095	File	"lemdat/levels/LVL0095.LVL"		; Only floaters can survive this
-level_0096	File	"lemdat/levels/LVL0096.LVL"		; Tailor-made for blockers
-level_0092	File	"lemdat/levels/LVL0092.LVL"		; Now use miners and climbers
-level_0093	File	"lemdat/levels/LVL0093.LVL"		; You need bashers this time
-level_0094	File	"lemdat/levels/LVL0094.LVL"		; A task for blockers and bombers
-level_0097	File	"lemdat/levels/LVL0097.LVL"		; Builders will help you here
+level_0091		File	"lemdat/levels/LVL0091.LVL"		; Just dig
+level_0095		File	"lemdat/levels/LVL0095.LVL"		; Only floaters can survive this
+level_0096		File	"lemdat/levels/LVL0096.LVL"		; Tailor-made for blockers
+level_0092		File	"lemdat/levels/LVL0092.LVL"		; Now use miners and climbers
+level_0093		File	"lemdat/levels/LVL0093.LVL"		; You need bashers this time
+level_0094		File	"lemdat/levels/LVL0094.LVL"		; A task for blockers and bombers
+level_0097		File	"lemdat/levels/LVL0097.LVL"		; Builders will help you here
 
-level_0055	File	"lemdat/levels/LVL0055.LVL"		; Steel Works
-level_0057	File	"lemdat/levels/LVL0057.LVL"		; It's hero time!
+level_0055		File	"lemdat/levels/LVL0055.LVL"		; Steel Works
+level_0057		File	"lemdat/levels/LVL0057.LVL"		; It's hero time!
 
 
 level1          File    "lemdat/level001.256"
 level2          File    "lemdat/level002.256"
 level3          File    "lemdat/level003.256"
 level4          File    "lemdat/level004.256"
-level91		File    "lemdat/level091.256"
+level91			File    "lemdat/level091.256"
 
 

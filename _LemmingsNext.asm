@@ -27,45 +27,46 @@ ModFileBank          equ                18
 ModSampleBank        equ                50
 
 
-                seg     CODE_SEG, 10:$1c5c,$5c5c
-                seg     MOD_SEG,  ModFileBank:$0000,$0000
-                seg     MOD_VOLUME,  ModVolumeBank:$0000,$0000                ; volume conversion goes here
 
 
-                seg        CODE_SEG
+			include "includes.asm"
 
 
 
-                include "includes.asm"
+			seg     CODE_SEG, Code_Bank:$0000,$8000
+			seg     MOD_SEG,  ModFileBank:$0000,$0000
+			seg     MOD_VOLUME,  ModVolumeBank:$0000,$0000                ; volume conversion goes here
 
 
-                ; IRQ is at $5c5c to 5e01
-                include "irq.asm"       
-               
-StackEnd:
-                ds      127
-StackStart:     dw      0,0,0,0
-                ds      128                     ; why do I need this?                
+			seg        CODE_SEG
 
+
+			; IRQ is at $fefe to 5e01
+			include "irq.asm"       
+			
+
+
+			org		$8000
+			; starts at $8080
 StartAddress:
 			di    
-			ld      sp,StackStart&$fffe
+			ld      sp,0+(StackStart+1)&$ffff			; Stack is last 128 bytes of memory.... (in IRQ.ASM)
 			ld      a,VectorTable>>8
 			ld      i,a               
 
-			ld      a,%00000011             ; 28Mhz
+			ld      a,%00000011             		; 28Mhz
 			NextReg $07,a
-			ld      a,%00001101
 			
-			BORDER          4      
-			call	FlipScreens             ; get front and bank buffer in order
+			
+			BORDER	4      
+			call	FlipScreens             		; get front and bank buffer in order
 			ld		a,$e3
-			BORDER          3
+			BORDER	3
 			call	Cls256
-			BORDER          2
+			BORDER	2
 			call	FlipScreens
 			ld		a,$d3
-			BORDER          1
+			BORDER	1
 			call    Cls256
 			im      2                       ; Set up IM2 mode
 			ei
@@ -127,11 +128,11 @@ MainLoop:
 
 
 
-		call    	OpenTrapDoors
-		call    	DrawLevelObjects
+;		call    	OpenTrapDoors
+;		call    	DrawLevelObjects
 			
-		call    	SpawnLemming
-		call    	ProcessLemmings
+;		call    	SpawnLemming
+;		call    	ProcessLemmings
 			
 		;ld      ix,LemData
 		;ld      a,(MouseX)
@@ -143,14 +144,14 @@ MainLoop:
 		;call    DrawLemmingFrame
 			
 			
-		call    	ProcessInput
-		call	DrawPanelNumbers_Force
+;		call    	ProcessInput
+;		call	DrawPanelNumbers_Force
 		;call    	CopyPanelToScreen
 
 
 		ld      a,1
 		out     ($fe),a
-		call    GenerateMiniMap
+;		call    GenerateMiniMap
 		ld      a,0
 		out     ($fe),a
 		;ld      	hl,$4001
@@ -227,34 +228,27 @@ Init:
 			call    InitSprites
 
 			LoadBanked LemmingsFile,LemmingsBank
-			CALL    InitExplosion
+			call	InitExplosion
 
 			ld      a,1                     ; enable IRQ cursor
-			ld      (CursorOn),a
-
-
-;if USE_COPPER = 1 
-;                ld      hl,GameCopper
-;                ld      de,GameCopperSize
-;                call    UploadCopper
-;                NextReg $62,%11000000
-;endif                
-                ret
+			ld      (CursorOn),a             
+			ret
 
 
 ; *****************************************************************************************************************************
-; includes modules
+; Draw 2 columns down each side of the screen to hide lemming clipping
 ; *****************************************************************************************************************************
 SetupAttribs:   
-                ld      b,20
-                ld      ix,$5800                ; attribute screen
-                ld      de,32
-                ld      a,0;    //64
-@DrawColumns:   ld      (ix+0),a                ; set the edges of the screen
-                ld      (ix+31),a
-                add     ix,de
-                djnz    @DrawColumns
-                ret
+			ld      b,20
+			ld      ix,$5800                ; attribute screen
+			ld      de,32
+			ld      a,0
+@DrawColumns:
+			ld      (ix+0),a                ; set the edges of the screen
+			ld      (ix+31),a
+			add     ix,de
+			djnz    @DrawColumns
+			ret
 
 
 ; *****************************************************************************************************************************
@@ -267,7 +261,7 @@ InitGame:
                 call    InitLemmings
                 call    InitLevel
                 call    InitPanel
-                call    LoadLevel
+                ;call    LoadLevel
                 ret
 
 ; *****************************************************************************************************************************

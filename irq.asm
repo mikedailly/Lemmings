@@ -4,26 +4,7 @@
 ;
 ; ************************************************************************
 
-; You don't have to di/ei because the nextreg port 0x243b is now readable. 
-; So in your isr you can read the port, do your thing, then restore the port before returning.
-
-                ; only 164 bytes available here
-                org     $5c5c
-IM2Routine:     push    hl
-                push    de
-                push    bc
-                push    af
-
-IRQVector:      jp      VBlankIRQ               
-ReturnFromIRQ:
-        
-                pop     af
-                pop     bc
-                pop     de
-                pop     hl
-                ei
-                reti
-                org     $5d00
+                org     $fd00
 VectorTable:            
                 dw      IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine
                 dw      IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine,IM2Routine
@@ -37,20 +18,22 @@ VectorTable:
 
 
 
+; You don't have to di/ei because the nextreg port 0x243b is now readable. 
+; So in your isr you can read the port, do your thing, then restore the port before returning.
 
-; ************************************************************************
-;
-; Function:     VBlank IRQ
-;
-; ************************************************************************
-VBlankIRQ:      
+                ; only 164 bytes available here
+                org     $fefe
+IM2Routine:     push    hl
+                push    de
+                push    bc
+                push    af
+
+
                 call    ReadMouse                
 
                 ld      a,(VBlank)                     ; simple frame counter
                 inc     a
                 ld      (VBlank),a
-
-                
 
 
                 ; New frame? Time to update sprite buffers?
@@ -74,54 +57,48 @@ VBlankIRQ:
                 NextReg 18,a
                 ld      a,(Screen2Bank)
                 NextReg 19,a
-				NextReg	23,0					; set y scroll to 0
+				NextReg	23,0					; set y scroll to 0 (panel is offset a bit)
 
 
                 ld      a,(CursorOn)
                 and     a
-                jr      z,@NoCursor
-                call    DisplayCursor
+                call    nz,DisplayCursor
 @NoCursor:      
-                jp      ReturnFromIRQ
 
 
-yscrtest        db      0
+ReturnFromIRQ:
+        
+                pop     af
+                pop     bc
+                pop     de
+                pop     hl
+                ei
+                reti
+
 ; ************************************************************************
 ; Function:     Flip the screens!
 ; ************************************************************************
 FlipScreens:   
                 ld      a,(CursorShape)                 ; flip cursor
                 ld      (CursorShape_Current),a
-                ld      a,(ExplosionX)
-                ld      (SysExplosionX),a
-                ld      a,(ExplosionY)
-                ld      (SysExplosionY),a
-                ld      a,$ff                   ; disable explosion for the next game frame
-                ld      (ExplosionY),a
-
 
                 ; Swap screen (banks) addresses around 
                 ld      a,(Screen1Bank)
                 push    af
                 ld      a,(Screen2Bank)
                 ld      (Screen1Bank),a
-;                ld      (CopperGameScreen+1),a
-                ;NextReg 18,a
                 pop     af
                 ld      (Screen2Bank),a
-                ;NextReg 19,a
-
-
-;if USE_COPPER = 1
-;                ld      hl,GameCopper
-;                ld      de,GameCopperSize
-;                call    UploadCopper       
-;                NextReg $62,%11000000    
-;endif
                 ret
 
 Screen1Bank     db      8
 Screen2Bank     db      11
+
+
+StackStart:   	equ		$ffff
+
+
+				org	$fc00
 
 ; ************************************************************************
 ;
@@ -135,77 +112,6 @@ DisplayCursor:
                 ld      a,0                     ; first sprite
                 out     (c),a
                 
-
-                ; Explosion...
-                ld      a,(SysExplosionY)
-                cp      $ff
-                jp      nz,@Active
-                xor     a
-                out     (SpriteReg),a           ; disable sprite 1
-                out     (SpriteReg),a
-                out     (SpriteReg),a
-                out     (SpriteReg),a
-
-                out     (SpriteReg),a           ; disable sprite 2
-                out     (SpriteReg),a
-                out     (SpriteReg),a
-                out     (SpriteReg),a
-
-                out     (SpriteReg),a           ; disable sprite 3
-                out     (SpriteReg),a
-                out     (SpriteReg),a
-                out     (SpriteReg),a
-
-                out     (SpriteReg),a           ; disable sprite 4
-                out     (SpriteReg),a
-                out     (SpriteReg),a
-                out     (SpriteReg),a
-                jp      @SkipExpSetup
-@Active:
-                ld      a,(SysExplosionX)
-                ld      l,a
-                ld      h,0
-                add     hl,24
-                ld      a,l
-                out     (SpriteReg),a           ; x
-                ld      a,(SysExplosionY)
-                out     (SpriteReg),a           ; y
-                ld      a,h
-                out     (SpriteReg),a           ; msb
-                ld      a,$86                   ; exp-shape top left 
-                out     (SpriteReg),a           
-
-                ld      a,l
-                out     (SpriteReg),a           ; x
-                ld      a,(SysExplosionY)
-                add     a,16                    ; lower left sprite
-                out     (SpriteReg),a           ; y
-                ld      a,h
-                out     (SpriteReg),a           ; msb
-                ld      a,$87                   ; exp-shape lower left
-                out     (SpriteReg),a           
-
-                add     hl,16
-                ld      a,l
-                out     (SpriteReg),a           ; x
-                ld      a,(SysExplosionY)
-                out     (SpriteReg),a           ; y
-                ld      a,h
-                out     (SpriteReg),a           ; msb
-                ld      a,$88                   ; exp-shape top right
-                out     (SpriteReg),a           
-
-                ld      a,l
-                out     (SpriteReg),a           ; x
-                ld      a,(SysExplosionY)
-                add     a,16                    ; lower right sprite
-                out     (SpriteReg),a           ; y
-                ld      a,h
-                out     (SpriteReg),a           ; msb
-                ld      a,$89                   ; exp-shape lower right
-                out     (SpriteReg),a  
-@SkipExpSetup:
-
                 ; Draw Panel selection
                 ld      a,(PanelSelection)
                 swapnib                         ; *16
