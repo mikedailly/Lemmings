@@ -3,7 +3,7 @@ if ERRORLEVEL 1 goto doexit
 
 
 rem simple 48k model
-..\CSpect.exe -debug -w3 -tv -map=_LemmingsNext.dat.map -zxnext -mmc=.\ _LemmingsNext.nex
+..\CSpect.exe -debug -60 -w3 -tv -map=_LemmingsNext.dat.map -zxnext -mmc=.\ _LemmingsNext.nex
 
 :doexit
 

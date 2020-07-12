@@ -62,79 +62,62 @@
 ; ************************************************************************
 ResetBank:	xor	a			; bank 0 sits at $C000
 ;if	NextInstructions!=0
-SetBank:	ld	(CurrentBank),a
-		add	a,a
+SetBank:
+		ld	(CurrentBank),a
+		add		a,a
 		mmu6
 		inc 	a
 		mmu7
-		ld	a,(CurrentBank)
+		ld		a,(CurrentBank)
 		ret
-;else
-;; ZX Spectrum 128 banking method....
-;SetBank:	push	bc
-;		ld	(CurrentBank),a
-;
-;		ld	bc,$7ffd		; banking port		
-;		and	$07
-;		out	(c),a
-;
-;		ld	a,(CurrentBank)
-;		srl	a
-;		srl	a
-;		srl	a
-;		and	$07
-;		ld	b,$df
-;		out	(c),a
-;
-;		ld	a,(CurrentBank)
-;		pop	bc
-;		ret
-;endif
-CurrentBank	db	0
+
+CurrentBank		db	0
 
 ; ************************************************************************
 ;
 ;	Function:	Clear the 256 colour screen to a set colour
-;	In:		A = colour to clear to ($E3 makes it transparent)
+;	In:			A = colour to clear to ($E3 makes it transparent)
 ;
 ; ************************************************************************
 Cls256:
 		push	bc
 		push	de
 		push	hl
-
-		ld	d,a			; byte to clear to
-                ld	e,3			; number of blocks
-                ld	a,8+3			; first bank... (bank 0 with write enable bit set)  (back buffer)
-                
-                ld      bc, $123b                
-@LoadAll:	out	(c),a			; bank in first bank
-                push	af
+		
+		ld		d,a						; byte to clear to
+		ld		e,3						; number of blocks
+		ld		a,8+3					; first bank... (bank 0 with write enable bit set)  (back buffer)
+		
+		ld      bc, $123b                
+@LoadAll:
+		out		(c),a					; bank in first bank
+		push	af
                 
                                 
-                ; Fill lower 16K with the desired byte
-                ld	hl,0
-@ClearLoop:	ld	(hl),d
-                inc	l
-                jr	nz,@ClearLoop
-                inc	h
-                ld	a,h
-                cp	$40
-                jr	nz,@ClearLoop
-
-                pop	af			; get block back
-                add	a,$40
-                dec	e			; loops 3 times
-                jr	nz,@LoadAll
-
-                ld      bc, $123b		; switch off background (should probably do an IN to get the original value)
-                ld	a,2
-                out	(c),a     
-
-                pop	hl
-                pop	de
-                pop	bc
-                ret                          
+		; Fill lower 16K with the desired byte
+		ld		hl,0
+@ClearLoop:
+		ld		(hl),d
+		inc		l
+		jr		nz,@ClearLoop
+		inc		h
+		ld		a,h
+		cp		$40
+		jr		nz,@ClearLoop
+		
+		pop		af						; get block back
+		add		a,$40
+		dec		e						; loops 3 times
+		jr		nz,@LoadAll
+		
+		ld		bc,$123b
+		ld		a,2
+		out		(c),a     
+		
+		pop		hl
+		pop		de
+		pop		bc
+		ret                          
 
 
 ; ************************************************************************
@@ -142,22 +125,27 @@ Cls256:
 ;	Function:	Clear the spectrum attribute screen
 ;	In:		A = attribute
 ;
+;    Attribute layout
+;    7  6  5  4  3  2  1  0
+;   FF BB P2 P1 P0 I2 I1 I0
+;
+;
 ; ************************************************************************
 ClsATTR:
 		push	hl
 		push	bc
 		push	de
 
-                ld      ($5800),a
-                ld      hl,$5800
-                ld      de,$5801
-                ld      bc,1000
-                ldir
+		ld      ($5800),a
+		ld      hl,$5800
+		ld      de,$5801
+		ld      bc,999
+		ldir
 
-                pop	de
-                pop	bc
-                pop	hl
-                ret
+		pop		de
+		pop		bc
+		pop		hl
+		ret
 
 
 ; ************************************************************************
@@ -170,17 +158,17 @@ Cls:
 		push	bc
 		push	de
 
-		xor	a
-                ld      ($4000),a
-                ld      hl,$4000
-                ld      de,$4001
-                ld      bc,6143
-                ldir
+		xor		a
+		ld      ($4000),a
+		ld      hl,$4000
+		ld      de,$4001
+		ld      bc,6143
+		ldir
 
-                pop	de
-                pop	bc
-                pop	hl
-                ret
+		pop		de
+		pop		bc
+		pop		hl
+		ret
 
 
 
@@ -190,10 +178,10 @@ Cls:
 ;
 ; ************************************************************************
 BitmapOn:
-                ld      bc, $123b
-                ld	a,2
-                out	(c),a     
-                ret                          
+		ld		bc, $123b
+		ld		a,2
+		out		(c),a     
+		ret                          
 
                	
 ; ************************************************************************
@@ -202,10 +190,10 @@ BitmapOn:
 ;
 ; ************************************************************************
 BitmapOff:
-                ld      bc, $123b
-                ld	a,0
-                out	(c),a     
-                ret          
+		ld		bc, $123b
+		ld		a,0
+		out		(c),a     
+		ret          
 
 
 
@@ -218,22 +206,18 @@ BitmapOff:
 ;
 ; ******************************************************************************
 PrintHex:	
-		push	bc
 		push	hl
 		push	af
-		ld	bc,HexCharset
 
-		srl	a
-		srl	a
-		srl	a
-		srl	a	
+		swapnib
+		and		$0f
 		call	DrawHexCharacter
 
-		pop	af
-		and	$f	
+		pop		af
+		and		$f	
 		call	DrawHexCharacter
-		pop	hl
-		pop	bc
+
+		pop		hl
 		ret
 
 
@@ -241,25 +225,26 @@ PrintHex:
 ; A= hex value to print
 ;
 DrawHexCharacter:
-		ld	h,0
-		ld	l,a
-		add	hl,hl	;*8
-		add	hl,hl
-		add	hl,hl
-		add	hl,bc	; add on base of character wet
+		ld		h,0
+		ld		l,a
+		add		hl,hl				;*8
+		add		hl,hl
+		add		hl,hl
+		add		hl,HexCharset		; add on base of character wet
 
 		push	de
 		push	bc
-		ld	b,8
-@lp1:		ld	a,(hl)
-		ld	(de),a
-		inc	hl		; cab't be sure it's on a 256 byte boundary
-		inc	d		; next line down
+		ld		b,8
+@lp1:		
+		ld		a,(hl)
+		ld		(de),a
+		inc		hl					; cab't be sure it's on a 256 byte boundary
+		inc		d					; next line down
 		djnz	@lp1
-		pop	bc
-		pop	de
-		inc	e
-		ret
+		pop		bc
+		pop		de
+		inc		e
+		ret	
 
 
 HexCharset:
@@ -402,24 +387,23 @@ HexCharset:
 ; Used:		uses bc,a
 ; ******************************************************************************
 ReadMouse:
-		ld	bc,Kempston_Mouse_Buttons
-		in	a,(c)
-		ld	(MouseButtons),a
+		ld		bc,Kempston_Mouse_Buttons
+		in		a,(c)
+		ld		(MouseButtons),a
 
-		ld	bc,Kempston_Mouse_X
-		in	a,(c)
-		ld	(MouseX),a
+		ld		bc,Kempston_Mouse_X
+		in		a,(c)
+		ld		(MouseX),a
 
-		ld	bc,Kempston_Mouse_Y
-		in	a,(c)
+		ld		bc,Kempston_Mouse_Y
+		in		a,(c)
 		neg
-		ld	(MouseY),a
-
+		ld		(MouseY),a
 		ret
 
 MouseButtons	db	0
-MouseX		db	0
-MouseY		db	0
+MouseX			db	0
+MouseY			db	0
 
 
 ; ******************************************************************************
@@ -432,42 +416,27 @@ MouseY		db	0
 ; ******************************************************************************
 UploadSprites
 		di
-		;push hl
-		;ld bc,0
-		;ld a,255
-@llp1		;ld (hl),a
-		;inc hl
-		;inc a
-		;djnz @llp1
-		;pop hl
-
-
-
 		; Upload sprite graphics
-                ld      a,e		; get start shape
-                ld	e,0		; each pattern is 256 bytes
+		ld		a,e		; get start shape
+		ld		e,0		; each pattern is 256 bytes
 @AllSprites:               
-                ; select pattern 2
-                ld      bc, $303B
-                out     (c),a
-
-                ; upload ALL sprite sprite image data
-                ld      bc, SpriteShape
+		; select pattern 2
+		ld		bc, $303B
+		out		(c),a
+		
+		; upload ALL sprite sprite image data
+		ld		bc, SpriteShape
 @UpLoadSprite:           
-                ;ld      a,(hl)		; 7
-                ;out     (c),a		; 12
-                ;inc     hl		; 4 = 23                
-                outi			; port=(hl), hl++, b--
-                inc	b		; 4 = 20
-
-                ;outinb
-
-                dec     de
-                ld      a,d
-                or      e               
-                jr      nz, @UpLoadSprite
-                ei
-                ret
+		outi			; port=(hl), hl++, b--
+		inc		b		; 4 = 20		
+		;outinb
+		
+		dec     de
+		ld      a,d
+		or      e               
+		jr      nz, @UpLoadSprite
+		ei
+		ret
 
 
 
@@ -476,37 +445,40 @@ UploadSprites
 ; Function:	Scan the keyboard
 ; ******************************************************************************
 ReadKeyboard:
-		ld	b,41
-		ld	hl,Keys
-		xor	a
-@lp1:		ld	(hl),a
-		inc	hl
+		ld		b,41
+		ld		hl,Keys
+		xor		a
+@lp1:	ld		(hl),a
+		inc		hl
 		djnz	@lp1
 
-		ld	ix,Keys
-		ld	bc,$fefe	;Caps,Z,X,C,V
-		ld	hl,RawKeys
-@ReadAllKeys:	in	a,(c)
-		ld	(hl),a
-		inc	hl		
+		ld		ix,Keys
+		ld		bc,$fefe	;Caps,Z,X,C,V
+		ld		hl,	RawKeys
+@ReadAllKeys:	
+		in		a,(c)
+		ld		(hl),a
+		inc		hl		
 		
-		ld	d,5
-		ld	e,$ff
-@DoAll:		srl	a
-		jr	c,@notset
-		ld	(ix+0),e
-;		jr	@SkipSkip
-@notset:	;ld	(ix+0),0
-@SkipSkip:	inc	ix
-		dec	d
-		jr	nz,@DoAll
+		ld		de,$05ff
+@DoAll:
+		srl		a
+		jr		c,@notset
+		ld		(ix+0),e
 
-		ld	a,b
-		sla	a
-		jr	nc,ExitKeyRead
-		or	1
-		ld	b,a
-		jp	@ReadAllKeys
+@notset:
+@SkipSkip:
+		inc		ix
+		dec		d
+		jr		nz,@DoAll
+
+		ld		a,b
+		sla		a
+		jr		nc,ExitKeyRead
+		or		1
+		ld		b,a
+		jp		@ReadAllKeys
+
 ExitKeyRead:
 		ret
 

@@ -43,13 +43,7 @@ GameCopper:
 		MOVE    COP_LAYER2_BANK,PanelBank        
 		WAIT    159,340
 		MOVE	COP_LAYER2_YOFF,32
-
-		WAIT    192,0
-CopperGameScreen:	
-		MOVE    COP_LAYER2_BANK,VRAM_BASE_BANK        
-		WAIT    192,40
-		MOVE	COP_LAYER2_YOFF,0
-                WAIT    400,0
+		WAIT    400,0
 
 GameCopperEnd:
 GameCopperSize      equ     GameCopperEnd-GameCopper

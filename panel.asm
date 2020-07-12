@@ -21,6 +21,13 @@ InitPanel:
 		jp	ResetBank
 
 
+StartPanelCopper:
+		ld      hl,GameCopper
+		ld      de,GameCopperSize
+		call    UploadCopper       
+		NextReg $62,%11000000   
+		ret
+
 
 ; ************************************************************************
 ;
@@ -40,18 +47,7 @@ CopyPanelToScreen:
 		ld	hl,PanelAddress
 		ld	de,256*32
 		ld	bc,8192
-
-if USE_DMA=1
-		ld	(DMASrc),hl
-		ld	(DMADest),de
-		ld	(DMALen),bc
-		
-		ld	hl,DMACopy 
-		ld	bc,DMASIZE*256 + Z80DMAPORT
-		otir
-else
 		ldir
-endif
 		call	DrawPanelNumbers
 
 		ld	bc,$123b

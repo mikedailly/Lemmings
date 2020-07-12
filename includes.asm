@@ -2,7 +2,6 @@
 ;
 ;	General equates and macros
 ;
-USE_DMA					equ		0
 USE_COPPER				equ		0
 NextInstructions        equ     1
 
