@@ -68,6 +68,15 @@ VBlankIRQ:
                 ; if >= frame 3, then flip screen+sprites
                 call    FlipScreens
 @CurrentBuffer:
+
+                ; Swap screen (banks) addresses around 
+                ld      a,(Screen1Bank)
+                NextReg 18,a
+                ld      a,(Screen2Bank)
+                NextReg 19,a
+				NextReg	23,0					; set y scroll to 0
+
+
                 ld      a,(CursorOn)
                 and     a
                 jr      z,@NoCursor
@@ -97,10 +106,10 @@ FlipScreens:
                 ld      a,(Screen2Bank)
                 ld      (Screen1Bank),a
 ;                ld      (CopperGameScreen+1),a
-                NextReg 18,a
+                ;NextReg 18,a
                 pop     af
                 ld      (Screen2Bank),a
-                NextReg 19,a
+                ;NextReg 19,a
 
 
 ;if USE_COPPER = 1

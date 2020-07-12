@@ -95,76 +95,77 @@ StartAddress:
 ;                               
 ; ************************************************************************************************************
 MainLoop:       
-			; wait for a minimum of 3 frames....
-			ld        a,(vblank)                 
-			ld        (realfps),a      
-			ld        a,1                     ; Wait on VBlank for new game frame....
-			ld        (NewFrameFlag),a                
+		; wait for a minimum of 3 frames....
+		ld        a,(vblank)                 
+		ld        (realfps),a      
+		ld        a,1                     ; Wait on VBlank for new game frame....
+		ld        (NewFrameFlag),a                
 @WaitVBlank:
-			ld        a,(NewFrameFlag)        ; for for it to be reset
-			and       a
-			jr        nz,@WaitVBlank
+		ld        a,(NewFrameFlag)        ; for for it to be reset
+		and       a
+		jr        nz,@WaitVBlank
 
 
-			;ld        a,VRAM_BASE_BANK
-			;NextReg   18,a
-			;NextReg   19,a
+		;ld        a,VRAM_BASE_BANK
+		;NextReg   18,a
+		;NextReg   19,a
 			
 		
 			
 
 			
-			;ld      a,1
-			;out     ($fe),a
+		;ld      a,1
+		;out     ($fe),a
 
-			; Scan keyboard
-			call    	ReadKeyboard
-			call    	ProecssMisc
+		; Scan keyboard
+		call    	ReadKeyboard
+		call    	ProecssMisc
 			
 			
 			
-			call    	DisplayMap              ; Display level bitmap
-
-
-
-			call    	OpenTrapDoors
-			call    	DrawLevelObjects
-			
-			call    	SpawnLemming
-			call    	ProcessLemmings
-			
-			;ld      ix,LemData
-			;ld      a,(MouseX)
-			;ld      hl,(ScrollIndex)
-			;add     hl,a
-			;ex      de,hl
-			;ld      a,(MouseY)
-			;ld      hl,0
-			;call    DrawLemmingFrame
-			
-			
-			call    	ProcessInput
-			call    	CopyPanelToScreen
+		call    	DisplayMap              ; Display level bitmap
 
 
-			ld      a,1
-			out     ($fe),a
-			call    GenerateMiniMap
-			ld      a,0
-			out     ($fe),a
-			;ld      	hl,$4001
-			;ld      	de,DemoText
-			;ld      	a,1
-			;call    	DrawText
+
+		call    	OpenTrapDoors
+		call    	DrawLevelObjects
 			
-			;ld      	hl,$4023
-			;ld      	de,DemoText2
-			;ld      	a,1
-			;call    	DrawText
-			ld      	a,0
-			out     	($fe),a
+		call    	SpawnLemming
+		call    	ProcessLemmings
 			
-			jp      	MainLoop                ; infinite loop
+		;ld      ix,LemData
+		;ld      a,(MouseX)
+		;ld      hl,(ScrollIndex)
+		;add     hl,a
+		;ex      de,hl
+		;ld      a,(MouseY)
+		;ld      hl,0
+		;call    DrawLemmingFrame
+			
+			
+		call    	ProcessInput
+		call	DrawPanelNumbers_Force
+		;call    	CopyPanelToScreen
+
+
+		ld      a,1
+		out     ($fe),a
+		call    GenerateMiniMap
+		ld      a,0
+		out     ($fe),a
+		;ld      	hl,$4001
+		;ld      	de,DemoText
+		;ld      	a,1
+		;call    	DrawText
+			
+		;ld      	hl,$4023
+		;ld      	de,DemoText2
+		;ld      	a,1
+		;call    	DrawText
+		ld      	a,0
+		out     	($fe),a
+			
+		jp      	MainLoop                ; infinite loop
 
 counter     db      0
 fps         db      0        

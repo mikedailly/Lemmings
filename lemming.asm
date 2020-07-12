@@ -3,17 +3,17 @@
 ; *****************************************************************************************************************************
 InitLemmings:
 		; Wipe lemming data
-		ld	hl,LemData
-		ld	de,LemData+1
-		ld	bc,LemDataSize-1
-		xor	a
-		ld	(hl),a
+		ld		hl,LemData
+		ld		de,LemData+1
+		ld		bc,LemDataSize-1
+		xor		a
+		ld		(hl),a
 		ldir
 
-		ld	hl,LemData
-		ld	(NextSpawnLemming),hl	; Lemming release index
-		xor	a
-		ld	(LemmingCounter),a
+		ld		hl,LemData
+		ld		(NextSpawnLemming),hl	; Lemming release index
+		xor		a
+		ld		(LemmingCounter),a
 		ret
 
 
@@ -21,46 +21,46 @@ InitLemmings:
 ; Process all lemmings
 ; *****************************************************************************************************************************
 SpawnLemming:
-		ld	a,(TrapDoorStartDelay)		; if trap door not open...
-		cp	$ff
-		ret	nz
+		ld		a,(TrapDoorStartDelay)		; if trap door not open...
+		cp		$ff
+		ret		nz
 
 
-		ld	a,(ReleaseRateCounter)
-		dec	a
-		jp	nz,@Exit
-		ld	a,(LemmingCounter)
-		cp	100	;100
-		jr	z,@Exit
-		inc	a
-		ld	(LemmingCounter),a
+		ld		a,(ReleaseRateCounter)
+		dec		a
+		jp		nz,@Exit
+		ld		a,(LemmingCounter)
+		cp		100	;100
+		jr		z,@Exit
+		inc		a
+		ld		(LemmingCounter),a
 				
 		
 		; set new falling lemming
-		ld	ix,(NextSpawnLemming)
-		ld	a,1
-		ld	(ix+LemDir),a		
-		ld	a,LEM_FALLER
+		ld		ix,(NextSpawnLemming)
+		ld		a,1
+		ld		(ix+LemDir),a		
+		ld		a,LEM_FALLER
 		call	SetState
 
-		ld	iy,(TrapDoorlistCurrent)
-		ld	a,(iy+0)
-		or	(iy+1)
-		jr	nz,@GetPosition
-		ld	iy,TrapDoorList
+		ld		iy,(TrapDoorlistCurrent)
+		ld		a,(iy+0)
+		or		(iy+1)
+		jr		nz,@GetPosition
+		ld		iy,TrapDoorList
 @GetPosition:		
-		ld	l,(iy+0)			; X low
-		ld	h,(iy+1)			; X high
-		ld	a,(iy+2)			; Y (always >0 and <160)
-;		ld	hl,(LemmingXSpawn)
-;		add	hl,105-209
-;		add	hl,48	;105
-		ld	(ix+LemX),l
-		ld	(ix+(LemX+1)),h
-		ld	(ix+LemY),a
-		ld	bc,3
-		add	iy,bc
-		ld	(TrapDoorlistCurrent),iy
+		ld		l,(iy+0)			; X low
+		ld		h,(iy+1)			; X high
+		ld		a,(iy+2)			; Y (always >0 and <160)
+;		ld		hl,(LemmingXSpawn)
+;		add		hl,105-209
+;		add		hl,48	;105
+		ld		(ix+LemX),l
+		ld		(ix+(LemX+1)),h
+		ld		(ix+LemY),a
+		ld		bc,3
+		add		iy,bc
+		ld		(TrapDoorlistCurrent),iy
 		
 		; set bomber
 		;ld	a,50/3
@@ -70,13 +70,13 @@ SpawnLemming:
 
 
 
-		ld	bc,LemStructSize
-		add	ix,bc
-		ld	(NextSpawnLemming),ix
-		ld	a,(MasterReleaseRate)		; from panel
-		;ld	a,10
+		ld		bc,LemStructSize
+		add		ix,bc
+		ld		(NextSpawnLemming),ix
+		ld		a,(MasterReleaseRate)		; from panel
+		;ld		a,10
 @Exit:
-		ld	(ReleaseRateCounter),a
+		ld		(ReleaseRateCounter),a
 		ret
 
 

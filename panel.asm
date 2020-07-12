@@ -18,14 +18,14 @@ InitPanel:
 		LoadBank	PanelFile,PanelAddress,PanelBank
 		LoadBank	PanelNumbers,PanelNumbersAddress,PanelNumbersBank
 
-		jp	ResetBank
+		;jp	ResetBank
 
 
 StartPanelCopper:
 		ld      hl,GameCopper
 		ld      de,GameCopperSize
 		call    UploadCopper       
-		NextReg $62,%11000000   
+		NextReg $62,%11000000  
 		ret
 
 
@@ -44,10 +44,12 @@ CopyPanelToScreen:
 		out	(c),a
 
 
+
 		ld	hl,PanelAddress
 		ld	de,256*32
 		ld	bc,8192
 		ldir
+
 		call	DrawPanelNumbers
 
 		ld	bc,$123b
@@ -60,102 +62,128 @@ CopyPanelToScreen:
 ; Draw the panel numbers
 ; ************************************************************************
 DrawPanelNumbers:
+		ld		a,(PanelDirty)
+		and		a
+		ret		z
 
-		ld	a,PanelNumbersBank
-		call	SetBank
+DrawPanelNumbers_Force:
+		xor		a
+		ld		(PanelDirty),a
 
-		ld	b,10
-		ld	ix,MinReleaseRate
-		ld	iy,PanelScoreOffsets
+		ld		a,PanelNumbersBank*2		; the numbers
+		Nextreg	$56,a
+		ld		a,PanelBank*2				; the panel itself
+		NextReg	$57,a
+
+		ld		b,10
+		ld		ix,MinReleaseRate
+		ld		iy,PanelScoreOffsets
 @DrawAllPanelNumbers:		
 		push	bc
-		ld	c,(iy+0)
-		ld	b,0
-		ld	hl,$2900
-		add	hl,bc
-		ld	a,(ix+0)
-		and	a
-		jr	z,@DontDraw
+		ld		c,(iy+0)
+		ld		b,0
+		ld		hl,$e900					; 2900
+		add		hl,bc
+
+		ld		a,(ix+0)
+		and		a
+		jr		z,@DontDraw
 		call	DrawPanelNumber
 @DontDraw:
-		inc	ix
-		inc	iy
-		pop	bc
+		inc		ix
+		inc		iy
+		pop		bc
 		djnz	@DrawAllPanelNumbers
-
-		;ld	a,$01
-		;ld	hl,$2903	; Current release rate
-		;call	DrawPanelNumber
  		ret	
+
+
 ;
 ; Draw panel number
+; HL = dest address
 ;
 DrawPanelNumber:
 		push	af
 		push	hl
-		srl	a
-		srl	a
-		srl	a
-		srl	a
+		swapnib
+		and		$f
 		call	DrawNumber
-		pop	hl
-		ld	bc,5
-		add	hl,bc
-		pop	af
+		pop		hl
+		add		hl,5
+		pop		af
 DrawNumber
-		and	$f
+		and		$f
 		push	hl
-		ld	hl,PanelOffsets
-		add	a,a
-		ld	c,a
-		ld	b,0
-		add	hl,bc
+		ld		hl,PanelOffsets
+		add		a,a
+		ld		c,a
+		ld		b,0
+		add		hl,bc
 		
-PanelNumOffset	ld	c,(hl)
-		inc	hl
-		ld	b,(hl)
-		pop	hl
-		ex	de,hl
-		ld	hl,PanelNumbersAddress
-		add	hl,bc
+PanelNumOffset	
+		ld		c,(hl)
+		inc		hl
+		ld		b,(hl)
+		pop		hl
+		ex		de,hl
+		ld		hl,PanelNumbersAddress
+		add		hl,bc
 		
-		ld	b,8
-@DrawLoop:	push	bc
-		ldi			; 14 * 5 = 70
+		ld		b,8
+		ld		c,255		; stops B from overflowiung
+@DrawLoop:	
+		ldi					; 14 * 5 = 70
 		ldi
 		ldi
 		ldi
 		ldi
-		ld	bc,256-5	; 10
-		ex	de,hl		; 4
-		add	hl,bc		; 11
-		ex	de,hl		; 4 = 29  (99)
-		pop	bc
+		add		de,256-5	; 10
 		djnz	@DrawLoop
 		ret
 
-PanelOffsets		dw	0,40*1,40*2,40*3,40*4,40*5,40*6,40*7,40*8,40*9	; offset to the graphics
-PanelScoreOffsets:	db	3,19,35,51,67,83,99,115,131,147			; pixel X coords on panel
-MaxReleaseLemmingsBin	db	0	; max number of lemmings to release (BIN)
-MaxReleaseLemmings	db	0	; max number of lemmings to release
-MinReleaseBin		db	0	; Binary "minimum"
-ReleaseRateBin		db	0	; raw value (not display one)
 
-; Panel numbers - DONT reorder!
-MinReleaseRate		db	0
-ReleaseRate		db	0	; panel values
-ClimbersLeft		db	0
-FloatersLeft		db	0
-BombersLeft		db	0
-BlockersLeft		db	0
-BuildersLeft		db	0
-BashersLeft		db	0
-MinersLeft		db	0
-DiggersLeft		db	0
 
-ButtonDown		db	0	; mouse button down?
-ButtonPressed		db	0	; button pressed this frame?
 
+
+; *****************************************************************************************************************************
+; 	Generate mini-map
+; *****************************************************************************************************************************
+GenerateMiniMap:
+		NextReg	$56,PanelBank*2			; page in panel
+		ld 		c,20					; mini map is 20 pixels high
+		exx
+		
+		ld 		de,$c000+(204+(10*256))	; start of panel "slot"
+		ld		a,LevelBitmapBank*2		; page in bitmap to $e000
+		ld		c,$10
+		exx
+@BuildMap:
+		exx
+		NextReg	$57,a
+		ex		af,af'			; remember current bank
+@Loop4:
+		ld		b,50			; do 4 lines before changing bank
+		ld 		hl,$e000
+@CopyRow
+		ld 		a,(hl)
+		and 	a
+		jr 		z,@SkipPixel
+		ld 		a,c		;$10			; set colour to "green"
+@SkipPixel:	
+		ld 		(de),a
+		inc 	de
+		ld 		a,32			; pixels are 32 pixels apart.
+		add 	hl,a
+		djnz	@CopyRow
+
+		ld 		a,256-50		; next row in the panel
+		add 	de,a
+
+		ex		af,af'			; remember current bank again
+		add		a,2				; move on 2 banks - 8 lines
+		exx		
+		dec		c
+		jr		nz,@BuildMap
+		ret		
 
 
 ; ************************************************************************
@@ -190,12 +218,13 @@ ProcessInput:
 		test	2							; LEFT button
 		jp		z,@TestSlots				; if button still down, return
 
-		xor	a								; button not perssed, so clear flag
-		ld	(ButtonDown),a
+		xor		a								; button not perssed, so clear flag
+		ld		(ButtonDown),a
 		ret
 
-@TestButton:	ld	a,(MouseButtons)
-		test	2							; LEFT button
+@TestButton:	
+		ld		a,(MouseButtons)
+		bit		1,a							; LEFT button
 		jp		nz,@TestSlots				; not pressed?
 		ld		(ButtonDown),a
 		dec		a
@@ -203,6 +232,8 @@ ProcessInput:
 
 		ld		a,0
 		ld		(DoubleClipCounterCurrent),a
+
+
 
 
 @TestSlots:
@@ -237,6 +268,7 @@ ProcessInput:
 		add		hl,a		
 		ld		a,(hl)
 		ld		(CurrentSkillmask+1),a
+		call	MakePanelDirty
 		ret
 		;
 		; Check release rate panels
@@ -265,14 +297,15 @@ ProcessInput:
 		call	ConvertToDelay				; convert into the frame delay value
 		;ld	(ReleaseRateCounter),a			; don't wipe "current" counter
 		ld		(MasterReleaseRate),a
-		ret
+		jp		MakePanelDirty
+
 @RateUp
 		ld		a,(ReleaseRateBin)			; else release UP
 		cp		99
 		ret		z
 		inc		a
 		jp		@UpdateReleaseRate
-		ret
+		;ret
 
 
 		; Assign skill to an actual lemming
@@ -353,8 +386,41 @@ FirstNukeClick:
 		ld		(NukeFlag),a
 		ret
 
+
+MakePanelDirty:
+		ld		a,255
+		ld		(PanelDirty),a
+		ret	
+
+
+
 DoubleClipCounterCurrent	db	0
 NukeFlag			db	0
 NukeStarted			db	0
 NukeIndex			dw	0
 
+
+
+
+PanelOffsets			dw	0,40*1,40*2,40*3,40*4,40*5,40*6,40*7,40*8,40*9	; offset to the graphics
+PanelScoreOffsets:		db	3,19,35,51,67,83,99,115,131,147			; pixel X coords on panel
+MaxReleaseLemmingsBin	db	0	; max number of lemmings to release (BIN)
+MaxReleaseLemmings		db	0	; max number of lemmings to release
+MinReleaseBin			db	0	; Binary "minimum"
+ReleaseRateBin			db	0	; raw value (not display one)
+
+; Panel numbers - DONT reorder!
+MinReleaseRate		db	0
+ReleaseRate			db	0	; panel values
+ClimbersLeft		db	0
+FloatersLeft		db	0
+BombersLeft			db	0
+BlockersLeft		db	0
+BuildersLeft		db	0
+BashersLeft			db	0
+MinersLeft			db	0
+DiggersLeft			db	0
+
+ButtonDown			db	0	; mouse button down?
+ButtonPressed		db	0	; button pressed this frame?
+PanelDirty			db	0	; retrun numbers?
