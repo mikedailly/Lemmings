@@ -4,23 +4,24 @@
 ;
 ; ************************************************************************
 BobBankOffset	dw	0
-BobBank		db	0
-BobXoff		db	0
-BobYoff		db	0
-BobWidth	dw	0	; dw so BC can load directly
-LineDelta	dw 	0	; value to move to next line
-BobHeight	db	0
-BobSize		dw	0
-BobXcoord	dw	0
-BobYcoord	dw	0
-BobBaseBank	db 	0
+BobBank			db	0
+BobXoff			db	0
+BobYoff			db	0
+BobWidth		dw	0	; dw so BC can load directly
+LineDelta		dw 	0	; value to move to next line
+BobHeight		db	0
+BobSize			dw	0
+BobXcoord		dw	0
+BobYcoord		dw	0
+BobBaseBank		db 	0
 CurrentScanline dw 	0
-BobFlags 	db 	0
+BobFlags 		db 	0
 
 
 ; ************************************************************************
 ;
 ;	Draw sprites up to 256x256 in size into the large level bitmap (2048x160 bitmap)
+;	This doesn't have to be super quick, it just has to work
 ;
 ;	hl = sprite number (354 lemmings...)
 ;	bc = X (0-1600)
@@ -33,12 +34,12 @@ BobFlags 	db 	0
 ; 
 ; ************************************************************************
 DrawBobLevel:
-
 		ld 		(BobFlags),a
 		ld		(BobXcoord),bc
 		ld		(BobYcoord),de
-		ld 		a,StyleBank*2		; 8k BANKS
-		ld		(BobBaseBank),a		; get current bank and use that as the base
+		ld 		a,StyleBank
+		ld		(BobBaseBank),a			; get current bank and use that as the base
+
 		NextReg	DRAW_BANK,a
 		inc		a
 		NextReg	DRAW_BANK+1,a
@@ -48,23 +49,23 @@ DrawBobLevel:
 		add		hl,hl
 		add		hl,DRAW_BASE			; base of "bank" (and sprite table offsets)
 
-		ld		e,(hl)					; read the bank offsetn 
+		ld		e,(hl)					; read the bank offset
 		inc		hl
-		ld 		d,(hl)					; de = bank offset (has $c0 already ORd in)
+		ld 		d,(hl)					; de = bank offset (has $40 already ORd in)
 		inc		hl		
 		ld		(BobBankOffset),de 		; save bank offset
 		
 
 		ld 		a,(BobBaseBank)			; base bank
 		ld		c,a
-		ld		a,(hl)					; get sprite bank
-		add		a,a						; get 8K banks
+		ld		a,(hl)					; get sprite bank offset
+		;add		a,a						; get 8K banks
 		add		a,c
-		ld		(BobBank),a		
+		ld		(BobBank),a
 		NextReg	DRAW_BANK,a
 		inc		a
 		NextReg	DRAW_BANK+1,a
- 
+
 		ex		de,hl					; get bank offset
 		ld		a,(hl)					;
 		ld		(BobXoff),a
@@ -143,39 +144,36 @@ DrawBobLevel:
 		NextReg	DRAW_BANK,a
 		inc		a
 		NextReg	DRAW_BANK+1,a
+		
 
-		ld		de,GraphicsBuffer
+		ld		de,GraphicsBuffer		; ideally... we don't want a copy each line...
 		ld		bc,(BobWidth)
 		ldir 
 
-		pop		af
+		pop		af						; get BobYCoord coordinate back
 		; get "bank" to draw scanline into
 		dec		a						; back to current line
 		push 	af
-		add 	a,a
+		and		3						; 4 lines per bank (2048 bytes per line in an 8K bank)
 		add		a,a
+		add		a,a						; *8 as one line = 2048 = $800 (high byte of *8)
 		add		a,a
-		;and 	$3f						; don't need to AND as $3F+$C0=$FF
-		or		Hi(DRAW_BASE)			; add on base address (always here)
+		or		Hi(DRAW_BASE)			; add on base address of bank
 		ld 		d,a 					; get Y (line offset into bank) into D
 		ld		e,0
-		pop 	af
+
+		pop 	af						; get Y coord and work out bank
 		srl 	a
-		srl 	a
-		srl 	a 						; /8 = bank
-		;and	$1f						; 0 put into bit 7 with srl so no need for AND
+		srl 	a 						; Y/4 = bank number (0 to 40)
 		add		a,LevelBitmapBank		; add on the base of the level
-		add		a,a
-		NextReg	DRAW_BANK,a
-		inc		a
-		NextReg	DRAW_BANK+1,a
+		NextReg	DRAW_BANK,a				; only need one bank, as we're doing a single scanline (4 scanlines per bank)
 
 
 		ld		hl,(BobXcoord)
 		add 	hl,de
-		ex		de,hl			; de = dest address
+		ex		de,hl					; de = dest address
 
-		ld 		hl,GraphicsBuffer	; Copied scanline
+		ld 		hl,GraphicsBuffer		; Copied scanline
 		ld 		a,(BobWidth)
 		ld 		c,a
 
@@ -287,19 +285,19 @@ bobgraphic	dw 	0
 ; 
 ; ************************************************************************
 DrawLevelBob:
-		;ld	hl,(LemFrameTest)
-		;ld	bc,$300
+		;ld		hl,(LemFrameTest)
+		;ld		bc,$300
 
 		; offset by level offset
 		push	bc
 		exx
-		pop	hl
-		ld	bc,(ScrollIndex)	; 20
-		xor	a			; clear carry
-		sbc	hl,bc			; subtract world location
+		pop		hl
+		ld		bc,(ScrollIndex)	; 20
+		xor		a			; clear carry
+		sbc		hl,bc			; subtract world location
 		push	hl
 		exx
-		pop	bc
+		pop		bc
 
 
 ; ************************************************************************
@@ -325,29 +323,29 @@ DrawBob:
 		ld		(BobXcoord),bc
 		ld		(BobYcoord),de
 		ld 		a,ObjectsBank
-		add		a,a
-		NextReg	$56,a
+		NextReg	DRAW_BANK,a
 
 		; get base of "bob"
-		ld		de,$c000		; base of "bank" (and sprite table offsets)
-		add		hl,hl			; *4
+		ld		de,DRAW_BASE			; base of "bank" (and sprite table offsets)
+		add		hl,hl					; *4
 		add		hl,hl
 		add		hl,de
 
-		ld		e,(hl)			; read the bank offset
+		ld		e,(hl)				; read the bank offset
 		inc		hl
-		ld 		d,(hl)			; de = bank offset (has $c0 already ORd in)
+		ld 		d,(hl)				; de = bank offset (has $c0 already ORd in)
 		inc		hl		
 		ld		(BobBankOffset),de 	; save bank offset
 		
 
 		; This can be optimised out once we know where it's going to live....
-		ld 		a,ObjectsBank*2		; base bank
+		ld 		a,ObjectsBank		; base bank
 		ld		c,a
-		ld		a,(hl)			; bank offset is already in 8K sizes
-		add		a,c			; add bank offset to base bank
+		ld		a,(hl)				; bank offset is already in 8K sizes
+		add		a,a					; *2
+		add		a,c					; add bank offset to base bank
 		ld		(BobBank),a
-		mmu6				; page in BOB graphic
+		NextReg	DRAW_BANK,a				; page in BOB graphic
 
 		;
 		; Now read sprite details
@@ -444,11 +442,11 @@ TestRightClip:
 		ld		a,(Screen2Bank)		; bank screen into top block
 		add		a,a
 		add		a,c		
-		NextReg	$57,a
+		NextReg	DRAW_BANK+1,a
 		ex		af,af'			; af' holds current bank
 		ld		a,d
 		and		$1f
-		or		$e0
+		or		Hi(DRAW_BASE+$2000)
 		ld		d,a
 
 
@@ -568,7 +566,7 @@ SourceModulo
 		ld		d,a
 		ex		af,af'				; get bank and increment
 		inc		a
-		mmu7
+		NextReg	DRAW_BANK+1,a
 		ex		af,af'				; and store it again....
 @NoBankChange:
 		dec		b

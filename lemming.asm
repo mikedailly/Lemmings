@@ -229,21 +229,21 @@ SkillJumpTable	dw	NextLemming_NotActive
 ; Function:	Faller
 ; *****************************************************************************************************************************
 ProcessLemFaller:
-		ld	a,(ix+LemY)
-		ld	l,(ix+LemX)		; get X
-		ld	h,(ix+(LemX+1))
+		ld		a,(ix+LemY)
+		ld		l,(ix+LemX)		; get X
+		ld		h,(ix+(LemX+1))
 		call	GetPixel		; DE = pixel, bank set
 
 		; count pixels falling
-		ld	b,0
+		ld		b,0
 @NextLine:
-		ld	a,(hl)
-		and	a
-		jr	nz,@HitGround
-		inc	b
-		ld	a,4
-		cp	b
-		jr	z,@KeepFalling		; 4 pixel fall?	(only fall a max 4 pixels at once)
+		ld		a,(hl)
+		and		a
+		jr		nz,@HitGround
+		inc		b
+		ld		a,4
+		cp		b
+		jr		z,@KeepFalling		; 4 pixel fall?	(only fall a max 4 pixels at once)
 		
 		add	hl,$800			; move down a line
 		ld	a,h			; crossed from $c000 to $0000
@@ -255,9 +255,9 @@ ProcessLemFaller:
 		inc	a
 		ld	(CurrentBank),a
 		add	a,a
-		mmu6
+		NextReg	DRAW_BANK,a
 		inc 	a
-		mmu7		
+		NextReg	DRAW_BANK+1,a
 		jp	@NextLine
 
 
@@ -355,9 +355,9 @@ ProcessLemWalker:
 		dec	a
 		ld	(CurrentBank),a
 		add	a,a
-		mmu6
+		NextReg	DRAW_BANK,a
 		inc 	a
-		mmu7		
+		NextReg	DRAW_BANK+1,a		
 		jp	@NextLineClimbing
 
 
@@ -408,9 +408,9 @@ ProcessLemWalker:
 		inc	a
 		ld	(CurrentBank),a
 		add	a,a
-		mmu6
+		NextReg	DRAW_BANK,a
 		inc 	a
-		mmu7		
+		NextReg	DRAW_BANK+1,a		
 		jp	@NextLineFalling
 @HitGround:
 		ld	(ix+LemY),c		; 19
@@ -662,27 +662,27 @@ ProcessLemBomber:
 ; *****************************************************************************************************************************
 GetPixel:
 		; Get bank pixel is on
-		ld	e,a			; save Y
+		ld		e,a						; save Y
 		add 	a,a
-		add	a,a
-		add	a,a
-		;and 	$3f			; don't need to and as $3F+$C0=$FF
-		or	$c0 			; add on base address (always here)
-		ld 	d,a 			; get Y (line offset into bank) into D
-		ld	a,e			; Get Y coordinate back
-		ld	e,0
-		srl 	a			; 0 put into bit 7,
+		add		a,a
+		add		a,a
+		;and 	$3f						; don't need to and as $3F+$C0=$FF
+		or		Hi(DRAW_BASE) 			; add on base address (always here)
+		ld 		d,a 					; get Y (line offset into bank) into D
+		ld		a,e						; Get Y coordinate back
+		ld		e,0
+		srl 	a						; 0 put into bit 7,
 		srl 	a
-		srl 	a 			; /8 = bank
-		;and	$1f			; 0 put into bit 7 so no need for AND
-		add	a,LevelBitmapBank	; add on the base of the level
-		add	hl,de			
+		srl 	a 						; /8 = bank
+		;and	$1f						; 0 put into bit 7 so no need for AND
+		add		a,LevelBitmapBank		; add on the base of the level
+		add		hl,de			
 
-		ld	(CurrentBank),a		; remember bank
-		add	a,a
-		mmu6
+		ld		(CurrentBank),a			; remember bank
+		add		a,a
+		NextReg	DRAW_BANK,a
 		inc 	a
-		mmu7
+		NextReg	DRAW_BANK+1,a
 		ret	
 
 
@@ -934,8 +934,10 @@ DrawLemmingFrame:
 ;		ld	(A_YPOS),a
 		push	af
 		push	de
-		ld	a,LemmingsBank*2	; first bank holds offset table
-		mmu6				; bank in
+		ld		a,LemmingsBank				; first bank holds offset table
+		NextReg	DRAW_BANK,a					; bank in
+		inc		a
+		NextReg	DRAW_BANK+1,a					; bank in
 
 		
 		ld 	b,h
@@ -958,7 +960,8 @@ DrawLemmingFrame:
 		ld	b,(hl)			; get x,y orgin offsets  (b=x,c=y)
 		inc	hl
 		ld	c,(hl)
-		mmu6
+		NextReg	DRAW_BANK,a					; bank in
+
 
 
 		pop	hl			; get X coordinate back

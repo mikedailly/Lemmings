@@ -182,7 +182,7 @@ tester:
 EndOfCode
 
 
-                org     $8000-1024
+                align	$f800
 GraphicsBuffer:
                 ds      1024
 

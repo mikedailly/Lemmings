@@ -60,17 +60,6 @@
 ;
 ;
 ; ************************************************************************
-ResetBank:	xor	a			; bank 0 sits at $C000
-;if	NextInstructions!=0
-SetBank:
-		ld	(CurrentBank),a
-		add		a,a
-		mmu6
-		inc 	a
-		mmu7
-		ld		a,(CurrentBank)
-		ret
-
 CurrentBank		db	0
 
 ; ************************************************************************

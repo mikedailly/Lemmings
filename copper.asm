@@ -40,7 +40,7 @@ PAPER_INDEX     equ     16
 ; 1K copper
 GameCopper:     
 		WAIT    159,300                  ; wait until right border
-		MOVE    COP_LAYER2_BANK,PanelBank        
+		MOVE    COP_LAYER2_BANK,PanelBank>>1     
 		WAIT    159,340
 		MOVE	COP_LAYER2_YOFF,32
 		WAIT    400,0

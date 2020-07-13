@@ -9,9 +9,9 @@
 ; *****************************************************************************************************************************
 ; Interrupts
 ; *****************************************************************************************************************************
-VBlank		db	0				; vblank counter
-CursorOn	db	0				; flag to enable the IRQ cursor 
-NewFrameFlag	db	0				; setting this will cause the sprite buffers to flip. Reset in IRQ
+VBlank				db	0				; vblank counter
+CursorOn			db	0				; flag to enable the IRQ cursor 
+NewFrameFlag		db	0				; setting this will cause the sprite buffers to flip. Reset in IRQ
 
 
 
@@ -19,47 +19,47 @@ NewFrameFlag	db	0				; setting this will cause the sprite buffers to flip. Reset
 ; *****************************************************************************************************************************
 ; File system
 ; *****************************************************************************************************************************
-filehandle:	db	0
-file_size	dw	0,0
-CurrentFBank	db	0
-BlockFileSize	db	0,0,0,0
-BankAddress 	dw	0
+filehandle:			db	0
+file_size			dw	0,0
+CurrentFBank		db	0
+BlockFileSize		db	0,0,0,0
+BankAddress 		dw	0
 
 ; Tile scrolling on counter
-ScrollIndex:	dw	0
-SkillMaskTable:	db	SKILLMASK_CLIMBER,SKILLMASK_FLOATER,SKILLMASK_BOMBER,SKILLMASK_BLOCKER,SKILLMASK_BUILDER,SKILLMASK_BASHER,SKILLMASK_MINER,SKILLMASK_DIGGER
+ScrollIndex:		dw	0
+SkillMaskTable:		db	SKILLMASK_CLIMBER,SKILLMASK_FLOATER,SKILLMASK_BOMBER,SKILLMASK_BLOCKER,SKILLMASK_BUILDER,SKILLMASK_BASHER,SKILLMASK_MINER,SKILLMASK_DIGGER
 
 
 ; Delay for the trap door opening - 2 seconds
 TrapDoorStartDelay	db	0
-TrapDoorList		ds	4*3		; upto 4 entrances (4 bytes per)
-			dw	0		; list termination
+TrapDoorList		ds	4*3				; upto 4 entrances (4 bytes per)
+					dw	0				; list termination
 TrapDoorlistCurrent	dw	0	
 
 ; *****************************************************************************************************************************
 ; Object definitions 256 bytes
 ; *****************************************************************************************************************************
 levelStyle
-ObjectInfo:	ds	Obj_MaxSize*16	; style?.dat loaded into here
+ObjectInfo:			ds	Obj_MaxSize*16	; style?.dat loaded into here
 
 ; *****************************************************************************************************************************
 ; Object Instances
 ; *****************************************************************************************************************************
-		rsreset
-oActive:	rb	1		; object active?
-oX:		rw	1		; sprite index into the object sprite pool
-oY:		rw	1		; starting frame of the animation
-oPtr:		rw	1		; pointer to object structure
-oFlags:		rb	1		; object flags
-oFrame:		rb	1		; current animation frame	8
-oFirstFrame:	rb	1		; first frame of animation	9
-oMaxFrames:	rb	1		; end frame of animation +1	10
-oDelta:		rb	1		; animation delta (usuall 1)	11
-oObjID		rb	1		; object ID (0=trap door)	12
-oInstSize	rb	0		; size of struct
+					rsreset
+oActive:			rb	1		; object active?
+oX:					rw	1		; sprite index into the object sprite pool
+oY:					rw	1		; starting frame of the animation
+oPtr:				rw	1		; pointer to object structure
+oFlags:				rb	1		; object flags
+oFrame:				rb	1		; current animation frame	8
+oFirstFrame:		rb	1		; first frame of animation	9
+oMaxFrames:			rb	1		; end frame of animation +1	10
+oDelta:				rb	1		; animation delta (usuall 1)	11
+oObjID				rb	1		; object ID (0=trap door)	12
+oInstSize			rb	0		; size of struct
 	
-ObjectData:	ds	32*oInstSize	; actual instance data
-ObjNumber	db	0		; number of active objects in this level
+ObjectData:			ds	32*oInstSize	; actual instance data
+ObjNumber			db	0				; number of active objects in this level
 
 ; *****************************************************************************************************************************
 ; File system
@@ -71,31 +71,31 @@ ObjNumber	db	0		; number of active objects in this level
 ; *****************************************************************************************************************************
 LemmingXSpawn		dw	0
 LemmingCounter		db	0
-ReleaseRateCounter	db	0	; actual release rate
-MasterReleaseRate	db	0	; "master" value
+ReleaseRateCounter	db	0				; actual release rate
+MasterReleaseRate	db	0				; "master" value
 
-NextSpawnLemming	dw	0			; offset to Lemming struct
-LemData			ds	LemDataSize
+NextSpawnLemming	dw	0				; offset to Lemming struct
+LemData				ds	LemDataSize
 EndLemData
 
 
-CursorLemmingIndex	dw 	0			; pointer to lemmign struct
+CursorLemmingIndex	dw 	0				; pointer to lemmign struct
 CursorWorldX 		dw 	0
-CursorDistance		db	0			; distance current selection is from centre of cursor 
+CursorDistance		db	0				; distance current selection is from centre of cursor 
 
 
-				; frame		count	offsets
-WalkerLAnim:	LEMANIM		FWalkerL,	8, 	3,0
-WalkerRAnim:	LEMANIM		FWalkerR,	8, 	3,0
-FallerLAnim:	LEMANIM		FFallerL,	4,	-3,0
-FallerRAnim:	LEMANIM		FFallerR,	4,	-3,0
-SplatterAnim:	LEMANIM		FSplatter,	17,	0,0		;+1 frame so processing code can detect
-DiggerAnim:	LEMANIM		FDigger,	16,	0,1		
-PreBomberAnim:	LEMANIM		FExploder,	17,	2,0		;+1 frame so processing code can detect
-BuilderRAnim:	LEMANIM		FBuilderRight,	17,	-2,0		;+1 for detection
-BuilderLAnim:	LEMANIM		FBuilderLeft,	17,	0,0		;+1 for detection
-BuilderRShrug:	LEMANIM		FShruggerRight,	9,	1,0		; +1 for detection
-BuilderLShrug:	LEMANIM		FShruggerLeft,	9,	-1,0		; +1 for detection
+								; frame			count	offsets
+WalkerLAnim:		LEMANIM		FWalkerL,		8, 		3,0
+WalkerRAnim:		LEMANIM		FWalkerR,		8, 		3,0
+FallerLAnim:		LEMANIM		FFallerL,		4,		-3,0
+FallerRAnim:		LEMANIM		FFallerR,		4,		-3,0
+SplatterAnim:		LEMANIM		FSplatter,		17,		0,0		;+1 frame so processing code can detect
+DiggerAnim:			LEMANIM		FDigger,		16,		0,1		
+PreBomberAnim:		LEMANIM		FExploder,		17,		2,0		;+1 frame so processing code can detect
+BuilderRAnim:		LEMANIM		FBuilderRight,	17,		-2,0	;+1 for detection
+BuilderLAnim:		LEMANIM		FBuilderLeft,	17,		0,0		;+1 for detection
+BuilderRShrug:		LEMANIM		FShruggerRight,	9,		1,0		; +1 for detection
+BuilderLShrug:		LEMANIM		FShruggerLeft,	9,		1,0		; +1 for detection
 
 
 

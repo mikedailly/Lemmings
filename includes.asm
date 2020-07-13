@@ -230,33 +230,6 @@ File		macro
 		endm
 
 
-MMU0		macro		
-		NextReg	$50,a
-		endm
-MMU1		macro		
-		NextReg	$51,a
-		endm
-MMU2		macro		
-		NextReg	$52,a
-		endm
-MMU3		macro		
-		NextReg	$53,a
-		endm
-MMU4		macro		
-		NextReg	$54,a
-		endm
-MMU5		macro		
-		NextReg	$55,a
-		endm
-MMU6		macro		
-		NextReg	$56,a
-		endm
-MMU7		macro		
-		NextReg	$57,a
-		endm
-
-
-
 		// copper WAIT  VPOS,HPOS
 WAIT		macro
 		db	HI($8000+(\0&$1ff)+(( (\1/8) &$3f)<<9))

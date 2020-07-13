@@ -76,7 +76,7 @@ StartAddress:
 			out     ($fe),a
 			call    Init
 			call    InitGame
-
+			ei
 
 			NextReg 8,%01001000				; disable RAM contention + DACs
 			NextReg 20,$e3   				; global transparancy to $E3             
@@ -129,7 +129,7 @@ MainLoop:
 
 
 ;		call    	OpenTrapDoors
-;		call    	DrawLevelObjects
+		call    	DrawLevelObjects
 			
 ;		call    	SpawnLemming
 ;		call    	ProcessLemmings
@@ -144,16 +144,20 @@ MainLoop:
 		;call    DrawLemmingFrame
 			
 			
-;		call    	ProcessInput
-;		call	DrawPanelNumbers_Force
-		;call    	CopyPanelToScreen
+		call    	ProcessInput
+		call		DrawPanelNumbers_Force
 
 
 		ld      a,1
 		out     ($fe),a
-;		call    GenerateMiniMap
+		call    GenerateMiniMap
 		ld      a,0
 		out     ($fe),a
+
+
+		NextReg		$52,10
+		NextReg		$53,11
+
 		;ld      	hl,$4001
 		;ld      	de,DemoText
 		;ld      	a,1
@@ -188,9 +192,9 @@ ProecssMisc:
                 ret
 @notpressed:
                 ; draw frame rate
-                ld      de,$4001
-                ld      a,(realfps)      ;(MouseButtons)
-                call    PrintHex
+                ;ld      de,$4001
+                ;ld      a,(realfps)      ;(MouseButtons)
+                ;call    PrintHex
 
                 ;ld      hl,$4003
                 ;ld      de,DemoText
@@ -261,7 +265,7 @@ InitGame:
                 call    InitLemmings
                 call    InitLevel
                 call    InitPanel
-                ;call    LoadLevel
+                call    LoadLevel
                 ret
 
 ; *****************************************************************************************************************************
@@ -281,11 +285,6 @@ InitGame:
                 include "masks.asm"
 
 EndOfCode
-
-
-                org     $c000-256
-GraphicsBuffer:
-                ds      256
 
                 ; where's our end address?
                 message "EndofCode = ",EndOfCode

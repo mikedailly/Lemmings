@@ -46,58 +46,54 @@ ClearLevelBitmap:
 LoadLevelBitmap:
 		call	GetSetDrive		; get drive we're going to....
 
-		ld	a,(hl)			; get size (2048*160 = 327,680 = 320k)
-		ld	(file_size),a
-		inc	hl
-		ld	a,(hl)
-		ld	(file_size+1),a
-		inc	hl
-		ld	a,(hl)
-		ld	(file_size+2),a
-		inc	hl
+		ld		a,(hl)				; get size (2048*160 = 327,680 = 320k)
+		ld		(file_size),a
+		inc		hl
+		ld		a,(hl)
+		ld		(file_size+1),a
+		inc		hl
+		ld		a,(hl)
+		ld		(file_size+2),a
+		inc		hl
 
-		push	hl			; get name into IX
-		pop	ix
+		push	hl			;	 get name into IX
+		pop		ix
 		ld      b,FA_READ		; read mode
 		call	fOpen			; open file
-		jr	c,@ErrorOpening		; error?
-		ld	(filehandle),a		; remember file handle
+		jr		c,@ErrorOpening		; error?
+		ld		(filehandle),a		; remember file handle
 
-		ld	a,LevelBitmapBank	; first bank
-@LoadAll:	call	SetBank
+		ld		a,LevelBitmapBank	; first bank
+@LoadAll:	
+		NextReg	DRAW_BANK,a
+		inc		a
+		NextReg	DRAW_BANK+1,a
 		push	af
 
 
 		; read a block into the 1st bank
-		ld	a,(filehandle)	
-		ld	bc,2048*8		; load in 8 lines worth (16K exactly)
-		ld	ix,LevelBitmapAddress	; read into bank at top of RAM
+		ld		a,(filehandle)	
+		ld		bc,2048*8		; load in 8 lines worth (16K exactly)
+		ld		ix,LevelBitmapAddress	; read into bank at top of RAM
 		call	fread
-		jr	c,@ReadError
+		jr		c,@ReadError
 		
 
-		pop	af			; get bank back
-		inc	a			; next one
-		cp	LevelBitmapBank+20
-		jp	nz,@LoadAll
+		pop		af			; get bank back
+		inc		a			; next one
+		cp		LevelBitmapBank+20
+		jp		nz,@LoadAll
 
 @EndLoad:
-		ld	a,(filehandle)
+		ld		a,(filehandle)
 		call	fClose
 
-		push	af
-		xor	a
-		call	SetBank		; restore bank
-		pop	af
 		ret			; even if error, return. A holds error code
 
 
 
-@ReadError:	push	af		; keep error code
-		call	ResetBank
-		pop	af
-
-		pop	de		; throw away old AF
+@ReadError:	
+		pop		de		; throw away old AF
 		ret
 
 @ErrorOpening:	ret			; return with error code
@@ -176,7 +172,7 @@ CopyScreen:
 		add		hl,LevelBitmapAddress
 
 		ld		de,8					; start at top of VRAM bank
-		ld		a,LevelBitmapBank*2		; 20 banks to loop through
+		ld		a,LevelBitmapBank		; 20 banks to loop through
 @CopyLoop:
 		NextReg	DRAW_BANK,a
 		inc		a
@@ -434,8 +430,8 @@ CopyScreen:
 		ldi
 		ldi
 
-		add		hl,2048-(256-16)	; offset to move to NEXT line in level bitmap
-		ld		a,16				; 15ts
+		add		hl,2048-(256-16)		; offset to move to NEXT line in level bitmap
+		ld		a,16					; 15ts
 		add		de,a
 
 		;pop		bc					; get 8 line counter back	
@@ -443,8 +439,8 @@ CopyScreen:
 		jr		z,@finishloop
 		jp		@Copy8Lines
 @finishloop
-		ld		a,d			; overflowed the lower 16K?
-		and		$c0			; if so we need to change bank (will increment above $4000)
+		ld		a,d						; overflowed the lower 16K?
+		and		Hi(DRAW_BASE)			; if so we need to change bank (will increment above $4000)
 		jr		z,@SkipBankSwap
 		ld		d,0
 
@@ -457,15 +453,13 @@ CopyScreen:
 @SkipBankSwap:
 		pop		hl					; get back to start of bank
 		pop		af
-		cp		LevelBitmapBank*2+40
+		cp		LevelBitmapBank+40
 		jp		nz,@CopyLoop
 
 		; leave screen on...
 		ld	bc,$123b
 		ld	a,$02+8
 		out	(c),a
-
-		call	ResetBank
 		ret
 
 VRAMBank	db	0

@@ -10,9 +10,9 @@ InitPanel:
 		LoadBank	CursorsFile,PanelAddress,PanelBank
 		;LoadBank	CursorsFile,$4000,0
 		ei
-		ld	e,0				; which sprite shape to copy to
-		ld	d,10				; how many to copy	
-		ld	hl,$c000			; copy from where?
+		ld		e,0					; which sprite shape to copy to
+		ld		d,10				; how many to copy	
+		ld		hl,DRAW_BASE		; copy from where?
 		call	UploadSprites
 		
 		LoadBank	PanelFile,PanelAddress,PanelBank
@@ -35,8 +35,10 @@ StartPanelCopper:
 ;
 ; ************************************************************************
 CopyPanelToScreen:
-		ld	a,PanelBank
-		call	SetBank
+		ld		a,PanelBank
+		NextReg	DRAW_BANK,a
+		inc		a
+		NextReg	DRAW_BANK+1,a
 
 		; set lower bank of Layer 2 screen
 		ld	bc,$123b
@@ -70,10 +72,10 @@ DrawPanelNumbers_Force:
 		xor		a
 		ld		(PanelDirty),a
 
-		ld		a,PanelNumbersBank*2		; the numbers
-		Nextreg	$56,a
-		ld		a,PanelBank*2				; the panel itself
-		NextReg	$57,a
+		ld		a,PanelNumbersBank		; the numbers
+		Nextreg	DRAW_BANK,a
+		ld		a,PanelBank				; the panel itself
+		NextReg	DRAW_BANK+1,a
 
 		ld		b,10
 		ld		ix,MinReleaseRate
@@ -82,7 +84,7 @@ DrawPanelNumbers_Force:
 		push	bc
 		ld		c,(iy+0)
 		ld		b,0
-		ld		hl,$e900					; 2900
+		ld		hl,DRAW_BASE+$2900		;$e900					; 2900
 		add		hl,bc
 
 		ld		a,(ix+0)
@@ -148,21 +150,21 @@ PanelNumOffset
 ; 	Generate mini-map
 ; *****************************************************************************************************************************
 GenerateMiniMap:
-		NextReg	$56,PanelBank*2			; page in panel
+		NextReg	DRAW_BANK,PanelBank		; page in panel
 		ld 		c,20					; mini map is 20 pixels high
 		exx
 		
-		ld 		de,$c000+(204+(10*256))	; start of panel "slot"
-		ld		a,LevelBitmapBank*2		; page in bitmap to $e000
+		ld 		de,DRAW_BASE+(204+(10*256))	; start of panel "slot"
+		ld		a,LevelBitmapBank			; page in bitmap to $e000
 		ld		c,$10
 		exx
 @BuildMap:
 		exx
-		NextReg	$57,a
+		NextReg	DRAW_BANK+1,a
 		ex		af,af'			; remember current bank
 @Loop4:
 		ld		b,50			; do 4 lines before changing bank
-		ld 		hl,$e000
+		ld 		hl,DRAW_BASE+$2000
 @CopyRow
 		ld 		a,(hl)
 		and 	a

@@ -98,8 +98,11 @@ Screen2Bank     db      11
 StackStart:   	equ		$ffff
 
 
-				org	$fc00
+				; just below IRQ
+                org     $fb00
+GraphicsBuffer:	ds      256					; ALWAYS paged in
 
+				ds		64
 ; ************************************************************************
 ;
 ; Function:     Display the cursor
