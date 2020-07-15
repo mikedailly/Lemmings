@@ -345,13 +345,13 @@ Load_Banked:
 		ld		(BlockFileSize+2),a
 		inc		hl
 
-		push	hl			; get name into ix
+		push	hl							; get name into ix
         pop		ix
-        ld      b,FA_READ		; mode open for reading
+        ld      b,FA_READ					; mode open for reading
         call    fOpen
-        jr		c,@error_opening	; carry set? so there was an error opening and A=error code
-        cp		0			; was file handle 0?
-        jr		z,@error_opening	; of so there was an error opening.
+        jr		c,@error_opening			; carry set? so there was an error opening and A=error code
+        cp		0							; was file handle 0?
+        jr		z,@error_opening			; of so there was an error opening.
 		ld		(FileHandle),a
 
 
@@ -359,36 +359,35 @@ Load_Banked:
 		ld		a,(CurrentFBank)
 		NextReg	DRAW_BANK,a
 		inc		a
-		NextReg	DRAW_BANK+1,a		
 		ld		(CurrentFBank),a
 
-		ld		a,(BlockFileSize+2)	; is size & $fffc00!=0? if not... more than 16K
+		ld		a,(BlockFileSize+2)			; if 3rd byte not zero, more than 8k to load
         and		a
-        jr		nz,@MoreThan16K
+        jr		nz,@MoreThan8K
 
-        ld		a,(BlockFileSize+1)	; do we have more than 16K to load? if so read a 16K block
-        cp		$3f
-        jr		c,@LessThan16K
-@MoreThan16K
-        ld		bc,16384		; more than 16K, so
+        ld		a,(BlockFileSize+1)			; if 2nd byte > 8191, more than 8K to load
+        cp		$1f
+        jr		c,@LessThan8K
+@MoreThan8K
+        ld		bc,8192						; more than 8K, so
         jp		@LoadRemaining
-@LessThan16K:
-		ld		a,(BlockFileSize)	; if not.... read in the rest of the file
+@LessThan8K:
+		ld		a,(BlockFileSize)			; if not.... read in the rest of the file
 		ld		c,a
         ld		a,(BlockFileSize+1)
         ld		b,a
 
 @LoadRemaining
-		ld 		ix,DRAW_BASE  	; Get bank start
+		ld 		ix,DRAW_BASE  				; Get bank start
         ld		a,(FileHandle)
-        call	fread			; read data from A to address IX of length BC                
+        call	fread						; read data from A to address IX of length BC                
 		jr		c,@error_reading
 
 
         ; Sub 16K from size
-        xor		a			; clear carry
+        xor		a							; clear carry
         ld		hl,(BlockFileSize)
-        ld		bc,16384
+        ld		bc,8192
         sbc		hl,bc
         ld		(BlockFileSize),hl
 
@@ -399,8 +398,8 @@ Load_Banked:
         jr		nc,@NextBlock
 
 
-        ld		a,(FileHandle)		; get handle back
-        call	fClose			; close file
+        ld		a,(FileHandle)				; get handle back
+        call	fClose						; close file
         jr		c,@error_closing
 
 		pop	de

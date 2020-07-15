@@ -15,7 +15,8 @@ LoadLevel:
 		; Style 0
 		cp 		0
 		jr 		nz,@NotDirt
-@DefaultStyle:	LoadFile	style0dat,ObjectInfo			; load object info
+@DefaultStyle:	
+		LoadFile	style0dat,ObjectInfo			; load object info
 		ld		hl,styleO0					; remember the object file to load
 		push	hl
 		LoadBanked	style0,StyleBank			; load style data
@@ -188,7 +189,7 @@ ClearLevel:
 		NextReg	DRAW_BANK,a
 		
 		ld		hl,DRAW_BASE
-		ld		(hl),a
+		ld		(hl),0
 		ld		de,DRAW_BASE+1
 		ld		bc,$2000-1
 		ldir
@@ -347,6 +348,7 @@ SetupLevelObjects:
 		ret
 
 
+level_bob_count		dw		0
 ; *****************************************************************************************************************************
 ; Create the level from the data....
 ; *****************************************************************************************************************************
@@ -392,8 +394,15 @@ CreateLevel:
 		sra 	a				; /16 - get bob options
 
 		call 	DrawBobLevel
+@Skippie:
 
-		ld 		a,LevelBank		; restore banks
+		push	hl
+		ld		hl,(level_bob_count)
+		inc		hl
+		ld		(level_bob_count),hl
+		pop		hl
+
+		ld 		a,LevelBank					;	 restore banks
 		NextReg	DRAW_BANK,a
 		inc		a
 		NextReg	DRAW_BANK+1,a

@@ -174,12 +174,3 @@ level_0097		File	"lemdat/levels/LVL0097.LVL"		; Builders will help you here
 
 level_0055		File	"lemdat/levels/LVL0055.LVL"		; Steel Works
 level_0057		File	"lemdat/levels/LVL0057.LVL"		; It's hero time!
-
-
-level1          File    "lemdat/level001.256"
-level2          File    "lemdat/level002.256"
-level3          File    "lemdat/level003.256"
-level4          File    "lemdat/level004.256"
-level91			File    "lemdat/level091.256"
-
-

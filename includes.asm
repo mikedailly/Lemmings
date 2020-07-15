@@ -24,6 +24,9 @@ BORDER		macro
 			out		($fe),a
 			endm
 
+BREAK		macro
+			db		$DD,$01
+			endm
 
 ; hardware/registers
 SpriteReg				equ	$57

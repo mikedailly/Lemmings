@@ -48,7 +48,10 @@ DrawBobLevel:
 		add		hl,hl					; *4
 		add		hl,hl
 		add		hl,DRAW_BASE			; base of "bank" (and sprite table offsets)
-
+		
+		; W - Offset into bank (0 to $1FFF)
+		; B - Bank number offset
+		; B - 0
 		ld		e,(hl)					; read the bank offset
 		inc		hl
 		ld 		d,(hl)					; de = bank offset (has $40 already ORd in)
@@ -59,13 +62,20 @@ DrawBobLevel:
 		ld 		a,(BobBaseBank)			; base bank
 		ld		c,a
 		ld		a,(hl)					; get sprite bank offset
-		;add		a,a						; get 8K banks
+		;add		a,a					; get 8K banks
 		add		a,c
 		ld		(BobBank),a
 		NextReg	DRAW_BANK,a
 		inc		a
 		NextReg	DRAW_BANK+1,a
 
+		;
+		; B - X offset 
+		; B - Y offset
+		; B - Width
+		; B - Height
+		; W - Area (W*H)
+		;
 		ex		de,hl					; get bank offset
 		ld		a,(hl)					;
 		ld		(BobXoff),a
@@ -77,7 +87,7 @@ DrawBobLevel:
 		ld 		(BobXcoord),hl
 		pop 	hl
 		inc		hl
-		ld		a,(hl)			;
+		ld		a,(hl)					;
 		ld		(BobYoff),a
 		push 	hl
 		ld 		hl,(BobYcoord)
@@ -86,13 +96,13 @@ DrawBobLevel:
 		ld 		(BobYcoord),hl
 		pop		hl
 		inc		hl
-		ld		a,(hl)			;
+		ld		a,(hl)			
 		ld		(BobWidth),a
 		ld 		(LineDelta),a
 		xor 	a
 		ld 		(LineDelta+1),a
 		inc		hl
-		ld		a,(hl)			;
+		ld		a,(hl)			
 		ld		(BobHeight),a
 		inc		hl
 		ld 		a,(hl)
@@ -103,6 +113,11 @@ DrawBobLevel:
 		inc 	hl
 		ld 		(CurrentScanline),hl			; base of actual graphic data
 
+		ld		a,h
+		cp		$60
+		jr		c,@LessThan
+		break
+@LessThan:
 		; do basic CLIP here....
 
 		; Flip sprite?
@@ -248,24 +263,34 @@ DrawBobLevel:
 ; ---------------------------------------
 @NextLine:
 @ClipLine:
-		ld 	hl,(CurrentScanline)	; base of actual graphic data
-		ld 	bc,(LineDelta)
+		ld 		hl,(CurrentScanline)	; base of actual graphic data
+		ld 		bc,(LineDelta)
 		add 	hl,bc
-		ld 	(CurrentScanline),hl
-		ld 	a,(BobHeight)
+		
+		ld		a,h
+		sub		Hi(DRAW_BASE)
+		and		$e0
+		jp		z,@NoBankChange
+		swapnib
+		srl		a
+		ld		c,a
+		ld		a,(BobBank)
+		add		a,c
+		ld		(BobBank),a
+		ld		a,h
+		and		$1f
+		add		a,Hi(DRAW_BASE)
+		ld		h,a
+@NoBankChange:
+		ld 		(CurrentScanline),hl
+		
+
+
+		ld 		a,(BobHeight)
 		dec 	a
-		ld 	(BobHeight),a
+		ld 		(BobHeight),a
 		ret 	z
-		jp	@DrawYLoop
-
-
-
-
-
-
-
-
-
+		jp		@DrawYLoop
 
 
 
@@ -331,59 +356,59 @@ DrawBob:
 		add		hl,hl
 		add		hl,de
 
-		ld		e,(hl)				; read the bank offset
+		ld		e,(hl)					; read the bank offset
 		inc		hl
-		ld 		d,(hl)				; de = bank offset (has $c0 already ORd in)
+		ld 		d,(hl)					; de = bank offset (has $c0 already ORd in)
 		inc		hl		
-		ld		(BobBankOffset),de 	; save bank offset
+		ld		(BobBankOffset),de 		; save bank offset
 		
 
 		; This can be optimised out once we know where it's going to live....
-		ld 		a,ObjectsBank		; base bank
+		ld 		a,ObjectsBank			; base bank
 		ld		c,a
-		ld		a,(hl)				; bank offset is already in 8K sizes
-		add		a,a					; *2
-		add		a,c					; add bank offset to base bank
+		ld		a,(hl)					; bank offset is already in 8K sizes
+		add		a,a						; *2
+		add		a,c						; add bank offset to base bank
 		ld		(BobBank),a
 		NextReg	DRAW_BANK,a				; page in BOB graphic
 
 		;
 		; Now read sprite details
 		;
-		ld		a,(de)			; x offset
+		ld		a,(de)					; x offset
 		;ld		(BobXoff),a
 		ld		hl,(BobXcoord)
-		add		hl,a			; add x offset
+		add		hl,a					; add x offset
 		ld		(BobXcoord),hl
 
 		inc		de
-		ld		a,(de)			; y offset
+		ld		a,(de)					; y offset
 		ld		(BobYoff),a
 		ld		hl,(BobYcoord)
 		add		hl,a
 		ld		(BobYcoord),hl
 
-		inc		de			; 6
-		ld		a,(de)			; width
+		inc		de						; 6
+		ld		a,(de)					; width
 		ld		(BobWidth),a
 		ld		c,a
 		ld		b,0
 
 		inc		de
-		ld		a,(de)			; height
+		ld		a,(de)					; height
 		ld		(BobHeight),a
 		inc		de
-		ld		a,(de)			; size in byte
+		ld		a,(de)					; size in byte
 		ld		(BobSize),a
 		inc		de
-		ld		a,(de)			; size in byte
+		ld		a,(de)					; size in byte
 		ld		(BobSize+1),a
 		inc		de
-		ex		de,hl			; base of sprite data in HL
+		ex		de,hl					; base of sprite data in HL
 		ld		(bobgraphic),hl
 
 
-		xor		a			; clear src modulo
+		xor		a						; clear src modulo
 		ld		(SourceModulo+2),a
 		ld		(SourceModulo+3),a
 		;
@@ -392,35 +417,36 @@ DrawBob:
 ClipLeft		
 		ld		hl,(BobXcoord)
 		ld		a,h
-		test	$80			; if not negative, then not clipped
+		test	$80						; if not negative, then not clipped
 		jr		z,TestRightClip
-		add		hl,bc			; add on width
+		add		hl,bc					; add on width
 		ld		a,h
-		test	$80			; still negative?
-		ret		nz			; still <0 then exit
-		ld		a,l			; the value over 0 is the new width
+		test	$80						; still negative?
+		ret		nz						; still <0 then exit
+		ld		a,l						; the value over 0 is the new width
 		ld		(BobWidth),a
-		ld		a,(BobXcoord)		; get pixels behind 0
+		ld		a,(BobXcoord)			; get pixels behind 0
 		neg
-		ld		(SourceModulo+2),a	; set source modulo
+		ld		(SourceModulo+2),a		; set source modulo
 		ld		hl,(bobgraphic)
 		add		hl,a
 		ld		(bobgraphic),hl
-		ld		l,0
-		ld		h,0
+		ld		hl,0					; set "X" coord
+
 TestRightClip:
 		ld		(BobXcoord),hl
-		ld		a,h			; get X MSByte
+
+		ld		a,h						; get X MSByte
 		and		a
-		ret		nz			; if X>=256 then fully clipped
-		ld		a,(BobWidth)		; is right edge clipped?
+		ret		nz						; if X>=256 then fully clipped
+		ld		a,(BobWidth)			; is right edge clipped?
 		add		hl,a
-		ld		a,h			; if h still == 0 then not off right
+		ld		a,h						; if h still == 0 then not off right
 		and		a
-		jr		z,@NoClip		;
+		jr		z,@NoClip				;
 		ld		a,(BobWidth)
-		sub		l			; if off right, then L = number of pixels over
-		ld		(BobWidth),a		; store new width		
+		sub		l						; if off right, then L = number of pixels over
+		ld		(BobWidth),a			; store new width		
 		ld		a,(SourceModulo+2)
 		add		a,l
 		ld		(SourceModulo+2),a
@@ -430,20 +456,20 @@ TestRightClip:
 		ld		d,a
 		;ld	d,$21
 
-;		ld	de,$2160		; y,x
+;		ld	de,$2160					; y,x
 
-		ld		a,d			; $1fff = bank offset
-		srl		a			; get bank  (to p3 bits)
+		ld		a,d						; $1fff = bank offset
+		srl		a						; get bank  (to p3 bits)
 		srl		a
 		srl		a
 		srl		a
 		srl		a
 		ld		c,a
-		ld		a,(Screen2Bank)		; bank screen into top block
+		ld		a,(Screen2Bank)			; bank screen into top block
 		add		a,a
 		add		a,c		
 		NextReg	DRAW_BANK+1,a
-		ex		af,af'			; af' holds current bank
+		ex		af,af'					; af' holds current bank
 		ld		a,d
 		and		$1f
 		or		Hi(DRAW_BASE+$2000)
@@ -451,11 +477,10 @@ TestRightClip:
 
 
 		;de = screen bank offset
-
 		ld		hl,(bobgraphic)
 
-		; Draw bob (normal)
 
+		; Draw bob (normal)
 		ld		a,(BobWidth)
 		push	hl
 		and		a
@@ -469,7 +494,7 @@ TestRightClip:
 		ld		c,a
 		ld		a,70 
 		sub		c
-		add		a,a			; 2 byte opcode
+		add		a,a						; 2 byte opcode
 		ld		bc,BobRenderTower
 		add		bc,a
 		ld		(BobJmpOffset+1),bc
@@ -477,7 +502,7 @@ TestRightClip:
 		ld		b,a
 BobDrawAll:
 		;jp	RenderInside
-		ld		c,$ff			; dummy counter - will never overflow into B
+		ld		c,$ff					; dummy counter - will never overflow into B
 		ld		a,$e3		
 BobJmpOffset	jp	$1234
 		

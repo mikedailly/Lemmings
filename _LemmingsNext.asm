@@ -128,11 +128,11 @@ MainLoop:
 
 
 
-;		call    	OpenTrapDoors
-		call    	DrawLevelObjects
+		call    	OpenTrapDoors
+;		call    	DrawLevelObjects
 			
-;		call    	SpawnLemming
-;		call    	ProcessLemmings
+		call    	SpawnLemming
+		call    	ProcessLemmings
 			
 		;ld      ix,LemData
 		;ld      a,(MouseX)

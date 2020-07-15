@@ -243,57 +243,59 @@ ProcessLemFaller:
 		inc		b
 		ld		a,4
 		cp		b
-		jr		z,@KeepFalling		; 4 pixel fall?	(only fall a max 4 pixels at once)
+		jr		z,@KeepFalling			; 4 pixel fall?	(only fall a max 4 pixels at once)
 		
-		add	hl,$800			; move down a line
-		ld	a,h			; crossed from $c000 to $0000
-		test	$f8
-		jr	nz,@NextLine
-		or	$c0
-		ld	h,a
-		ld	a,(CurrentBank)
-		inc	a
-		ld	(CurrentBank),a
-		add	a,a
+		ld		a,h						; crossed from $c000 to $0000
+		add		8
+		ld		h,a
+		cp		Hi(DRAW_BASE)+$40		; if >=$8000 then swap banks
+		jr		c,@NextLine
+		and		$1f
+		or		Hi(DRAW_BASE)
+		ld		h,a
+
+		ld		a,(CurrentBank)
+		add		a,2
+		ld		(CurrentBank),a
 		NextReg	DRAW_BANK,a
 		inc 	a
 		NextReg	DRAW_BANK+1,a
-		jp	@NextLine
+		jp		@NextLine
 
 
 @KeepFalling:
 		; move Y down by upto 4 pixels at a time
-		ld	a,(ix+LemY)
-		add	a,b
-		ld	(ix+LemY),a
-		cp	160+10
-		jp	nc,KillLemming		; off bottom of the screen?
+		ld		a,(ix+LemY)
+		add		a,b
+		ld		(ix+LemY),a
+		cp		160+10
+		jp		nc,KillLemming		; off bottom of the screen?
 
 		; Keep track of how far we've fallen
-		ld	a,(ix+LemFallCount)
-		add	a,b
-		ld	(ix+LemFallCount),a
-		jp	Lemming_Draw		
+		ld		a,(ix+LemFallCount)
+		add		a,b
+		ld		(ix+LemFallCount),a
+		jp		Lemming_Draw		
 
 @HitGround:
 		; move Y down by upto 4 pixels at a time
-		ld	a,(ix+LemY)
-		add	a,b
-		ld	(ix+LemY),a
+		ld		a,(ix+LemY)
+		add		a,b
+		ld		(ix+LemY),a
 
 		; Keep track of how far we've fallen
-		ld	a,(ix+LemFallCount)
-		add	a,b
-		cp	54
-		;jr	nc,@ChangeToSplatter
-		ld	(ix+LemFallCount),a
-		ld	a,LEM_WALKER
+		ld		a,(ix+LemFallCount)
+		add		a,b
+		cp		54
+		;jr	nc,@ChangeToSplatter			; comment out to fall forever
+		ld		(ix+LemFallCount),a
+		ld		a,LEM_WALKER
 		call	SetState
-		jp	Lemming_Draw		
+		jp		Lemming_Draw		
 @ChangeToSplatter:
-		ld	a,LEM_SPLATTER
+		ld		a,LEM_SPLATTER
 		call	SetState
-		jp	Lemming_Draw
+		jp		Lemming_Draw
 
 
 ; *****************************************************************************************************************************
@@ -301,60 +303,62 @@ ProcessLemFaller:
 ; *****************************************************************************************************************************
 ProcessLemWalker:
 		; move left/right
-		ld	l,(ix+LemX)		; 19
-		ld	h,(ix+(LemX+1))		; 19
-		ld	a,(ix+LemDir)		; 19
-		and	a
-		jp	nz,@MoveRight
-		dec	hl
-		jp	@updown
-@MoveRight:	inc	hl
+		ld		l,(ix+LemX)				; 19
+		ld		h,(ix+(LemX+1))			; 19
+		ld		a,(ix+LemDir)			; 19
+		and		a
+		jp		nz,@MoveRight
+		dec		hl
+		jp		@updown
+@MoveRight:		inc	hl
 @updown:
-		ld	(ix+LemX),l		; 19
-		ld	(ix+(LemX+1)),h		; 19
+		ld		(ix+LemX),l				; 19
+		ld		(ix+(LemX+1)),h			; 19
 
 
 
-		ld	a,(ix+LemY)		; 19
-		ld	c,a			; remember Y
-		dec	a			; y-1
-		call	GetPixel		; DE = pixel, bank set
+		ld		a,(ix+LemY)				; 19
+		ld		c,a						; remember Y
+		dec		a						; y-1
+		call	GetPixel				; DE = pixel, bank set
 
 		; count pixels climing/falling
-		ld	b,0
+		ld		b,0
 
-		ld	de,$0408		; 10
+		ld		de,$0408				; 10
 		; check first pixel at feet - if empty, then fall
-		ld	a,(hl)
-		and	a
-		jp	z,@DoFalling_skip	; jp instead of jr - 2 T-States quicker
-		;ld	de,$0508
-		inc	d
-		jp	@DoClimbing_skip
+		ld		a,(hl)
+		and		a
+		jp		z,@DoFalling_skip		; jp instead of jr - 2 T-States quicker
+		
+		
+		inc		d
+		jp		@DoClimbing_skip
 @NextLineClimbing
-		ld	a,(hl)
-		and	a
-		jp	z,@ClimbUp		; if no more pixels to climb, exit loop
+		ld		a,(hl)
+		and		a
+		jp		z,@ClimbUp				; if no more pixels to climb, exit loop
 @DoClimbing_skip
-		dec	c
-		inc	b
-		ld	a,d			; faster loading of 5 - save 3 T-States
-		cp	b
-		jp	z,@HitWall		; 4 pixel fall?	(only fall a max 4 pixels at once)
+		dec		c						; dec Y
+		inc		b						; count pixels we're climbing
+		ld		a,d						; faster loading of 5 - save 3 T-States
+		cp		b
+		jp		z,@HitWall				; 4 pixel fall?	(only fall a max 4 pixels at once)
 
-		ld	a,h
-		sub	e			; sub 8 = hl-$800
-		ld	h,a
-		;add	hl,-$800		; move UP a line
-		;ld	a,h			; crossed from $c000 to $0000
-		test	$40			; in top 2 banks? if dropped into $bX then need to change bank
-		jr	nz,@NextLineClimbing
-		or	$40			; bring bank into top 2 banks
-		ld	h,a
-		ld	a,(CurrentBank)
-		dec	a
-		ld	(CurrentBank),a
-		add	a,a
+		ld		a,h
+		sub		e						; sub 8 = hl-$800
+		ld		h,a
+
+		cp		Hi(DRAW_BASE)			; crossed from $4000/$6000 to $3xxxx
+		jr		nc,@NextLineClimbing
+
+		and		$1f
+		or		Hi(DRAW_BASE)
+		ld		h,a
+
+		ld		a,(CurrentBank)
+		sub		2
+		ld		(CurrentBank),a		
 		NextReg	DRAW_BANK,a
 		inc 	a
 		NextReg	DRAW_BANK+1,a		
@@ -364,17 +368,18 @@ ProcessLemWalker:
 @HitWall	;
 		; Check for climber here
 		;
-		ld	a,c
-		add	a,5
-		ld	c,a
-		ld	a,(ix+LemDir)		; flip direction
-		xor	1
-		ld	(ix+LemDir),a
+		ld		a,c
+		add		a,5
+		ld		c,a
+		ld		a,(ix+LemDir)			; flip direction
+		xor		1
+		ld		(ix+LemDir),a
 		;call	SetWalkerDirection_NoLoad
 
-@ClimbUp:	; Normal walker "climb"
-		ld	(ix+LemY),c
-		jp	DrawWalker		
+@ClimbUp:	
+		; Normal walker "climb"
+		ld		(ix+LemY),c
+		jp		DrawWalker		
 
 
 
@@ -384,69 +389,74 @@ ProcessLemWalker:
 		;
 @NextLineFalling:
 		; check first pixel - if empty, then fall
-		ld	a,(hl)
-		and	a
-		jp	nz,@HitGround
+		ld		a,(hl)
+		and		a
+		jp		nz,@HitGround
 
-		inc	c
-		inc	b
-		ld	a,d			; faster loading of 4 (save 3 t-states)
-		cp	b
-		jp	z,SetFaller		; 4 pixel fall?	(only fall a max 4 pixels at once)
+		inc		c
+		inc		b
+		ld		a,d						; faster loading of 4 (save 3 t-states)
+		cp		b						; have we fallen 4 pixels?
+		jp		z,SetFaller				; 4 pixel fall?	(only fall a max 4 pixels at once)
 
 @DoFalling_skip:
-		ld	a,h
-		add	a,e			; add $8 = hl+$800
-		ld	h,a	
-		;add	hl,$800			; move DOWN a line
-		;ld	a,h			; crossed from $c000 to $0000
-		test	$f8			; in top 2 banks? if dropped into $bX then need to change bank
-		jr	nz,@NextLineFalling
-		or	$c0			; bring bank into top 2 banks
-		ld	h,a
-		ld	a,(CurrentBank)
-		inc	a
-		ld	(CurrentBank),a
-		add	a,a
+		ld		a,h						; move down a line (one line = $800)
+		add		a,e						; e=$8
+		ld		h,a				
+
+		bit		7,a						; Banks $4000-$7fff. If we make $8XXX then we need to increase the banks
+		jr		z,@NextLineFalling		; if not, then don't need to increase the banks
+		and		$1f						; mask off address (keep bank offset)
+		or		Hi(DRAW_BASE)			; put base bank back in
+		ld		h,a
+
+		ld		a,(CurrentBank)			; now increase the banks by 2
+		add		a,2
+		ld		(CurrentBank),a
 		NextReg	DRAW_BANK,a
 		inc 	a
 		NextReg	DRAW_BANK+1,a		
-		jp	@NextLineFalling
+		jp		@NextLineFalling
 @HitGround:
-		ld	(ix+LemY),c		; 19
-		jp	DrawWalker		
+		ld		(ix+LemY),c
+		;jp		DrawWalker				; fall through to draw
 
+
+
+;
+; Draw the walk, using the X coordinate 
+;
 DrawWalker:	
-		ld	e,(ix+LemX)
-		ld	a,(ix+LemDir)
-		and	a
-		jp	nz,@GoingRight
-		ld	a,e		; frame = 7-(x&7)
-		and	7
-		ld	c,a
-		ld	a,7
-		sub	c
-		add	a,FWalkerL
-		ld	l,a
-		ld	h,0
-		jp	@DrawLem
+		ld		e,(ix+LemX)
+		ld		a,(ix+LemDir)
+		and		a
+		jp		nz,@GoingRight
+		ld		a,e						; frame = 7-(x&7)
+		and		7
+		ld		c,a
+		ld		a,7
+		sub		c
+		add		a,FWalkerL
+		ld		l,a
+		ld		h,0
+		jp		@DrawLem
 @GoingRight	
-		ld	a,e		; frame = X&7
-		and	7
-		add	a,FWalkerR
-		ld	l,a
-		ld	h,0
+		ld		a,e						; frame = X&7
+		and		7
+		add		a,FWalkerR
+		ld		l,a
+		ld		h,0
 @DrawLem:	
-		ld	d,(ix+LemX+1)	
-		ld	a,(ix+LemY)	
+		ld		d,(ix+LemX+1)
+		ld		a,(ix+LemY)	
 		call	DrawLemmingFrame
 
-		jp	NextLemming_NoDraw
+		jp		NextLemming_NoDraw
 
 SetFaller:
-		ld	a,LEM_FALLER
+		ld		a,LEM_FALLER
 		call	SetState
-		jp	Lemming_Draw	
+		jp		Lemming_Draw	
 
 ; *****************************************************************************************************************************
 ; Function:	Process a lemming building
@@ -466,119 +476,119 @@ ProcessLemBuilderShrug:
 ; Function:	Process a lemming building
 ; *****************************************************************************************************************************
 ProcessLemBuilder:
-		ld	a,(ix+LemY)
-		ld	l,(ix+LemX)		; get X
-		ld	h,(ix+(LemX+1))
-		call	GetPixel		; DE = pixel, bank set
+		ld		a,(ix+LemY)
+		ld		l,(ix+LemX)					; get X
+		ld		h,(ix+(LemX+1))
+		call	GetPixel					; DE = pixel, bank set
 
-		ld	a,(ix+LemFrame)
-		cp	10			; Brick goes down on frame 9 or 10... try 10
-		jr	z,@BrickFrame
-		ld	a,(ix+LemFrame)
-		cp	16			; Brick goes down on frame 9 or 10... try 10
-		jr	z,@MoveBuilder
-		jp	Lemming_Draw
+		ld		a,(ix+LemFrame)
+		cp		10							; Brick goes down on frame 9 or 10... try 10
+		jr		z,@BrickFrame
+		ld		a,(ix+LemFrame)
+		cp		16							; Brick goes down on frame 9 or 10... try 10
+		jr		z,@MoveBuilder
+		jp		Lemming_Draw
 @MoveBuilder:
-		ld	a,(ix+LemSkillTemp)
-		and	$ff
-		jp	nz,@BricksLeft
-		ld	a,LEM_BUILDER_SHRUG
+		ld		a,(ix+LemSkillTemp)
+		and		$ff
+		jp		nz,@BricksLeft
+		ld		a,LEM_BUILDER_SHRUG
 		call	SetState
-		jp	Lemming_Draw
+		jp		Lemming_Draw
 @BricksLeft:
-		xor	a
-		ld	(ix+LemFrame),a
+		xor		a
+		ld		(ix+LemFrame),a
 
-		ld	l,(ix+LemX)
-		ld	h,(ix+(LemX+1))
+		ld		l,(ix+LemX)
+		ld		h,(ix+(LemX+1))
 
-		ld	a,(ix+LemDir)		; left or right?
-		and	a
-		jr	z,@FaceLeftMove
-		inc	hl
-		inc	hl
-		jr	@SkipLeftMove
+		ld		a,(ix+LemDir)				; left or right?
+		and		a
+		jr		z,@FaceLeftMove
+		inc		hl
+		inc		hl
+		jr		@SkipLeftMove
 @FaceLeftMove:
-		dec	hl
-		dec	hl
+		dec		hl
+		dec		hl
 @SkipLeftMove
-		ld	(ix+LemX),l
-		ld	(ix+(LemX+1)),h
+		ld		(ix+LemX),l
+		ld		(ix+(LemX+1)),h
 
-		ld	a,(ix+LemY)
-		dec	a
-		cp	$FF
-		jp	z,KillLemming
-		ld	(ix+LemY),a
-		jp	Lemming_Draw
+		ld		a,(ix+LemY)
+		dec		a
+		cp		$FF
+		jp		z,KillLemming
+		ld		(ix+LemY),a
+		jp		Lemming_Draw
 
 @BrickFrame:
-		ld	hl,BuilderStep
+		ld		hl,BuilderStep
 		; Draw builer step
-		ld	e,(ix+LemY)
-		ld	d,0
-		dec	de
-		ld	l,(ix+LemX)
-		ld	h,(ix+(LemX+1))
+		ld		e,(ix+LemY)
+		ld		d,0
+		dec		de
+		ld		l,(ix+LemX)
+		ld		h,(ix+(LemX+1))
 
-		ld	a,(ix+LemDir)		; left or right?
-		and	a
-		jr	z,@FaceLeft
-		dec	hl
-		dec	hl
-		jr	@SkipLeftOffset
+		ld		a,(ix+LemDir)		; left or right?
+		and		a
+		jr		z,@FaceLeft
+		dec		hl
+		dec		hl
+		jr		@SkipLeftOffset
 @FaceLeft:
-		add	hl,-6
+		add		hl,-6
 @SkipLeftOffset:
-		ld	b,h
-		ld	c,l
-		ld	hl,BuilderStep
+		ld		b,h
+		ld		c,l
+		ld		hl,BuilderStep
 		call	RenderBoblevel
-		ld	a,(ix+LemSkillTemp)
-		dec	a
-		ld	(ix+LemSkillTemp),a
+		ld		a,(ix+LemSkillTemp)
+		dec		a
+		ld		(ix+LemSkillTemp),a
 
-		jp	Lemming_Draw
+		jp		Lemming_Draw
 
 ; *****************************************************************************************************************************
 ; Function:	Process a lemming digging
 ; *****************************************************************************************************************************
 ProcessLemDigger:
-		ld	a,(ix+LemY)
-		ld	l,(ix+LemX)		; get X
-		ld	h,(ix+(LemX+1))
+		ld		a,(ix+LemY)
+		ld		l,(ix+LemX)		; get X
+		ld		h,(ix+(LemX+1))
 		call	GetPixel		; DE = pixel, bank set
 
 @NextLine:
-		ld	a,(hl)			; if no ground under them, then turn into faller
-		and	a
-		jp	z,SetFaller
+		ld		a,(hl)			; if no ground under them, then turn into faller
+		and		a
+		jp		z,SetFaller
 
-		ld	a,(ix+LemFrame)
-		cp	0
-		jr	z,@DigFrame
-		cp	13
-		jp	nz,Lemming_Draw
+		ld		a,(ix+LemFrame)
+		cp		0
+		jr		z,@DigFrame
+		cp		13
+		jp		nz,Lemming_Draw
 		
 @DigFrame:		
 		; remove part of the level
-		ld	l,(ix+LemY)
-		ld	h,0
-		add	hl,-2
-		ex	de,hl
-		ld	l,(ix+LemX)
-		ld	h,(ix+(LemX+1))
-		add	hl,-6
-		ld	b,h
-		ld	c,l
-		ld	hl,DiggerMask
-		call	ClearBoblevel
+		ld		l,(ix+LemY)
+		ld		h,0
+		add		hl,-2
+		ex		de,hl
+		ld		l,(ix+LemX)
+		ld		h,(ix+(LemX+1))
+		add		hl,-6
+		ld		b,h
+		ld		c,l
+		ld		hl,DiggerMask
+		;call	ClearBoblevel
 
-		ld	a,(ix+LemY)
-		inc	a
-		ld	(ix+LemY),a
+		ld		a,(ix+LemY)
+		inc		a
+		ld		(ix+LemY),a
 
-		jp	Lemming_Draw
+		jp		Lemming_Draw
 
 
 
@@ -656,32 +666,29 @@ ProcessLemBomber:
 ; *****************************************************************************************************************************
 ; Function:	Get pixel address (in level bitmap)
 ; IN:		a  = Y
-;		HL = X
+;			HL = X
 ; Ret:		HL = address, bank set
 ; Uses		af,de,hl
 ; *****************************************************************************************************************************
 GetPixel:
 		; Get bank pixel is on
 		ld		e,a						; save Y
+		and		3
 		add 	a,a
 		add		a,a
 		add		a,a
-		;and 	$3f						; don't need to and as $3F+$C0=$FF
-		or		Hi(DRAW_BASE) 			; add on base address (always here)
+		add		a,Hi(DRAW_BASE) 		; add on base address (always here)
 		ld 		d,a 					; get Y (line offset into bank) into D
 		ld		a,e						; Get Y coordinate back
 		ld		e,0
-		srl 	a						; 0 put into bit 7,
-		srl 	a
-		srl 	a 						; /8 = bank
-		;and	$1f						; 0 put into bit 7 so no need for AND
-		add		a,LevelBitmapBank		; add on the base of the level
 		add		hl,de			
 
-		ld		(CurrentBank),a			; remember bank
-		add		a,a
+		srl		a
+		srl		a
+		add		a,LevelBitmapBank		; add on the base of the level
+		ld		(CurrentBank),a
 		NextReg	DRAW_BANK,a
-		inc 	a
+		inc		a
 		NextReg	DRAW_BANK+1,a
 		ret	
 
@@ -940,65 +947,70 @@ DrawLemmingFrame:
 		NextReg	DRAW_BANK+1,a					; bank in
 
 		
-		ld 	b,h
-		ld 	c,l
-		add	hl,hl			; *4
-		add	hl,hl
-		add	hl,bc			; *5
-		add	hl,$c000		; HL = address
+		ld 		b,h
+		ld 		c,l
+		add		hl,hl			; *4
+		add		hl,hl
+		add		hl,bc			; *5
+		add		hl,DRAW_BASE	; HL = address
 		
-		ld	e,(hl)			; get draw function address
-		inc	hl
-		ld	d,(hl)
-		ld	(CallLemming+1),de
+		ld		e,(hl)			; get draw function address
+		inc		hl
+		ld		d,(hl)
+		ld		(CallLemming+1),de
 
-		inc	hl
-		ld	a,(hl)			; get draw function bank offset
-		inc	hl
-		add	a,LemmingsBank*2
+		inc		hl
+		ld		a,(hl)			; get draw function bank offset
+		inc		hl
+		add		a,LemmingsBank
 
-		ld	b,(hl)			; get x,y orgin offsets  (b=x,c=y)
-		inc	hl
-		ld	c,(hl)
-		NextReg	DRAW_BANK,a					; bank in
+		ld		b,(hl)			; get x,y orgin offsets  (b=x,c=y)
+		inc		hl
+		ld		c,(hl)
+		NextReg	DRAW_BANK,a				; bank in
+		inc		a
+		NextReg	DRAW_BANK+1,a			; bank in
 
 
 
-		pop	hl			; get X coordinate back
+
+		pop		hl						; get X coordinate back
 		ld      de,(ScrollIndex)
-		ccf
-		sbc	hl,de			; subtract from scroll offset
-		add	hl,16
-		ld	a,(ix+LemFrameOffX)
+		and		a						; clear carry
+		sbc		hl,de					; subtract from scroll offset
+		add		hl,16
+		ld		a,(ix+LemFrameOffX)
 		test	$80
-		jr	z,@DoPlus
-		ld	e,a
-		ld	d,-1
-		add	hl,de
-		jp	@SkipAdd
-@DoPlus:	add	hl,a
-@SkipAdd:	ld	a,c			; save Y offset
-		ld	c,b
-		ld	b,0
-		ccf
-		sbc	hl,bc
+		jr		z,@DoPlus
+		ld		e,a
+		ld		d,-1
+		add		hl,de
+		jp		@SkipAdd
+@DoPlus:	
+		add		hl,a
+@SkipAdd:	
+		ld		a,c			; save Y offset
+		ld		c,b
+		ld		b,0
+		and		a
+		sbc		hl,bc
 		
 
-		ld	c,a			; get Y offset back into c
-		ld	a,h
-		and	a
-		jr	nz,ClipLemming
-		ld	a,l
-		cp	$f8			; right clip
-		jr	nc,ClipLemming
+		ld		c,a			; get Y offset back into c
+		ld		a,h
+		and		a
+		jr		nz,ClipLemming
+		ld		a,l
+		cp		$f8			; right clip
+		jr		nc,ClipLemming
 
-		pop	af
+		pop		af
 		;sub	c
 		;add	a,c
-		dec	a
-		cp	176			; if Y > 176 then clip
-		ret	nc
-		ld	h,a
+		dec		a
+		cp		176			; if Y > 176 then clip
+		ret		nc
+		ld		h,a
 
 		; HL = screen address [y,x]
 
@@ -1006,21 +1018,23 @@ DrawLemmingFrame:
 		;
 		; Common drawing code....
 		;
-		ld	bc,$123b
-		ld	a,h			
-		and	$c0
-		or	$03+8
-		out	(c),a
+		ld		bc,$123b
+		ld		a,h			
+		and		$c0
+		or		$03+8
+		out		(c),a
 
-		ex	af,af'
-		ld	a,h
-		and	$3f
-            	ld	h,a
+		ex		af,af'
+		ld		a,h
+		and		$3f
+		ld		h,a
 
-CallLemming:	jp	$0000
+CallLemming:	
+		jp		$0000
 		
 
-ClipLemming	pop	af
+ClipLemming	
+		pop		af
 		ret
 
 
