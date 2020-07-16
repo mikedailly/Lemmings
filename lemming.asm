@@ -582,7 +582,7 @@ ProcessLemDigger:
 		ld		b,h
 		ld		c,l
 		ld		hl,DiggerMask
-		;call	ClearBoblevel
+		call	ClearBoblevel
 
 		ld		a,(ix+LemY)
 		inc		a
@@ -648,18 +648,18 @@ ProcessLemPreBomber:
 ; *****************************************************************************************************************************
 ; Function:	Process a Bomber
 ProcessLemBomber:
-		ld	a,(ix+LemFrame)
-		inc	a
-		cp	53
-		jp	z,KillLemming
+		ld		a,(ix+LemFrame)
+		inc		a
+		cp		53
+		jp		z,KillLemming
 
-                ld      h,(ix+LemX+1)
-                ld      l,(ix+LemX)
+		ld      h,(ix+LemX+1)
+		ld      l,(ix+LemX)
 		ld      e,(ix+LemY)
 
-                ld      (ix+LemFrame),a
-                call    DrawExplosionFrame
-                jp	DontDoCursorCheck		; bombers shouldn't be detected
+		ld		(ix+LemFrame),a
+		call	DrawExplosionFrame
+		jp		DontDoCursorCheck				; bombers shouldn't be detected
 
 
 
@@ -1088,7 +1088,7 @@ DrawCounter
 		ld	b,h
 		ld	c,l
 		ld	hl,BomberMask
-		;call	ClearBoblevel
+		call	ClearBoblevel
 
 		ld	a,LEM_PREBOMBER
 		jp	SetState

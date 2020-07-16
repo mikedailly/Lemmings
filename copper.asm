@@ -37,7 +37,7 @@ COP_CONTROL_HI          equ     98
 
 PAPER_INDEX     equ     16
 
-; 1K copper
+; Panel copper
 GameCopper:     
 		WAIT    159,300                  ; wait until right border
 		MOVE    COP_LAYER2_BANK,PanelBank>>1     

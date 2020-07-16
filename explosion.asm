@@ -42,12 +42,12 @@ InitExplosion:
 ;
 ; Draw an explosion frame
 ;
-; In:		HL  = X origin
+; In:	HL  = X origin
 ;		E   = Y origin
 ;		A   = frame
 ;		
 ; Notes:	160 bytes per frame (80 points), 256 byte apart.
-;		$00 for X = ignore point
+;			$00 for X = ignore point
 ;
 ;
 ; port $123b
@@ -72,13 +72,13 @@ DrawExplosionFrame:
 		; should probably do a large BBOX clip here...
 
 		; point to correct frame
-		add		a,$c0
+		add		a,Hi(DRAW_BASE)
 		ld		d,a
 		ld		e,0						; DE = frame address (once banked in)
 
 		; set animation bank
-		NextReg	$56,PointsBank*2
-		NextReg	$57,1+(PointsBank*2)
+		NextReg	DRAW_BANK,PointsBank
+		NextReg	DRAW_BANK+1,1+PointsBank
 
 
 		;
@@ -98,64 +98,64 @@ DrawExplosionFrame:
 		jr		z,@NextPoint			; if X==$00 then ignore point
 
 @PointsXOrigin:	
-		ld		hl,$0000		; get X origin
-		add		hl,a			; add positive  X offset to X origin
+		ld		hl,$0000				; get X origin
+		add		hl,a					; add positive  X offset to X origin
 		ld		a,h
-		and		a			; if high byte is NOT 0, then off screen
-		jr		nz,@NextPoint		; clip to screen
+		and		a						; if high byte is NOT 0, then off screen
+		jr		nz,@NextPoint			; clip to screen
 		ld		a,l
-		ld		(@XStore+1),a		; store X
+		ld		(@XStore+1),a			; store X
 
 
 		; now do Y
 @PointsYOrigin:	
-		ld		hl,$0000		; get Y origin
-		ld		a,(de)			; Get Y offset (now positive)
+		ld		hl,$0000				; get Y origin
+		ld		a,(de)					; Get Y offset (now positive)
 		add		hl,a
 		ld		a,h
-		and		a			; if high byte is NOT 0, then off screen
+		and		a						; if high byte is NOT 0, then off screen
 		jr		nz,@NextPoint	
 
-		ld		a,l			; get Y
-		cp		160			; in panel area?
+		ld		a,l						; get Y
+		cp		160						; in panel area?
 		jr		nc,@NextPoint
 @XStore		
-		ld		l,$00			; LOAD "X" (self-mod-code)
-		ld 		h,a			; put Y into H
+		ld		l,$00					; LOAD "X" (self-mod-code)
+		ld 		h,a						; put Y into H
 
 
 		; select correct bank
 		and		$c0
-		or		%00001011		; or in Layer 2 on, write on, back buffer on
+		or		%00001011				; or in Layer 2 on, write on, back buffer on
 		out		(c),a
 
-		ld		a,h			; get offset into 16k bank
+		ld		a,h						; get offset into 16k bank
 		and		$3f
 		ld		h,a
 
-		ex		af,af'			; get pixel colour
-		ld		(hl),a			; store on screen
-		rrca				; rotate pixel colour
-		ex		af,af'			; store again
+		ex		af,af'					; get pixel colour
+		ld		(hl),a					; store on screen
+		rrca							; rotate pixel colour
+		ex		af,af'					; store again
 
-		inc		e			; points are 256 byte aligned...
+		inc		e						; points are 256 byte aligned...
 		exx
 		djnz	@AllPoints
 
-		exx				; get BC back...
+		exx								; get BC back...
 		ld		a,2
 		out		(c),a
 		ret		
 
 @NextPoint:	
-		inc		e			; points are 256 byte aligned...
+		inc		e						; points are 256 byte aligned...
 		ex		af,af'
 		rrca
 		ex		af,af'
 		exx
 		djnz	@AllPoints
 
-		exx				; get BC back...
+		exx								; get BC back...
 		ld		a,2
 		out		(c),a
 		ret

@@ -280,7 +280,7 @@ DrawBobLevel:
 		ld		a,h
 		and		$1f
 		add		a,Hi(DRAW_BASE)
-		ld		h,a
+		ld		h,a		
 @NoBankChange:
 		ld 		(CurrentScanline),hl
 		
@@ -778,7 +778,7 @@ RenderInside:
 ; 
 ; ************************************************************************
 ClearBoblevel:		
-		ld		a,(hl)			; get width
+		ld		a,(hl)				; get width
 		ld		(MaskWidth),a
 		inc		hl
 		ld		a,(hl)
@@ -792,26 +792,26 @@ ClearBoblevel:
 		exx
 		ld		(MaskAddress),hl	; store current Mask pointer
 
-		ld		a,d			; Y negative? clip it
+		ld		a,d					; Y negative? clip it
 		and		a
 		jr		nz,@Nextline
 		ld		a,e
 		cp		160
-		ret		nc			; past panel area, clip - JUST STOP
+		ret		nc					; past panel area, clip - JUST STOP
 
-		srl		a			; /4 to get BANK
+		srl		a					; /4 to get BANK
 		srl		a
-		add		a,LevelBitmapBank*2	; add on base bank
-		NextReg	$57,a
-		ld		a,e			; get Y pos
-		add		a,a			; 1 line = $08
+		add		a,LevelBitmapBank	; add on base bank
+		NextReg	DRAW_BANK,a
+		ld		a,e					; get Y pos
+		and		3
+		add		a,a					; 1 line = $08
 		add		a,a
 		add		a,a
-		and		$18			; keep lines within bank
-		add		a,$e0			; base of bank
+		add		a,Hi(DRAW_BASE)		; base of bank
 		ld		h,a
 		ld		l,0
-		add		hl,bc			; add on X coord
+		add		hl,bc				; add on X coord
 
 
 		;
@@ -841,7 +841,7 @@ ClearBoblevel:
 		ld		hl,(MaskAddress)
 		ld		a,(MaskWidth)
 		add		hl,a
-		inc		de			; y++
+		inc		de						; y++
 
 
 		exx	
@@ -883,14 +883,14 @@ RenderBoblevel:
 
 		srl		a					; /4 to get BANK
 		srl		a
-		add		a,LevelBitmapBank*2	; add on base bank
-		NextReg	$57,a
+		add		a,LevelBitmapBank	; add on base bank
+		NextReg	DRAW_BANK,a
 		ld		a,e					; get Y pos
+		and		3
 		add		a,a					; 1 line = $08
 		add		a,a
 		add		a,a
-		and		$18					; keep lines within bank
-		add		a,$e0				; base of bank
+		add		a,Hi(DRAW_BASE)		; base of bank
 		ld		h,a
 		ld		l,0
 		add		hl,bc				; add on X coord

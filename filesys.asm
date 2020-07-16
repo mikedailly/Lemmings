@@ -594,7 +594,7 @@ DemoText			db	"Demo V0.1",0
 DemoText2			db	"ZX Spectrum Next Lemmings",0
 DemoText3			db	"     Prototype V0.1",0
 	
-DefaultDrive:	db	0
-LastFileName	dw	0		; last filename to be loaded
+DefaultDrive:		db	0
+LastFileName		dw	0		; last filename to be loaded
 
 
