@@ -3,11 +3,11 @@
 ; *****************************************************************************************************************************
 LoadLevel:
 		;LoadBank	level_0023,LevelAddress,LevelBank	; Watch out, there's traps about
-		;LoadBank	level_0030,LevelAddress,LevelBank	; ship  -  Every Lemming for himself!!!
+		LoadBank	level_0030,LevelAddress,LevelBank	; ship  -  Every Lemming for himself!!!
 		;LoadBank	level_0055,LevelAddress,LevelBank	; Steel Works
 		;LoadBank	level_0031,LevelAddress,LevelBank	; art gallery
 		;LoadBank	level_0091,LevelAddress,LevelBank	; Just dig
-		LoadBank	level_0020,LevelAddress,LevelBank	; huge sprites
+		;LoadBank	level_0020,LevelAddress,LevelBank	; huge sprites
 
 		ld		ix,LevelAddress
 		ld 		a,(ix+$1b)
@@ -18,9 +18,9 @@ LoadLevel:
 		jr 		nz,@NotDirt
 @DefaultStyle:	
 		LoadFile	style0dat,ObjectInfo			; load object info
-		ld		hl,styleO0					; remember the object file to load
+		ld		hl,styleO0							; remember the object file to load
 		push	hl
-		LoadBanked	style0,StyleBank			; load style data
+		LoadBanked	style0,StyleBank				; load style data
 		jp 		@CarryOn
 @NotDirt:
 		; ------------------------------------
@@ -500,8 +500,8 @@ DrawLevelObjects
 		ld		d,(ix+(oY+1))
 		ld		l,(ix+oFrame)				; hl = sprite
 		ld		h,0
-		;ld	a,(ix+7)						; a = flags (behind, flip etc)
-		xor		a
+		ld		a,(ix+oFlags)				; a = flags (behind, flip etc)
+		;xor		a
 		call	DrawLevelBob
 
 @OffRight:

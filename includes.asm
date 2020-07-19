@@ -6,6 +6,9 @@
 DRAW_BANK				equ		$52
 DRAW_BASE				equ		$4000
 
+L2_BANK					equ		$50
+L2_BASE					equ		$0000
+
 USE_COPPER				equ		0
 NextInstructions        equ     1
 

@@ -165,31 +165,29 @@ CopyScreen:
 		; $02 = enable layer 2 display
 		; $08 = to map active layer 2 (nextreg 0x12), 1 to map shadow layer 2 (nextreg 0x13)
 		ld		a,1+2+8 
-		ld		(VRAMBank),a
+		exx
 		ld		bc,$123b
 		out		(c),a
+		ex		af,af'						; hold Layer 2 bank in alt A
+		exx
 
 		add		hl,LevelBitmapAddress
-
-		ld		de,8					; start at top of VRAM bank
-		ld		a,LevelBitmapBank		; 20 banks to loop through
+		ld		de,8						; start at top of VRAM bank
+		ld		a,LevelBitmapBank			; 20 banks to loop through
 @CopyLoop:
 		NextReg	DRAW_BANK,a
 		inc		a
 		NextReg	DRAW_BANK+1,a
 		inc		a
-		;ex		af,af'		; remember bank
-		push	af
 		push	hl
-		ld		b,8			; 8 lines per bank
+		ld		b,8							; 8 lines per bank
 
 		
 @Copy8Lines:	
-		ld		c,255
-		;push	bc
+		ld		c,255						; set to 255 so "B" doesn't decrement (240 pixels)
 
-;		; copy a whole row (240 pixels)
-		ldi					; 240*16
+		; copy a whole row (240 pixels)
+		ldi									; 16Ts per ldi
 		ldi
 		ldi
 		ldi
@@ -430,40 +428,37 @@ CopyScreen:
 		ldi
 		ldi
 
-		add		hl,2048-(256-16)		; offset to move to NEXT line in level bitmap
-		ld		a,16					; 15ts
-		add		de,a
+		add		hl,2048-(256-16)		; 16Ts	offset to move to NEXT line in level bitmap
+		ld		e,8						; 7Ts	reset E back to start of line
+		inc		d						; 4Ts	move down one line
+		dec		b						; 8 lines in one block
+		jp		nz,@Copy8Lines
 
-		;pop		bc					; get 8 line counter back	
-		dec		b
-		jr		z,@finishloop
-		jp		@Copy8Lines
 @finishloop
-		ld		a,d						; overflowed the lower 16K?
-		and		Hi(DRAW_BASE)			; if so we need to change bank (will increment above $4000)
-		jr		z,@SkipBankSwap
-		ld		d,0
+		bit		6,d						; overflowed the lower 16K?  ( b>=$40 )
+		jr		z,@SkipBankSwap			; if so we need to change bank (will increment above $4000)
+		ld		d,0						; reset to start of next bank
 
-		ld		a,(VRAMBank)		; get current VRAM bank
-		add		$40					; next one
-		ld		(VRAMBank),a
-		ld		bc,$123b			; set VRAM bank
+		ex		af,af'
+		exx								; get bc=$123b back (8Ts instead of 10Ts)
+		add		$40						; move to next Layer2 16K bank
 		out		(c),a
+		exx
+		ex		af,af'
 
 @SkipBankSwap:
-		pop		hl					; get back to start of bank
-		pop		af
+		pop		hl						; get back to start of bank
 		cp		LevelBitmapBank+40
 		jp		nz,@CopyLoop
 
 		; leave screen on...
-		ld	bc,$123b
-		ld	a,$02+8
-		out	(c),a
+		exx								; load BC with $123b again
+		ld		bc,$123b
+		ld		a,$02+8
+		out		(c),a
 		ret
 
-VRAMBank	db	0
-BankCount	db	0
+
 
 
 

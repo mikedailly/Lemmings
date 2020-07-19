@@ -129,7 +129,7 @@ MainLoop:
 
 
 		call    	OpenTrapDoors
-;		call    	DrawLevelObjects
+		call    	DrawLevelObjects
 			
 		call    	SpawnLemming
 		call    	ProcessLemmings

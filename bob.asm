@@ -314,28 +314,30 @@ DrawLevelBob:
 		;ld		bc,$300
 
 		; offset by level offset
+		push	af
 		push	bc
 		exx
 		pop		hl
 		ld		bc,(ScrollIndex)	; 20
-		xor		a			; clear carry
+		xor		a					; clear carry
 		sbc		hl,bc			; subtract world location
 		push	hl
 		exx
 		pop		bc
+		pop		af
 
 
 ; ************************************************************************
 ;
 ;	Draw sprites upto 70x255 in size 
 ;
-;	hl = sprite number (354 lemmings...)
+;	hl = sprite number 
 ;	bc = X (0-1600)
 ;	de  = Y
 ; 	a  = flags
 ;		2 = remove terrain
 ;		4 = upside down
-;		8 = behind
+;		$80 = behind
 ;	Bank = base of graphics
 ; 
 ; ************************************************************************
@@ -345,6 +347,7 @@ DrawBob:
 		;ld	bc,$80
 
 		ld 		(BobFlags),a
+		ld		(BobDrawAll+1),a
 		ld		(BobXcoord),bc
 		ld		(BobYcoord),de
 		ld 		a,ObjectsBank
@@ -358,19 +361,19 @@ DrawBob:
 
 		ld		e,(hl)					; read the bank offset
 		inc		hl
-		ld 		d,(hl)					; de = bank offset (has $c0 already ORd in)
+		ld 		d,(hl)					; de = bank offset (has $40 already ORd in)
 		inc		hl		
 		ld		(BobBankOffset),de 		; save bank offset
 		
 
 		; This can be optimised out once we know where it's going to live....
-		ld 		a,ObjectsBank			; base bank
-		ld		c,a
+		ld 		c,ObjectsBank			; base bank
 		ld		a,(hl)					; bank offset is already in 8K sizes
-		add		a,a						; *2
 		add		a,c						; add bank offset to base bank
 		ld		(BobBank),a
 		NextReg	DRAW_BANK,a				; page in BOB graphic
+		inc		a
+		NextReg	DRAW_BANK+1,a			; page in BOB graphic
 
 		;
 		; Now read sprite details
@@ -459,20 +462,21 @@ TestRightClip:
 ;		ld	de,$2160					; y,x
 
 		ld		a,d						; $1fff = bank offset
-		srl		a						; get bank  (to p3 bits)
-		srl		a
-		srl		a
-		srl		a
-		srl		a
+		swapnib
+		and		$0e
+		srl		a						; get bank  (top p3 bits)
 		ld		c,a
 		ld		a,(Screen2Bank)			; bank screen into top block
 		add		a,a
 		add		a,c		
-		NextReg	DRAW_BANK+1,a
+		NextReg	L2_BANK,a
+		inc		a
+		NextReg	L2_BANK+1,a
+		dec		a
 		ex		af,af'					; af' holds current bank
 		ld		a,d
 		and		$1f
-		or		Hi(DRAW_BASE+$2000)
+		;or		Hi(L2_BASE)				; currently this is $0000
 		ld		d,a
 
 
@@ -501,10 +505,18 @@ TestRightClip:
 		ld		a,(BobHeight)
 		ld		b,a
 BobDrawAll:
+		ld		a,$00
+		bit		7,a
+		jp		nz,RenderBehind
+		bit		6,a
+		jp		nz,RenderInside
+
+
 		;jp	RenderInside
 		ld		c,$ff					; dummy counter - will never overflow into B
 		ld		a,$e3		
-BobJmpOffset	jp	$1234
+BobJmpOffset	
+		jp		$1234
 		
 BobRenderTower	LDIX
 		LDIX
@@ -579,27 +591,68 @@ BobRenderTower	LDIX
 
 
 
-
+NextBobLine:
 DestModulo	
 		add		de,$0000
 SourceModulo	
 		add		hl,$0000
 		ld		a,d
-		test	$e0				; crossed from $e0-$ff to $00?
-		jr		nz,@NoBankChange		
-		or		$e0				; D is already 0, so just OR in bank base address
+		bit		5,a								; cross out of the dest bank? ($6000-$7fff)
+		jr		z,@NoBankChange		
+		and		$1f
+		;add		Hi(L2_BASE)					; currently $0000
 		ld		d,a
-		ex		af,af'				; get bank and increment
+		ex		af,af'							; get bank and increment
 		inc		a
-		NextReg	DRAW_BANK+1,a
-		ex		af,af'				; and store it again....
+		NextReg	L2_BANK,a
+		inc		a
+		NextReg	L2_BANK+1,a
+		dec		a		
+		ex		af,af'							; and store it again....
 @NoBankChange:
 		dec		b
 		jp		nz,BobDrawAll
+
+
+		NextReg	L2_BANK,255
+		NextReg	L2_BANK+1,255
 		ret
 
 
 
+
+; ------------------------------------------------------------------------------------------------------------
+;
+;	Render behind the background
+;
+RenderBehind:
+		ld		a,(BobWidth)
+		and		a
+		ret		z
+		push	bc
+		ld		b,a
+		ld		c,$ff
+@DoAll:
+		ld		a,(de)
+		and		a
+		jp		nz,@SkipByte
+		ld		a,$e3
+		ldix
+		;ld		a,(hl)
+		;cp		$e3
+		;jp		z,@SkipByte
+		;ld		(de),a
+		djnz	@DoAll
+		pop		bc
+		jp		NextBobLine
+
+
+@SkipByte:
+		inc		e		
+		inc		hl
+		djnz	@DoAll
+		pop		bc
+		jp		NextBobLine
 
 
 ; ------------------------------------------------------------------------------------------------------------
@@ -608,162 +661,28 @@ SourceModulo
 ;
 RenderInside:	
 		ld		a,(BobWidth)
-		add		a,a				; double width so we can do a DEC C after LDIX
-		ld		c,a
+		and		a
+		ret		z
 		push	bc
-		ld		b,$e3		; allow for fast reloading 
-@lp1:		
-		; 
-		; Unrolled for optimal "fall-through" path.... 
-		; 7 T-States on branch fail, 12 on taking. So fall through is quicker path
-		;	
-		ld		a,(de)				; 7
-		and		a				; 4
-		jr		z,@SkipDraw			; 7
-@DoDraw:	
-		ld		a,b				; 4	b=$e3
-		ldix					; 16
-		dec		c				; 4
-		jr		z,@exit 			; 7 = 49
-
-		ld		a,(de)				
-		and		a				
-		jr		z,@SkipDraw			
-		ld		a,b
+		ld		b,a
+		ld		c,$ff
+@DoAll:
+		ld		a,(de)
+		and		a
+		jp		z,@SkipByte
+		ld		a,$e3
 		ldix
-		dec		c
-		jr		z,@exit 
-
-		ld		a,(de)				
-		and		a				
-		jr		z,@SkipDraw			
-		ld		a,b
-		ldix
-		dec		c
-		jr		z,@exit 
-	
-		ld		a,(de)				
-		and		a				
-		jr		z,@SkipDraw			
-		ld		a,b
-		ldix
-		dec		c
-		jr		z,@exit
-
-		ld		a,(de)				; 7	
-		and		a				; 4
-		jr		z,@SkipDraw			; 12
-		ld		a,b
-		ldix
-		dec		c
-		jr		z,@exit 
-
-		ld		a,(de)				; 7	
-		and		a				; 4
-		jr		z,@SkipDraw			; 12
-		ld		a,b
-		ldix
-		dec		c
-		jr		z,@exit 
-
-		ld		a,(de)				; 7	
-		and		a				; 4
-		jr		z,@SkipDraw			; 12
-		ld		a,b
-		ldix	
-		dec		c
-		jr		z,@exit 
-		
-		ld		a,(de)				; 7	
-		and		a				; 4
-		jr		z,@SkipDraw			; 12
-		ld		a,b
-		ldix
-		dec		c
-		jp		nz,@lp1				; 10 for jump (jr = 12)
-
-@exit:		
+		djnz	@DoAll
 		pop		bc
-		jp		DestModulo
+		jp		NextBobLine
 
 
-
-@SkipDraw:	
+@SkipByte:
+		inc		e		
 		inc		hl
-		inc		e	
-		dec		c
-		dec		c
-		jr		z,@exit2  
-
-		ld		a,(de)				; 7	
-		and		a					; 4
-		jr		nz,@DoDraw
-		inc		hl
-		inc		e	
-		dec		c
-		dec		c
-		jr		z,@exit2
-
-
-		ld		a,(de)				; 7	
-		and		a				; 4
-		jr		nz,@DoDraw
-		inc		hl
-		inc		e	
-		dec		c
-		dec		c
-		jr		z,@exit2
-
-
-		ld		a,(de)				; 7	
-		and		a				; 4
-		jr		nz,@DoDraw
-		inc		hl
-		inc		e	
-		dec		c
-		dec		c
-		jr		z,@exit2
-
-
-		ld		a,(de)				; 7	
-		and		a				; 4
-		jr		nz,@DoDraw
-		inc		hl
-		inc		e	
-		dec		c
-		dec		c
-		jr		z,@exit2
-
-
-		ld		a,(de)				; 7	
-		and		a				; 4
-		jp		nz,@DoDraw
-		inc		hl
-		inc		e	
-		dec		c
-		dec		c
-		jr		z,@exit2
-
-
-		ld		a,(de)				; 7	
-		and		a				; 4
-		jp		nz,@DoDraw
-		inc		hl
-		inc		e	
-		dec		c
-		dec		c
-		jp		nz,@lp1
-
-@exit2:
+		djnz	@DoAll
 		pop		bc
-		jp		DestModulo
-
-
-; ------------------------------------------------------------------------------------------------------------
-;
-;	Render behind the background
-;
-
+		jp		NextBobLine
 
 
 
