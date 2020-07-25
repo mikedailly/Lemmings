@@ -148,11 +148,11 @@ MainLoop:
 		call		DrawPanelNumbers_Force
 
 
-		ld      a,1
-		out     ($fe),a
-		call    GenerateMiniMap
-		ld      a,0
-		out     ($fe),a
+		;ld      a,1
+		;out     ($fe),a
+		;call    GenerateMiniMap
+		;ld      a,0
+		;out     ($fe),a
 
 
 		NextReg		$52,10

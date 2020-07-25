@@ -459,7 +459,8 @@ Load_Banked:
 ; *********************************************************************
 DisplayError:
 		push	af
-
+		NextReg	$52,10
+		NextReg	$53,11
 		; wipe screen, ready for error message
 		ld		a,7
 		call	ClsATTR

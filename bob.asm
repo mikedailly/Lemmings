@@ -461,38 +461,62 @@ DrawBob:
 		;
 		; do clipping
 		;
+LEFT_EDGE	equ	$08
+RIGHT_EDGE	equ	$f8
 ClipLeft		
 		ld		hl,(BobXcoord)
+		bit		7,h						; h is negative?
+		jr		nz,@DoClipLeft
 		ld		a,h
-		test	$80						; if not negative, then not clipped
-		jr		z,TestRightClip
-		add		hl,bc					; add on width
-		ld		a,h
-		test	$80						; still negative?
-		ret		nz						; still <0 then exit
-		ld		a,l						; the value over 0 is the new width
+		and		a						; if a>=1 then off the right - so kill
+		ret		nz
+		; H is 0 if we get here
+		ld		a,l
+		cp		LEFT_EDGE
+		jr		nc,TestRightClip		; if l>=16 then don't clip
+
+@DoClipLeft:
+		ld		a,LEFT_EDGE
+		sub		l
+		ld		l,a
+		ld		a,0
+		sbc		a,h
+		ld		h,a
+
+		ld		a,(BobWidth)
+		sub		l
+		ret		c						; off left edge
 		ld		(BobWidth),a
-		ld		a,(BobXcoord)			; get pixels behind 0
-		neg
-		ld		(SourceModulo+2),a		; set source modulo
+		ld		a,l
+		ld		(SourceModulo+2),a		; set source modulo		(SourceModulo+3) is already 0
 		ld		hl,(bobgraphic)
 		add		hl,a
 		ld		(bobgraphic),hl
-		ld		hl,0					; set "X" coord
-
+		ld		hl,LEFT_EDGE			; set "X" coord
 TestRightClip:
 		ld		(BobXcoord),hl
 
-		ld		a,h						; get X MSByte
+		ld		a,h						; get X MSByte (much further on in level as well...)
 		and		a
-		ret		nz						; if X>=256 then fully clipped
+		ret		nz						; if X>=256 then FULLY CLIPPED		
 		ld		a,(BobWidth)			; is right edge clipped?
 		add		hl,a
 		ld		a,h						; if h still == 0 then not off right
 		and		a
-		jr		z,@NoClip				;
+		jr		nz,@DoClip
+		ld		a,l
+		cp		RIGHT_EDGE
+		jr		c,@NoClip
+@DoClip:
+		ld		a,l
+		sub		RIGHT_EDGE
+		ld		l,a
+		ld		a,h
+		sbc		a,$0
+		ld		h,a
 		ld		a,(BobWidth)
 		sub		l						; if off right, then L = number of pixels over
+		ret		c
 		ld		(BobWidth),a			; store new width		
 		ld		a,(SourceModulo+2)
 		add		a,l
@@ -683,7 +707,7 @@ RenderBehind:
 		ld		a,(de)
 		and		a
 		jp		z,@DrawByte
-		inc		de					; 
+		inc		e					; We clip at $f8... so can INC E instead of INC DE
 		inc		hl					; 20Ts when not drawing
 		jp		@SkipLDIX
 @DrawByte:
@@ -711,21 +735,28 @@ RenderInside:
 		ld		b,a
 		ld		c,$ff
 
-
+; This loop interleaves an "empty" loop and a "copy" loop....
+; it takes a hit at the start of each "run" type, then should be optimal for a sequence of those bytes
 @DoAll:
 		ld		a,(de)				; 7
 		and		a					; 4
-		jp		nz,@DrawByte		; 10
-		inc		de					; 
-		inc		hl					; 20Ts when not drawing
-		jp		@SkipLDIX
+		jr		nz,@DrawByte		; 12/7	Since ALL "draw inside" sprites are arrows, there's more space then arrow...
+@BlankPixel
+		inc		e					; 4     We clip at $f8... so can INC E instead of INC DE
+		inc		hl					; 6
+		djnz	@DoAll				; 13/8  = 41 when not drawing
+		pop		bc
+		jp		NextBobLine
+
+@DoAll_Draw
+		ld		a,(de)				; 7
+		and		a					; 4
+		jr		z,@BlankPixel		; 12/7
 @DrawByte:
 		ld		a,$e3				; 7  (23Ts when drawing)
-		ldix						; 16 = 44
+		ldix						; 16
 @SkipLDIX:
-
-
-		djnz	@DoAll				; 13/8
+		djnz	@DoAll_Draw			; 13/8 = 54 when drawing
 		pop		bc
 		jp		NextBobLine
 

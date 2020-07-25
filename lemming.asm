@@ -52,6 +52,7 @@ SpawnLemming:
 		ld		l,(iy+0)			; X low
 		ld		h,(iy+1)			; X high
 		ld		a,(iy+2)			; Y (always >0 and <160)
+		add		a,2
 ;		ld		hl,(LemmingXSpawn)
 ;		add		hl,105-209
 ;		add		hl,48	;105

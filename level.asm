@@ -7,7 +7,8 @@ LoadLevel:
 		;LoadBank	level_0055,LevelAddress,LevelBank	; Steel Works
 		;LoadBank	level_0031,LevelAddress,LevelBank	; art gallery
 		;LoadBank	level_0091,LevelAddress,LevelBank	; Just dig
-		LoadBank	level_0020,LevelAddress,LevelBank	; huge sprites
+		;LoadBank	level_0020,LevelAddress,LevelBank	; huge sprites
+		LoadBank	level_0014,LevelAddress,LevelBank	; huge sprites
 
 		ld		ix,LevelAddress
 		ld 		a,(ix+$1b)
@@ -502,10 +503,10 @@ DrawLevelObjects
 		ld		l,(ix+(oX+0))				; bx = x
 		ld		h,(ix+(oX+1))
 @ScrOffset:	
-		ld		bc,$1234					; 20
+		ld		bc,$aaaa					; SELF-MOD code
 		xor		a							; clear carry
 		sbc		hl,bc						; subtract world location		
-		add		hl,72						; ball park clipping
+		add		hl,68						; ball park clipping (max sprite width is 68 I think)
 		ld 		a,h
 		and		$80
 		jr		nz,@OffRight
