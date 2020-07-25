@@ -1,4 +1,4 @@
-; *****************************************************************************************************************************
+br ; *****************************************************************************************************************************
 ; Level loading/storage
 ; *****************************************************************************************************************************
 LoadLevel:
@@ -8,7 +8,14 @@ LoadLevel:
 		;LoadBank	level_0031,LevelAddress,LevelBank	; art gallery
 		;LoadBank	level_0091,LevelAddress,LevelBank	; Just dig
 		;LoadBank	level_0020,LevelAddress,LevelBank	; huge sprites
-		LoadBank	level_0014,LevelAddress,LevelBank	; huge sprites
+		;LoadBank	level_0093,LevelAddress,LevelBank	; You need bashers this time (ice work. see through ice)
+		;LoadBank	level_0036,LevelAddress,LevelBank	; Upside down world.  *ERROR*
+		LoadBank	level_0003,LevelAddress,LevelBank
+
+		NextReg		$43,$14
+		NextReg		$40,1
+		NextReg		$41,0			; make the "darkest blue" black... darkest blue isn't used
+
 
 		ld		ix,LevelAddress
 		ld 		a,(ix+$1b)

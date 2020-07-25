@@ -130,10 +130,10 @@ style4dat		File	"lemdat/styles/style4.dat"
 
 ; levels
 level_0000		File	"lemdat/levels/LVL0000.LVL"
-level_0001		File	"lemdat/levels/LVL0001.LVL"
-level_0002		File	"lemdat/levels/LVL0002.LVL"
-level_0003		File	"lemdat/levels/LVL0003.LVL"
-level_0004		File	"lemdat/levels/LVL0004.LVL"
+level_0001		File	"lemdat/levels/LVL0001.LVL"		; what an awesome level
+level_0002		File	"lemdat/levels/LVL0002.LVL"		; Menacing !!
+level_0003		File	"lemdat/levels/LVL0003.LVL"		;
+level_0004		File	"lemdat/levels/LVL0004.LVL"		; A BeastII of a level
 level_0005		File	"lemdat/levels/LVL0005.LVL"
 level_0006		File	"lemdat/levels/LVL0006.LVL"
 level_0007		File	"lemdat/levels/LVL0007.LVL"
@@ -142,7 +142,7 @@ level_0007		File	"lemdat/levels/LVL0007.LVL"
 level_0010		File	"lemdat/levels/LVL0010.LVL"
 level_0011		File	"lemdat/levels/LVL0011.LVL"
 level_0012		File	"lemdat/levels/LVL0012.LVL"
-level_0013		File	"lemdat/levels/LVL0013.LVL"
+level_0013		File	"lemdat/levels/LVL0013.LVL"		; A Beast of a level
 level_0014		File	"lemdat/levels/LVL0014.LVL"
 level_0015		File	"lemdat/levels/LVL0015.LVL"
 level_0016		File	"lemdat/levels/LVL0016.LVL"
@@ -162,15 +162,64 @@ level_0033		File	"lemdat/levels/LVL0033.LVL"
 level_0034		File	"lemdat/levels/LVL0034.LVL"
 level_0035		File	"lemdat/levels/LVL0035.LVL"
 level_0036		File	"lemdat/levels/LVL0036.LVL"
+level_0037		File	"lemdat/levels/LVL0037.LVL"
+level_0040		File	"lemdat/levels/LVL0040.LVL"
+level_0041		File	"lemdat/levels/LVL0041.LVL"
+level_0042		File	"lemdat/levels/LVL0042.LVL"
+level_0043		File	"lemdat/levels/LVL0043.LVL"
+level_0044		File	"lemdat/levels/LVL0044.LVL"
+level_0045		File	"lemdat/levels/LVL0045.LVL"
+level_0046		File	"lemdat/levels/LVL0046.LVL"
+level_0047		File	"lemdat/levels/LVL0047.LVL"
+level_0050		File	"lemdat/levels/LVL0050.LVL"
+level_0051		File	"lemdat/levels/LVL0051.LVL"
+level_0052		File	"lemdat/levels/LVL0052.LVL"
+level_0053		File	"lemdat/levels/LVL0053.LVL"
+level_0054		File	"lemdat/levels/LVL0054.LVL"
+level_0055		File	"lemdat/levels/LVL0055.LVL"
+level_0056		File	"lemdat/levels/LVL0056.LVL"
+level_0057		File	"lemdat/levels/LVL0057.LVL"
+level_0060		File	"lemdat/levels/LVL0060.LVL"
+level_0061		File	"lemdat/levels/LVL0061.LVL"
+level_0062		File	"lemdat/levels/LVL0062.LVL"
+level_0063		File	"lemdat/levels/LVL0063.LVL"
+level_0064		File	"lemdat/levels/LVL0064.LVL"
+level_0065		File	"lemdat/levels/LVL0065.LVL"
+level_0066		File	"lemdat/levels/LVL0066.LVL"
+level_0067		File	"lemdat/levels/LVL0067.LVL"
+level_0070		File	"lemdat/levels/LVL0070.LVL"
+level_0071		File	"lemdat/levels/LVL0071.LVL"
+level_0072		File	"lemdat/levels/LVL0072.LVL"
+level_0073		File	"lemdat/levels/LVL0073.LVL"
+level_0074		File	"lemdat/levels/LVL0074.LVL"
+level_0075		File	"lemdat/levels/LVL0075.LVL"
+level_0076		File	"lemdat/levels/LVL0076.LVL"
+level_0077		File	"lemdat/levels/LVL0077.LVL"
+level_0080		File	"lemdat/levels/LVL0080.LVL"
+level_0081		File	"lemdat/levels/LVL0081.LVL"
+level_0082		File	"lemdat/levels/LVL0082.LVL"
+level_0083		File	"lemdat/levels/LVL0083.LVL"
+level_0084		File	"lemdat/levels/LVL0084.LVL"
+level_0085		File	"lemdat/levels/LVL0085.LVL"
+level_0086		File	"lemdat/levels/LVL0086.LVL"
+level_0087		File	"lemdat/levels/LVL0087.LVL"
+level_0090		File	"lemdat/levels/LVL0090.LVL"
+level_0091		File	"lemdat/levels/LVL0091.LVL"
+level_0092		File	"lemdat/levels/LVL0092.LVL"
+level_0093		File	"lemdat/levels/LVL0093.LVL"
+level_0094		File	"lemdat/levels/LVL0094.LVL"
+level_0095		File	"lemdat/levels/LVL0095.LVL"
+level_0096		File	"lemdat/levels/LVL0096.LVL"
+level_0097		File	"lemdat/levels/LVL0097.LVL"
 
 ; first few levels
-level_0091		File	"lemdat/levels/LVL0091.LVL"		; Just dig
-level_0095		File	"lemdat/levels/LVL0095.LVL"		; Only floaters can survive this
-level_0096		File	"lemdat/levels/LVL0096.LVL"		; Tailor-made for blockers
-level_0092		File	"lemdat/levels/LVL0092.LVL"		; Now use miners and climbers
-level_0093		File	"lemdat/levels/LVL0093.LVL"		; You need bashers this time
-level_0094		File	"lemdat/levels/LVL0094.LVL"		; A task for blockers and bombers
-level_0097		File	"lemdat/levels/LVL0097.LVL"		; Builders will help you here
+;level_0091		File	"lemdat/levels/LVL0091.LVL"		; Just dig
+;level_0095		File	"lemdat/levels/LVL0095.LVL"		; Only floaters can survive this
+;level_0096		File	"lemdat/levels/LVL0096.LVL"		; Tailor-made for blockers
+;level_0092		File	"lemdat/levels/LVL0092.LVL"		; Now use miners and climbers
+;level_0093		File	"lemdat/levels/LVL0093.LVL"		; You need bashers this time
+;level_0094		File	"lemdat/levels/LVL0094.LVL"		; A task for blockers and bombers
+;level_0097		File	"lemdat/levels/LVL0097.LVL"		; Builders will help you here
 
-level_0055		File	"lemdat/levels/LVL0055.LVL"		; Steel Works
-level_0057		File	"lemdat/levels/LVL0057.LVL"		; It's hero time!
+;level_0055		File	"lemdat/levels/LVL0055.LVL"		; Steel Works
+;level_0057		File	"lemdat/levels/LVL0057.LVL"		; It's hero time!
