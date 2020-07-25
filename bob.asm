@@ -113,32 +113,58 @@ DrawBobLevel:
 		inc 	hl
 		ld 		(CurrentScanline),hl			; base of actual graphic data
 
-		ld		a,h
-		cp		$60
-		jr		c,@LessThan
-		break
-@LessThan:
+		;ld		a,h
+		;cp		$60
+		;jr		c,@LessThan
+		;break
+;@LessThan:
 		; do basic CLIP here....
 
 		; Flip sprite?
 		;jp 	@DontFlip
 		ld 		a,(BobFlags)
 		and 	4
-		;ret 	z
+TestFlip
+		;jp		@DontFlip
+		;ret 	nz		
 		jr		z,@DontFlip
-		ld 		a,(BobWidth)
+
+		ld		hl,(CurrentScanline)	; Move to END of bob
+		ld 		bc,(BobSize)			; Start address of graphic + size
+		ld		a,h
+		sub		Hi(DRAW_BASE)			; remove bank base address
+		ld		h,a
+		xor		a
+		add 	hl,bc
+		adc		a,0						; if we have a huge sprite... it's over 64k in size.
+		and		a						; clc
+		ld 		bc,(LineDelta)			; Now subtract off a line
+		sbc 	hl,bc
+		sbc		0
+		srl		a						; 0-> >>1 ->C
+		ld		a,h						
+		rra								; C-> >>1 -> C
+		swapnib
+		and		$f						; get bank offset from start of graphic
+		ld		c,a
+		ld		a,(BobBank)				; add on base of bob
+		add		a,c
+		ld		(BobBank),a
+		NextReg	DRAW_BANK,a
+		inc		a
+		NextReg	DRAW_BANK+1,a
+		ld		a,h						; Now work out address in new bank
+		and		$1f
+		add		a,Hi(DRAW_BASE)
+		ld		h,a
+		ld 		(CurrentScanLine),hl
+
+		ld 		a,(BobWidth)			; negate length of line so we go backwards
 		neg
 		ld 		(LineDelta),a
 		ld 		a,255
 		ld 		(LineDelta+1),a
 
-		ld		hl,(CurrentScanline)
-		ld 		bc,(BobSize)
-		add 	hl,bc
-		ld 		bc,(LineDelta)
-		add 	hl,bc
-		;dec 	hl
-		ld 	(CurrentScanLine),hl
 @DontFlip:
 
 
@@ -265,8 +291,26 @@ DrawBobLevel:
 @ClipLine:
 		ld 		hl,(CurrentScanline)	; base of actual graphic data
 		ld 		bc,(LineDelta)
+		bit		7,b
+		jr		z,@PositiveAdd
+
 		add 	hl,bc
-		
+		ld		a,h
+		cp		Hi(DRAW_BASE)
+		jp		nc,@NoBankChange
+
+		ld		a,(BobBank)
+		dec		a
+		ld		(BobBank),a
+		ld		a,h
+		and		$1f
+		add		a,Hi(DRAW_BASE)
+		ld		h,a	
+		jr		@NoBankChange
+
+
+@PositiveAdd:
+		add 	hl,bc
 		ld		a,h
 		sub		Hi(DRAW_BASE)
 		and		$e0
@@ -454,7 +498,8 @@ TestRightClip:
 		add		a,l
 		ld		(SourceModulo+2),a
 @NoClip:
-		ld		de,(BobXcoord)
+		ld		a,(BobXcoord)
+		ld		e,a
 		ld		a,(BobYcoord)
 		ld		d,a
 		;ld	d,$21
@@ -485,12 +530,12 @@ TestRightClip:
 
 
 		; Draw bob (normal)
-		ld		a,(BobWidth)
 		push	hl
-		and		a
+		ld		a,(BobWidth)
 		ld		c,a
 		ld		b,0
 		ld		hl,$100
+		and		a
 		sbc		hl,bc
 		ld		(DestModulo+2),hl
 		pop		hl
@@ -633,26 +678,24 @@ RenderBehind:
 		ld		b,a
 		ld		c,$ff
 @DoAll:
+
+
 		ld		a,(de)
 		and		a
-		jp		nz,@SkipByte
-		ld		a,$e3
-		ldix
-		;ld		a,(hl)
-		;cp		$e3
-		;jp		z,@SkipByte
-		;ld		(de),a
-		djnz	@DoAll
+		jp		z,@DrawByte
+		inc		de					; 
+		inc		hl					; 20Ts when not drawing
+		jp		@SkipLDIX
+@DrawByte:
+		ld		a,$e3				; 7
+		ldix						; 16 = 23 when drawing
+@SkipLDIX:
+
+
+		djnz	@DoAll		
 		pop		bc
 		jp		NextBobLine
 
-
-@SkipByte:
-		inc		e		
-		inc		hl
-		djnz	@DoAll
-		pop		bc
-		jp		NextBobLine
 
 
 ; ------------------------------------------------------------------------------------------------------------
@@ -662,27 +705,30 @@ RenderBehind:
 RenderInside:	
 		ld		a,(BobWidth)
 		and		a
-		ret		z
+		ret		z					; nothing to draw....
 		push	bc
+
 		ld		b,a
 		ld		c,$ff
+
+
 @DoAll:
-		ld		a,(de)
-		and		a
-		jp		z,@SkipByte
-		ld		a,$e3
-		ldix
-		djnz	@DoAll
+		ld		a,(de)				; 7
+		and		a					; 4
+		jp		nz,@DrawByte		; 10
+		inc		de					; 
+		inc		hl					; 20Ts when not drawing
+		jp		@SkipLDIX
+@DrawByte:
+		ld		a,$e3				; 7  (23Ts when drawing)
+		ldix						; 16 = 44
+@SkipLDIX:
+
+
+		djnz	@DoAll				; 13/8
 		pop		bc
 		jp		NextBobLine
 
-
-@SkipByte:
-		inc		e		
-		inc		hl
-		djnz	@DoAll
-		pop		bc
-		jp		NextBobLine
 
 
 

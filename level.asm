@@ -3,11 +3,11 @@
 ; *****************************************************************************************************************************
 LoadLevel:
 		;LoadBank	level_0023,LevelAddress,LevelBank	; Watch out, there's traps about
-		LoadBank	level_0030,LevelAddress,LevelBank	; ship  -  Every Lemming for himself!!!
+		;LoadBank	level_0030,LevelAddress,LevelBank	; ship  -  Every Lemming for himself!!!
 		;LoadBank	level_0055,LevelAddress,LevelBank	; Steel Works
 		;LoadBank	level_0031,LevelAddress,LevelBank	; art gallery
 		;LoadBank	level_0091,LevelAddress,LevelBank	; Just dig
-		;LoadBank	level_0020,LevelAddress,LevelBank	; huge sprites
+		LoadBank	level_0020,LevelAddress,LevelBank	; huge sprites
 
 		ld		ix,LevelAddress
 		ld 		a,(ix+$1b)
@@ -356,6 +356,8 @@ level_bob_count		dw		0
 CreateLevel:	
 		ld		bc,LevelAddress+$760
 		ld		ix,LevelAddress+$120	; start of level building data
+		ld		hl,0
+		ld		(BlockNumber),hl
 @DrawAll	
 		push	bc
 		ld		a,(ix+0)
@@ -394,6 +396,25 @@ CreateLevel:
 		sra 	a
 		sra 	a				; /16 - get bob options
 
+		;break
+		push	hl
+		push	bc
+		and		a
+		ld		hl,(BlockNumber)
+		inc		hl
+		ld		(BlockNumber),hl
+
+		ld		bc,138
+		sbc		hl,bc
+		jr		c,@NotLessThan
+		;break
+		;pop		bc
+		;pop		hl
+		;jp		@Skippie
+
+@NotLessThan:
+		pop	bc
+		pop	hl
 		call 	DrawBobLevel
 @Skippie:
 
@@ -421,7 +442,8 @@ CreateLevel:
 		jr 		nz,@DrawAll
 	
 		ret
-
+BlockNumber:
+		dw		0
 
 ; *****************************************************************************************************************************
 ; 	GenerateMask - Build the mask the Lemming will walk on.
