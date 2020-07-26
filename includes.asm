@@ -69,8 +69,9 @@ Mouse_Wheel				equ	$f0
 ;		Seg  CodeSeg,Code_Bank:$0000,$0000
 
 
-Code_Bank				equ		4					; 32K of code  (ZX128 banks 6 and 7)
-VRAM_BASE_BANK			equ		8					; 2 layer 2 screens = 6 banks
+Code_Bank				equ		4					; 32K of code  (ZX128 banks 6 and 7 - 16k banks)
+MixerCode_Bank			equ		12
+VRAM_BASE_BANK			equ		8					; 2 layer 2 screens = 12 banks.   (bank 16 in 8K banks)  
 LevelBank				equ		28
 LevelAddress			equ		DRAW_BASE			; 2K
 PanelNumbersBank		equ		28
@@ -89,6 +90,8 @@ PointsBank				equ		LemmingsBank+12		; (2 banks)
 PointsAddress			equ		DRAW_BASE
 CollisionBank			equ		PointsBank+4		; 4x4 array collision map (3 banks)
 CollisionAddress		equ		DRAW_BASE+$2000		; (20480 bytes from 24576)
+SamplesBank				equ		CollisionBank+3		; Start of sample data
+SamplesAddress			equ		DRAW_BASE+$2000		; 
 	
 MAX_LEM					equ		100
 	
@@ -331,5 +334,103 @@ SDIVBC	macro		; signed (maintains top bit)
 	rr	c
 	endm
 
+
+
+NEG_HL		macro
+		xor	a
+		sub	l
+		ld	l,a
+		sbc	a,a
+		sub	h
+		ld	h,a
+		endm
+NEG_DE		macro
+		xor	a
+		sub	e
+		ld	e,a
+		sbc	a,a
+		sub	d
+		ld	d,a
+		endm
+NEG_BC		macro
+		xor	a
+		sub	c
+		ld	c,a
+		sbc	a,a
+		sub	b
+		ld	b,a
+		endm
+NEG_DEHL	macro
+		xor	a	; clear and reset carry
+		sub	l
+		ld	l,a
+
+		ld	a,0
+		sbc	a,h
+		ld	h,a
+
+		ld	a,0
+		sbc	a,e
+		ld	e,a
+
+		ld	a,0
+		sbc	a,d
+		ld	d,a
+
+		endm
+
+NEG_HLDE	macro
+		xor	a	; clear and reset carry
+		sub	e
+		ld	e,a
+
+		ld	a,0
+		sbc	a,d
+		ld	d,a
+
+		ld	a,0
+		sbc	a,l
+		ld	l,a
+
+		ld	a,0
+		sbc	a,h
+		ld	h,a
+
+		endm		
+
+
+NEG_HLIX	macro
+		xor	a	; clear and reset carry
+		sub	ixl
+		ld	ixl,a
+
+		ld	a,0
+		sbc	a,ixh
+		ld	ixh,a
+
+		ld	a,0
+		sbc	a,l
+		ld	l,a
+
+		ld	a,0
+		sbc	a,h
+		ld	h,a
+
+		endm	
+
+
+NEG_HBC		macro
+		xor	a	; clear and reset carry
+		sub	c
+		ld	c,a
+
+		ld	a,0
+		sbc	a,b
+		ld	b,a
+
+		ld	a,0
+		sbc	a,h
+		ld	h,a
+		endm	
 
 

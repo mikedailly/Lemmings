@@ -581,6 +581,14 @@ OpenTrapDoors:
 		jr		nz,@NotTrapDoor
 
 		ld		a,(ix+oFrame)
+		cp		2
+		jr		nz,@SkipSound
+		push	ix
+		push	af
+		call	PlaySFX2
+		pop		af
+		pop	ix
+@SkipSound:
 		add		a,(ix+oDelta)
 		cp		(ix+oMaxFrames)	
 		jr		nz,@NotEndOfAnim

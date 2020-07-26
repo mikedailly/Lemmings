@@ -94,7 +94,8 @@ namespace LemConv
             double prev = 0;
             for(int i = 0; i < len; i++)
             {
-                byte b = sample[(int)index];
+                //byte b = (byte) (((int)sample[(int)index]+128)&0xff);         // use if we're going to "mix"
+                byte b = sample[(int)index];                                    // use if we're not mixing
                 Resampled[i] = b;
                 prev = index;
                 index += delta;

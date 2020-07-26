@@ -536,7 +536,7 @@ TestRightClip:
 		srl		a						; get bank  (top p3 bits)
 		ld		c,a
 		ld		a,(Screen2Bank)			; bank screen into top block
-		add		a,a
+		add		a,a						; *2 (as screen banks at in 16K blobs)
 		add		a,c		
 		NextReg	L2_BANK,a
 		inc		a
@@ -587,7 +587,8 @@ BobDrawAll:
 BobJmpOffset	
 		jp		$1234
 		
-BobRenderTower	LDIX
+BobRenderTower	
+		LDIX
 		LDIX
 		LDIX
 		LDIX

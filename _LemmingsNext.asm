@@ -34,8 +34,8 @@ ModSampleBank        equ                50
 
 
 			seg     CODE_SEG, Code_Bank:$0000,$8000
-			seg     MOD_SEG,  ModFileBank:$0000,$0000
-			seg     MOD_VOLUME,  ModVolumeBank:$0000,$0000                ; volume conversion goes here
+			seg		MIXER_SEG,MixerCode_Bank:$0000,$c000				
+			seg     SAMPLE_DATA,  SamplesBank:$0000,$0000                ; volume conversion goes here
 
 
 			seg        CODE_SEG
@@ -57,7 +57,9 @@ StartAddress:
 			ld      a,%00000011             		; 28Mhz
 			NextReg $07,a
 			
-			
+			NextReg	$56,0
+			NextReg	$57,1
+
 			BORDER	4      
 			call	FlipScreens             		; get front and bank buffer in order
 			ld		a,$e3
@@ -155,6 +157,27 @@ MainLoop:
 		;out     ($fe),a
 
 
+		ld		a,(Keys+VK_S)
+		and		a
+		jr		z,@SkipPlay
+		ld		a,(Debounce)
+		and		a
+		jr		nz,@SkipDebounce
+		ld		a,255
+		ld		(Debounce),a
+
+		xor		a
+		ld		(Keys+VK_S),a
+
+		call	PlaySFX
+		jr		@SkipDebounce
+@SkipPlay:
+		xor		a
+		ld		(Debounce),a
+@SkipDebounce
+
+
+
 		NextReg		$52,10
 		NextReg		$53,11
 
@@ -177,8 +200,7 @@ fps         db      0
 realfps     db      0        
 frame       db      0
 
-
-
+Debounce			db		0
 
 ; *****************************************************************************************************************************
 ; Process the small "misc" bits
@@ -231,6 +253,11 @@ Init:
 			call    InitFilesystem
 			call    InitSprites
 
+			NextReg	$56,MixerCode_Bank
+			call	MixerInit
+			NextReg	$56,0
+
+
 			LoadBanked LemmingsFile,LemmingsBank
 			call	InitExplosion
 
@@ -238,6 +265,11 @@ Init:
 			ld      (CursorOn),a             
 			ret
 
+
+RegisterSample:
+			NextReg	$56,MixerCode_Bank
+			call	MixerInit
+			NextReg	$56,0
 
 ; *****************************************************************************************************************************
 ; Draw 2 columns down each side of the screen to hide lemming clipping
@@ -268,6 +300,28 @@ InitGame:
                 call    LoadLevel
                 ret
 
+PlaySFX:
+		xor		a
+		ld		c,SamplesBank			; the bank the 		
+		ld		hl,0					; sample offset into the bank
+		ld		de,LetsGoLength&$ffff	; sample length (low 2 bytes)
+		ld		b,LetsGoLength>>16		; sample length high byte
+		NextReg	$56,MixerCode_Bank	
+		call	MixerPlaySample
+		NextReg	$56,0
+		ret
+PlaySFX2:
+		xor		a
+		ld		c,Bank(OpenDoorSample)			; the bank the 		
+		ld		hl,BankOff(OpenDoorSample)		; sample offset into the bank
+		ld		de,OpenDoorSampleLength&$ffff	; sample length (low 2 bytes)
+		ld		b,OpenDoorSampleLength>>16		; sample length high byte
+		NextReg	$56,MixerCode_Bank	
+		call	MixerPlaySample
+		NextReg	$56,0
+		ret
+
+
 ; *****************************************************************************************************************************
 ; includes modules
 ; *****************************************************************************************************************************
@@ -283,13 +337,25 @@ InitGame:
                 include "Copper.asm"
                 include "data.asm"
                 include "masks.asm"
-
 EndOfCode
+				seg		MIXER_SEG
+				include "mixer_player.asm"
+
 
                 ; where's our end address?
                 message "EndofCode = ",EndOfCode
                 message "End of Buffer =",PC
 
+
+
+SampleText		seg		SAMPLE_DATA
+LetsGo			incbin	"lemdat/sound/LETSGO.raw"
+LetsGo_End
+LetsGoLength	equ	LetsGo_End-LetsGo
+
+OpenDoorSample	incbin	"lemdat/sound/DOOR.raw"
+OpenDoorSample_End
+OpenDoorSampleLength	equ	OpenDoorSample_End-OpenDoorSample
 
 
                 ; Save the SNA out....
