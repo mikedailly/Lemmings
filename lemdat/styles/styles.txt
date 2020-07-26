@@ -1,0 +1,1 @@
+Lemmings graphical styles, sprites and object definitions are copied into here
