@@ -707,16 +707,22 @@ RenderBehind:
 
 		ld		a,(de)
 		and		a
-		jp		z,@DrawByte
+		jr		z,@DrawByte
+@SkipByte:
 		inc		e					; We clip at $f8... so can INC E instead of INC DE
 		inc		hl					; 20Ts when not drawing
-		jp		@SkipLDIX
+		djnz	@DoAll		
+		pop		bc
+		jp		NextBobLine
+
+@DrawAll
+		ld		a,(de)
+		and		a
+		jr		nz,@SkipByte
 @DrawByte:
 		ld		a,$e3				; 7
 		ldix						; 16 = 23 when drawing
 @SkipLDIX:
-
-
 		djnz	@DoAll		
 		pop		bc
 		jp		NextBobLine

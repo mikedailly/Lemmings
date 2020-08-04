@@ -11,7 +11,7 @@ InitExplosion:
 
 
 		; set animation bank
-		ld		a,PointsBank*2
+		ld		a,PointsBank
 		NextReg	DRAW_BANK,a
 		inc		a
 		NextReg	DRAW_BANK+1,a
@@ -64,12 +64,12 @@ DrawExplosionFrame:
 		ld		(@PointsYOrigin+1),de	; store Y
 
 		ld		de,(ScrollIndex)		; 20
-		scf								; SET carry flag (x might be out by 1... doesn't really matter)
+		and		a						; reset carry
 		sbc		hl,de					; subtract world location
 		add		hl,$ff80				; offset origin
 		ld		(@PointsXOrigin+1),hl
 
-		; should probably do a large BBOX clip here...
+		; should probably do a large BBOX clip here...8
 
 		; point to correct frame
 		add		a,Hi(DRAW_BASE)

@@ -6,11 +6,11 @@ LoadLevel:
 		;LoadBank	level_0030,LevelAddress,LevelBank	; ship  -  Every Lemming for himself!!!
 		;LoadBank	level_0055,LevelAddress,LevelBank	; Steel Works
 		;LoadBank	level_0031,LevelAddress,LevelBank	; art gallery
-		;LoadBank	level_0091,LevelAddress,LevelBank	; Just dig
+		LoadBank	level_0091,LevelAddress,LevelBank	; Just dig
 		;LoadBank	level_0020,LevelAddress,LevelBank	; huge sprites
 		;LoadBank	level_0093,LevelAddress,LevelBank	; You need bashers this time (ice work. see through ice)
 		;LoadBank	level_0036,LevelAddress,LevelBank	; Upside down world.  *ERROR*
-		LoadBank	level_0003,LevelAddress,LevelBank
+		;LoadBank	level_0003,LevelAddress,LevelBank
 
 		NextReg		$43,$14
 		NextReg		$40,1
@@ -452,44 +452,6 @@ CreateLevel:
 		ret
 BlockNumber:
 		dw		0
-
-; *****************************************************************************************************************************
-; 	GenerateMask - Build the mask the Lemming will walk on.
-; *****************************************************************************************************************************
-;GenerateMask:
-		ld		a,PanelBank				; page in panel
-		NextReg	DRAW_BANK,a
-		ld 		de,$c000+(204+(10*256))	; start of panel "slot"
-
-		ld		a,LevelBitmapBank		; page in bitmap to $e000
-		ld 		c,20					; mini map is 20 pixels high
-@BuildMap:
-		NextReg	DRAW_BANK+1,a			; bank in
-
-		ex		af,af'					; remmeber current bank
-@Loop4:
-		ld		b,50					; do 4 lines before changing bank
-		ld 		hl,DRAW_BASE+$2000
-@CopyRow
-		ld 		a,(hl)
-		and 	a
-		jr 		z,@SkipPixel
-		ld 		a,$10
-@SkipPixel:	
-		ld 		(de),a
-		inc 	de
-		ld 		a,32					; pixels are 32 pixels apart.
-		add 	hl,a					; next opcode :)
-		djnz	@CopyRow
-
-		ld 		a,256-50				; next row in the panel
-		add 	de,a
-
-		ex		af,af'					; remmeber current bank
-		add		a,2						; move on 2 banks - 8 lines
-		dec		c
-		jr		nz,@BuildMap
-		ret		
 
 
 

@@ -370,7 +370,7 @@ ProcessLemWalker:
 		; Check for climber here
 		;
 		ld		a,c
-		add		a,5
+		add		a,4
 		ld		c,a
 		ld		a,(ix+LemDir)			; flip direction
 		xor		1
