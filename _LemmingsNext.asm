@@ -122,7 +122,7 @@ MainLoop:
 
 		; Scan keyboard
 		call    	ReadKeyboard
-		call    	ProecssMisc
+		call    	ProcessMisc
 			
 			
 			
@@ -205,7 +205,7 @@ Debounce			db		0
 ; *****************************************************************************************************************************
 ; Process the small "misc" bits
 ; *****************************************************************************************************************************
-ProecssMisc:
+ProcessMisc:
                 ld      a,(Keys+VK_SPACE)
                 and     a
                 jr      z,@notpressed  

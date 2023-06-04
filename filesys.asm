@@ -168,7 +168,7 @@ Load_Bank:
 ; *******************************************************************************************************
 ; Function:	Load a whole file into memory	(confirmed working on real machine)
 ; In:		hl = file data pointer
-;		ix = address to load to
+;			ix = address to load to
 ; *******************************************************************************************************
 Load:	ld		(LastFileName),hl
 		call    GetSetDrive			; need to do this each time?!?!?

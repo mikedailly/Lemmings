@@ -768,7 +768,7 @@ namespace LemConv
             sb.AppendLine("\t\t; Sprite Number " + _sprite_number.ToString());
             sb.AppendLine("\t\t; Common code = 59 T-States (outside function)");
             sb.AppendLine("\t\t; HL = screen address [y,x]");
-            // This is now down OUTSIDE the function, as it's common
+            // This is now done OUTSIDE the function, as it's common
             //sb.AppendLine("\t\tld\tbc,$123b"); tstates += 10; bytes += 3; buff.Write(0x123B01, 3);
             //sb.AppendLine("\t\tld\ta,h"); tstates += 4; bytes += 1; buff.Write(0x7C, 1);
             //sb.AppendLine("\t\tand\t$c0"); tstates += 7; bytes += 2; buff.Write(0xc0E6, 2);

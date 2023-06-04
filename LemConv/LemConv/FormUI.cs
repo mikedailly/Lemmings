@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,13 +35,14 @@ namespace LemConv
             }
 
             string destf = DestFolderBox.Text;
-            if( !System.IO.Directory.Exists(destf)){
-                MessageBox.Show("Error: \"" + destf + "\" does not exist");
-                return;
-            }
+            //if( !System.IO.Directory.Exists(destf)){
+            //    MessageBox.Show("Error: \"" + destf + "\" does not exist");
+            //    return;
+            //}
 
             Program.WinLemPath = srcf;
             Program.DestFolder = destf;
+            if (!Program.CreateAFolder(Program.DestFolder)) return;
 
             Program.ConvertResources();
 

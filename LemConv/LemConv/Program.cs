@@ -187,6 +187,7 @@ namespace LemConv
         {
             string stylefile;
             string Dest = Path.Combine(DestFolder, "styles");
+            if (!CreateAFolder(Dest)) return;
 
             SPRLoader.BankSize = 8192;
             stylefile = CheckFile(STYLE_L0);
@@ -443,6 +444,7 @@ namespace LemConv
         {
             string src = Path.Combine(WinLemPath, "level/ORIG");
             string dest = Path.Combine(DestFolder, "levels");
+            if (!CreateAFolder(dest)) return;
 
             string[] lst = System.IO.Directory.GetFiles(src,"*.lvl");
             foreach(string filename in lst)
@@ -466,7 +468,28 @@ namespace LemConv
             }
         }
 
-
+        // ####################################################################################
+        /// <summary>
+        ///     Create a folder or display an error if we can't
+        /// </summary>
+        /// <param name="_folder"></param>
+        // ####################################################################################
+        public static bool CreateAFolder(string _folder)
+        {
+            if (!Directory.Exists(_folder))
+            {
+                try
+                {
+                    Directory.CreateDirectory(_folder);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Error creating Directory: " + _folder);
+                    return false;
+                }
+            }
+            return true;
+        }
         // ####################################################################################
         /// <summary>
         ///     Convert all Windows Lemmings sounds into 6400Hz
@@ -475,6 +498,7 @@ namespace LemConv
         public static void CovertSound()
         {
             string dest_path = Path.Combine(DestFolder, "sound");
+            if (!CreateAFolder(dest_path)) return;
 
             string[] files = { SND_1, SND_2, SND_3, SND_4, SND_5, SND_6, SND_7, SND_8, SND_9,
                                SND_10, SND_11, SND_12, SND_13, SND_14, SND_15, SND_16, SND_17,
